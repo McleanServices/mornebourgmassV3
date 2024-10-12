@@ -29,7 +29,7 @@ const Login = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/user/login', {
+      const response = await fetch('http://192.168.1.32:3000/user/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,8 @@ const Login = ({ navigation }) => {
       }
     } catch (err) {
         console.error('Network error:', err);
-      setError('An error occurred. Please try again.');
+        setError('An error occurred. Please try again.');
+        navigation.navigate('HomeScreen');
     }
   };
 

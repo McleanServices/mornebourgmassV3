@@ -10,10 +10,10 @@ app.use(bodyParser.json());
 
 // MySQL connection
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'test'
+    host: 'srv1267.hstgr.io',
+    user: 'u175541833_tyreceapi',
+    password: '1+FzHs=NLdP]',
+    database: 'u175541833_apitesting'
 });
 
 db.connect((err) => {
