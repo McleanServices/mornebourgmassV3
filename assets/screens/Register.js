@@ -176,40 +176,42 @@ export default function RegisterScreen({ navigation }) {
           <Text style={styles.link}>Log in</Text>
         </TouchableOpacity>
       </View>
+
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: "row",
-    marginTop: 4,
-  },
-  link: {
-    fontWeight: "bold",
-    color: theme.colors.primary,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: theme.colors.background,
-  },
-  termsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  checkbox: {
-    marginRight: 10,
-  },
-  checked: {
-    fontSize: 18,
-  },
-  unchecked: {
-    fontSize: 18,
-    opacity: 0.5,
-  },
-  termsText: {
-    flex: 1,
-  },
+    row: {
+        flexDirection: "row",
+        marginTop: 4,
+    },
+    link: {
+        fontWeight: "bold",
+        color: theme.colors.primary,
+    },
+    container: {
+        flexGrow: 1,
+        padding: 20,
+        backgroundColor: theme.colors.background,
+        justifyContent: "center",
+    },
+    termsContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 20,
+    },
+    checkbox: {
+        marginRight: 10,
+    },
+    checked: {
+        fontSize: 18,
+    },
+    unchecked: {
+        fontSize: 18,
+        opacity: 0.5,
+    },
+    termsText: {
+        flex: 1,
+    },
 });

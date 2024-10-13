@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { View, Text, StyleSheet} from 'react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 const Profile = () => {
+    const [userId, setUserId] = useState(null);
+
+    useEffect(() => {
+        const loadUserId = async () => {
+            const storedUserId = await AsyncStorage.getItem('userId');
+            if (storedUserId) {
+                setUserId(storedUserId);
+            }
+        };
+
+        loadUserId();
+    }, []);
     return (
         <View style={styles.container}>
-            
-            <Text style={styles.name}>John Doe</Text>
-            <Text style={styles.bio}>Software Developer at XYZ Company</Text>
-        </View>
+        {userId ? (
+            <Text>Welcome, User ID: {userId}!</Text>
+        ) : (
+            <Text>Loading user data...</Text>
+        )}
+    </View>
     );
 };
 

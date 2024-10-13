@@ -14,20 +14,7 @@ const HomeScreen = () => {
             </View>
 
             {/* Second Section - Activity */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Activities</Text>
-                <View style={styles.column}>
-                    <View style={styles.item}>
-                        <Text style={styles.itemText}>Activity 1</Text>
-                    </View>
-                    <View style={styles.item}>
-                        <Text style={styles.itemText}>Activity 2</Text>
-                    </View>
-                    <View style={styles.item}>
-                        <Text style={styles.itemText}>Activity 3</Text>
-                    </View>
-                </View>
-            </View>
+            
 
             {/* Third Section - Palmares (Achievements as Cards) */}
             <View style={styles.section}>

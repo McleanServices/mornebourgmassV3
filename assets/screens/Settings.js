@@ -1,9 +1,26 @@
 import React from 'react';
-import { View, Text, Switch, StyleSheet } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = ({ navigation }) => {
     const [isEnabled, setIsEnabled] = React.useState(false);
+    
     const toggleSwitch = () => setIsEnabled(previousState => !previousState);
+    
+    const handleLogout = async () => {
+        // Clear AsyncStorage
+        try {
+            await AsyncStorage.removeItem('token');
+            await AsyncStorage.removeItem('userId');
+
+            // Navigate to the login screen
+            navigation.navigate('Welcome');
+            Alert.alert("Logout successful", "You have been logged out.");
+        } catch (error) {
+            Alert.alert("Logout failed", "An error occurred while logging out.");
+            console.error("Logout error:", error);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -17,7 +34,9 @@ const SettingsScreen = ({ navigation }) => {
                     value={isEnabled}
                 />
             </View>
-           
+            
+            {/* Logout Button */}
+            <Button title="Logout" onPress={handleLogout} color="#FF5C5C" />
         </View>
     );
 };
