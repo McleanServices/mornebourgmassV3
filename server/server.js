@@ -2,18 +2,28 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 
+const cors = require('cors');
+
+
+
+// Middleware
+ // Enable CORS for all routes
+
+
 const app = express();
 const port = 3000;
+
+app.use(cors()); 
 
 // Middleware
 app.use(bodyParser.json());
 
 // MySQL connection
 const db = mysql.createConnection({
-    host: 'srv1267.hstgr.io',
-    user: 'u175541833_tyreceapi',
-    password: '1+FzHs=NLdP]',
-    database: 'u175541833_apitesting'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'test'
 });
 
 db.connect((err) => {
