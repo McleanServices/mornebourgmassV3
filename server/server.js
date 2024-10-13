@@ -3,7 +3,7 @@ const mysql = require('mysql');
 const bodyParser = require('body-parser');
 
 const cors = require('cors');
-
+const jwt = require('jsonwebtoken');
 
 
 // Middleware
@@ -17,6 +17,10 @@ app.use(cors());
 
 // Middleware
 app.use(bodyParser.json());
+
+const SECRET_KEY = "0192837465123456789";  // Make sure to keep this secure
+
+app.use(express.json());
 
 // MySQL connection
 const db = mysql.createConnection({
@@ -35,25 +39,95 @@ db.connect((err) => {
 });
 
 // Login API endpoint
+// app.post('/user/login', (req, res) => {
+//     const { username, password } = req.body;
+
+//     const user = result[0];
+
+//     if (!username || !password) {
+//         return res.status(400).json({ message: 'Username and password are required' });
+//     }
+
+//     const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+//     db.query(query, [username, password], (err, results) => {
+//         if (err) {
+//             console.error('Error executing query:', err);
+//             return res.status(500).json({ message: 'Internal server error' });
+//         }
+
+//         if (results.length > 0) {
+//             res.json({ message: 'Login successful' });
+//         } else {
+//             res.status(401).json({ message: 'Invalid username or password' });
+//         }
+
+
+//     });
+
+//     const token = jwt.sign(
+//         { id: user.id},
+//         SECRET_KEY,
+//         { expiresIn: '1h' }  // Token expires in 1 hour
+//     );
+
+//     // Return token and user data
+//     res.json({
+//         token,
+//         user: { id: user.id }
+//     });
+
+
+
+// });
+
+
+
 app.post('/user/login', (req, res) => {
     const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Username and password are required' });
+    // Sample user lookup
+    const query = 'SELECT * FROM users WHERE username = ?';
+    db.query(query, [username], (err, result) => {
+        if (err) return res.status(500).json({ message: 'Database error' });
+        if (result.length === 0) return res.status(404).json({ message: 'User not found' });
+
+        const user = result[0];
+
+        // Directly compare stored password with provided password
+        if (user.password !== password) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        // Generate token and send response
+        const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
+        res.json({ token, userId: user.id });
+    });
+});
+
+
+
+app.get('/user/account', (req, res) => {
+    const token = req.headers['authorization'];
+
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
     }
 
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.query(query, [username, password], (err, results) => {
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
         if (err) {
-            console.error('Error executing query:', err);
-            return res.status(500).json({ message: 'Internal server error' });
+            return res.status(401).json({ message: 'Invalid token' });
         }
 
-        if (results.length > 0) {
-            res.json({ message: 'Login successful' });
-        } else {
-            res.status(401).json({ message: 'Invalid username or password' });
-        }
+        const query = 'SELECT id, username FROM users WHERE id = ?';
+        db.query(query, [decoded.id], (err, result) => {
+            if (err) throw err;
+
+            if (result.length === 0) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+            res.json(result[0]);
+        });
     });
 });
 
