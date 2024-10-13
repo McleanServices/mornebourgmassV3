@@ -12,6 +12,7 @@ import { theme } from "../core/Theme";
 
 import { usernameValidator } from "../helpers/UsernameValidator";
 import { passwordValidator } from "../helpers/PasswordValidator";
+import { TouchableOpacity } from "react-native";
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState({ value: '', error: '' });
@@ -84,7 +85,17 @@ const Login = ({ navigation }) => {
       <Button mode="contained" onPress={onLoginPressed}>
         Login
       </Button>
+      <View style={styles.row}>
+        <Text>You do not have an account yet ?</Text>
+      </View>
+      <View style={styles.row}>
+        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+          <Text style={styles.link}>Create !</Text>
+        </TouchableOpacity>
+
+        </View>
     </View>
+    
   );
 };
 
