@@ -11,6 +11,8 @@ import HomeScreen from './assets/screens/HomeScreen';
 import Profile from './assets/screens/Profile';
 import SettingsScreen from './assets/screens/Settings';
 import RegisterScreen from './assets/screens/Register';
+import ActivityScreen from './assets/screens/Activity';
+import AuthLoadingScreen from './assets/screens/AuthLoadingScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,6 +30,15 @@ const BottomTabNavigator = () => {
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Activity"
+        component={ActivityScreen}
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'pulse-sharp' : 'pulse-outline'} color={color} size={24} />
           ),
         }}
       />
@@ -58,8 +69,9 @@ const BottomTabNavigator = () => {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen name="Welcome" component={Welcome} />
+      <Stack.Navigator>
+      <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Home" component={BottomTabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
