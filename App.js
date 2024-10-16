@@ -15,6 +15,8 @@ import ActivityScreen from './assets/screens/Activity';
 import AuthLoadingScreen from './assets/screens/AuthLoadingScreen';
 import ShoppingCart from './assets/screens/Shopping';
 
+//testing
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
