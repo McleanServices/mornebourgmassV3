@@ -6,19 +6,20 @@ import Header from "../components/Header";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
+import validator from "validator";
 
 import { theme } from "../core/Theme";
 
-import { emailValidator } from "../helpers/EmailValidator";
-import { passwordValidator } from "../helpers/PasswordValidator";
-import { nameValidator } from "../helpers/NameValidator";
+// Commenting out the validator imports for now
+// import { emailValidator } from "../helpers/EmailValidator";
+// import { passwordValidator } from "../helpers/PasswordValidator";
+// import { nameValidator } from "../helpers/NameValidator";
 // import { usernameValidator } from "../helpers/UsernameValidator"; // New helper for username
 // import { phoneValidator } from "../helpers/PhoneValidator"; // New helper for phone validation
 // import { dateOfBirthValidator } from "../helpers/DateOfBirthValidator"; // New helper for DOB validation
 
 export default function RegisterScreen({ navigation }) {
-//   const [username, setUsername] = useState({ value: "", error: "" });
-  const [name, setName] = useState({ value: "", error: "" });
+  const [username, setUsername] = useState({ value: "", error: "" });
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [firstName, setFirstName] = useState({ value: "", error: "" });
@@ -27,34 +28,39 @@ export default function RegisterScreen({ navigation }) {
   const [phoneNumber, setPhoneNumber] = useState({ value: "", error: "" });
   const [acceptTerms, setAcceptTerms] = useState(false); // State for checkbox
 
-  const onSignUpPressed = () => {
-    // const usernameError = usernameValidator(username.value);
-    const nameError = nameValidator(name.value);
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
-    // const phoneError = phoneValidator(phoneNumber.value);
-    // const dobError = dateOfBirthValidator(dateOfBirth.value);
-
-    // Check if the user accepted terms and conditions
-    if (!acceptTerms) {
-      alert("You must accept the terms and conditions.");
-      return;
-    }
-
-    if (nameError || emailError || passwordError || phoneError || dobError) {
-    //   setUsername({ ...username, error: usernameError });
-      setName({ ...name, error: nameError });
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
-      setPhoneNumber({ ...phoneNumber, error: phoneError });
-      setDateOfBirth({ ...dateOfBirth, error: dobError });
-      return;
-    }
-
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "HomeScreen" }],
-    });
+    
+  
+  const onSignUpPressed = async () => {
+      // Removed validation logic
+      if (!acceptTerms) {
+        alert("You must accept the terms and conditions.");
+        return;
+      }
+  
+      if (!validator.isEmail(email.value)) {
+        setEmail({ ...email, color: "red", error: "Please enter a valid email address." });
+        alert("Please enter a valid email address.");
+        return;
+      }
+  
+      try {
+        const response = await fetch("http://localhost:3000/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: email.value, // Use email as the username
+            firstName: firstName.value,
+            lastName: lastName.value,
+          }),
+        });
+  
+        // Handle response here
+  
+      } catch (error) {
+        console.error("Error during registration:", error);
+      }
   };
 
   return (
@@ -62,17 +68,17 @@ export default function RegisterScreen({ navigation }) {
       <BackButton goBack={navigation.goBack} />
       <Logo />
       <Header>Welcome.</Header>
-      
+
       {/* Username Input */}
-      {/* <TextInput
+      <TextInput
         label="Username"
         returnKeyType="next"
         value={username.value}
         onChangeText={(text) => setUsername({ value: text, error: "" })}
         error={!!username.error}
         errorText={username.error}
-      /> */}
-      
+        autoCapitalize="none"></TextInput>
+
       {/* First Name Input */}
       <TextInput
         label="First Name"
@@ -117,7 +123,7 @@ export default function RegisterScreen({ navigation }) {
         errorText={password.error}
         secureTextEntry
       />
-      
+
       {/* Date of Birth Input */}
       <TextInput
         label="Date of Birth (YYYY-MM-DD)"
@@ -127,7 +133,7 @@ export default function RegisterScreen({ navigation }) {
         error={!!dateOfBirth.error}
         errorText={dateOfBirth.error}
       />
-      
+
       {/* Phone Number Input */}
       <TextInput
         label="Phone Number"
@@ -137,7 +143,7 @@ export default function RegisterScreen({ navigation }) {
         error={!!phoneNumber.error}
         errorText={phoneNumber.error}
       />
-      
+
       {/* Terms and Conditions Checkbox */}
       <View style={styles.termsContainer}>
         <TouchableOpacity
@@ -156,7 +162,8 @@ export default function RegisterScreen({ navigation }) {
           and{" "}
           <TouchableOpacity onPress={() => navigation.navigate("PrivacyPolicy")}>
             <Text style={styles.link}>privacy policy</Text>
-          </TouchableOpacity>.
+          </TouchableOpacity>
+          .
         </Text>
       </View>
 
@@ -176,42 +183,41 @@ export default function RegisterScreen({ navigation }) {
           <Text style={styles.link}>Log in</Text>
         </TouchableOpacity>
       </View>
-
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-    row: {
-        flexDirection: "row",
-        marginTop: 4,
-    },
-    link: {
-        fontWeight: "bold",
-        color: theme.colors.primary,
-    },
-    container: {
-        flexGrow: 1,
-        padding: 20,
-        backgroundColor: theme.colors.background,
-        justifyContent: "center",
-    },
-    termsContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 20,
-    },
-    checkbox: {
-        marginRight: 10,
-    },
-    checked: {
-        fontSize: 18,
-    },
-    unchecked: {
-        fontSize: 18,
-        opacity: 0.5,
-    },
-    termsText: {
-        flex: 1,
-    },
+  row: {
+    flexDirection: "row",
+    marginTop: 4,
+  },
+  link: {
+    fontWeight: "bold",
+    color: theme.colors.primary,
+  },
+  container: {
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+  },
+  termsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
+  },
+  checkbox: {
+    marginRight: 10,
+  },
+  checked: {
+    fontSize: 18,
+  },
+  unchecked: {
+    fontSize: 18,
+    opacity: 0.5,
+  },
+  termsText: {
+    flex: 1,
+  },
 });
