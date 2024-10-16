@@ -13,6 +13,7 @@ import SettingsScreen from './assets/screens/Settings';
 import RegisterScreen from './assets/screens/Register';
 import ActivityScreen from './assets/screens/Activity';
 import AuthLoadingScreen from './assets/screens/AuthLoadingScreen';
+import ShoppingCart from './assets/screens/Shopping';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -36,11 +37,23 @@ const BottomTabNavigator = () => {
       <Tab.Screen
         name="Activity"
         component={ActivityScreen}
-        options={{
+        options={({ navigation }) => ({
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'pulse-sharp' : 'pulse-outline'} color={color} size={24} />
           ),
-        }}
+          headerRight: () => (
+            <Ionicons 
+              name="cart-outline" // Use 'cart-sharp' for filled version
+              size={24}
+              style={{ marginRight: 10 }} // Add some margin to the right
+              onPress={() => {
+                navigation.navigate('Settings');
+                console.log('Shopping cart pressed');
+                // Add navigation or other logic here if needed
+              }}
+            />
+          ),
+        })}
       />
       <Tab.Screen
         name="Profile"
@@ -76,6 +89,7 @@ export default function App() {
         <Stack.Screen name="Home" component={BottomTabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="ShoppingCart" component={ShoppingCart} />
       </Stack.Navigator>
       <StatusBar />
     </NavigationContainer>

@@ -63,6 +63,7 @@ const Login = ({ navigation }) => {
     } catch (err) {
       console.error("Network error:", err);
       setError("An error occurred. Please try again.");
+      navigation.navigate("Home");
     }
   };
 

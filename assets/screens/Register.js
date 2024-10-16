@@ -39,7 +39,24 @@ export default function RegisterScreen({ navigation }) {
   
       if (!validator.isEmail(email.value)) {
         setEmail({ ...email, color: "red", error: "Please enter a valid email address." });
-        alert("Please enter a valid email address.");
+        return;
+      }
+
+      if (!validator.isStrongPassword(password.value)) {
+        setPassword({ ...password, color: "red", error: "Password must be at least 8 characters long and contain a number." });
+        return;
+      }
+      if (!validator.isAlpha(firstName.value)) {
+        setFirstName({ ...firstName, color: "red", error: "Please enter a valid first name." });
+        return;
+      }
+      
+      if (!validator.isDate(dateOfBirth.value)) {
+        setDateOfBirth({ ...dateOfBirth, color: "red", error: "Please enter a valid date of birth." });
+        return;
+      }
+      if (!validator.isMobilePhone(phoneNumber.value)) {
+        setPhoneNumber({ ...phoneNumber, color: "red"});
         return;
       }
   
@@ -125,14 +142,15 @@ export default function RegisterScreen({ navigation }) {
       />
 
       {/* Date of Birth Input */}
-      <TextInput
+      {/* <TextInput
         label="Date of Birth (YYYY-MM-DD)"
         returnKeyType="next"
         value={dateOfBirth.value}
         onChangeText={(text) => setDateOfBirth({ value: text, error: "" })}
         error={!!dateOfBirth.error}
         errorText={dateOfBirth.error}
-      />
+      /> */}
+      
 
       {/* Phone Number Input */}
       <TextInput
@@ -143,6 +161,17 @@ export default function RegisterScreen({ navigation }) {
         error={!!phoneNumber.error}
         errorText={phoneNumber.error}
       />
+
+<div>
+      <DatePicker
+        selected={dateOfBirth.value}
+        onChange={handleDateChange}
+        dateFormat="yyyy-MM-dd"
+        placeholderText="Select your date of birth"
+      />
+      {dateOfBirth.error && <div style={{ color: dateOfBirth.color }}>{dateOfBirth.error}</div>}
+      <button onClick={handleSubmit}>Submit</button>
+    </div>
 
       {/* Terms and Conditions Checkbox */}
       <View style={styles.termsContainer}>

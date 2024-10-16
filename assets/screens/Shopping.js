@@ -1,0 +1,73 @@
+import React, { useState } from 'react';
+import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
+
+const ShoppingCart = () => {
+    const [cartItems, setCartItems] = useState([
+        { id: '1', name: 'Item 1', price: 29.99, description: 'Description for item 1' },
+        { id: '2', name: 'Item 2', price: 49.99, description: 'Description for item 2' },
+        { id: '3', name: 'Item 3', price: 19.99, description: 'Description for item 3' },
+    ]);
+
+    const renderItem = ({ item }) => (
+        <View style={styles.itemContainer}>
+            <Text style={styles.itemName}>{item.name}</Text>
+            <Text style={styles.itemDescription}>{item.description}</Text>
+            <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+        </View>
+    );
+
+    const getTotalPrice = () => {
+        return cartItems.reduce((total, item) => total + item.price, 0).toFixed(2);
+    };
+
+    return (
+        <View style={styles.container}>
+            <FlatList
+                data={cartItems}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+            />
+            <View style={styles.totalContainer}>
+                <Text style={styles.totalText}>Total: ${getTotalPrice()}</Text>
+                <Button title="Checkout" onPress={() => alert('Proceed to Checkout')} />
+            </View>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#fff',
+    },
+    itemContainer: {
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc',
+    },
+    itemName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    itemDescription: {
+        fontSize: 14,
+        color: '#666',
+    },
+    itemPrice: {
+        fontSize: 16,
+        color: '#000',
+    },
+    totalContainer: {
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#ccc',
+        alignItems: 'center',
+    },
+    totalText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+});
+
+export default ShoppingCart;

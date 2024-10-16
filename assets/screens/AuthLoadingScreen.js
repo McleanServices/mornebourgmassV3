@@ -22,11 +22,11 @@ export default function AuthLoadingScreen({ navigation }) {
                     navigation.navigate('Home');
                 } catch (error) {
                     // If token is invalid, navigate to login
-                    navigation.navigate('Login');
+                    navigation.navigate('Welcome');
                 }
             } else {
                 // No token found, navigate to login
-                navigation.navigate('Login');
+                navigation.navigate('Welcome');
             }
 
             setLoading(false);
