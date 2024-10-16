@@ -12,14 +12,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "jsEngine": "jsc" 
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.tyreceexpo.mynewproject2"
+      "package": "com.tyreceexpo.mynewproject2",
+      "jsEngine": "hermes"
+
     },
     "web": {
       "favicon": "./assets/favicon.png"
