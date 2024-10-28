@@ -21,6 +21,18 @@ const SettingsScreen = ({ navigation }) => {
             console.error("Logout error:", error);
         }
     };
+    const testApiGet = async () => {
+        try {
+          const response = await fetch("http://145.223.73.21:80/api/test");
+          const data = await response.json();
+          console.log("GET response data:", data);
+        } catch (err) {
+          console.error("GET request error:", err);
+        }
+      };
+      
+      // Call this function in useEffect or on a button press to test the GET request
+      
 
     return (
         <View style={styles.container}>

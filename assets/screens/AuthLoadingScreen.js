@@ -12,7 +12,7 @@ export default function AuthLoadingScreen({ navigation }) {
 
             if (token) {
                 try {
-                    const response = await axios.get('http://localhost:3000/user/account', {
+                    const response = await axios.get('http://145.223.73.21:80/user/account', {
                         headers: {
                             Authorization: token
                         }

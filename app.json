@@ -4,7 +4,7 @@
     "slug": "my-new-project2",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo1.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -13,7 +13,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "jsEngine": "jsc" 
+      "jsEngine": "jsc",
+      "bundleIdentifier": "debuggingMorneBourgApp"
     },
     "android": {
       "adaptiveIcon": {
@@ -22,15 +23,20 @@
       },
       "package": "com.tyreceexpo.mynewproject2",
       "jsEngine": "hermes"
-
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     },
     "extra": {
       "eas": {
         "projectId": "0c3f7964-199f-421e-ab17-198009cb4307"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0c3f7964-199f-421e-ab17-198009cb4307"
     }
   }
 }

@@ -17,7 +17,7 @@ return (
         style={styles.reactLogo}
       />
     <Button
-        title="Go to Next Page"
+        title="Commencer"
         onPress={() => {
             navigation.push('Login');
         }}

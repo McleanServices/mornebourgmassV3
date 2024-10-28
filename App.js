@@ -28,12 +28,23 @@ const BottomTabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="HomeScreen"
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
           ),
+          headerRight: () => (
+            <Ionicons 
+              name="notifications-outline" // Use 'notifications-sharp' for filled version
+              size={24}
+              style={{ marginRight: 10 }} // Add some margin to the right
+              onPress={() => {
+                console.log('Notifications pressed');
+                // Add navigation or other logic here if needed
+              }}
+            />
+          )
         }}
       />
       <Tab.Screen
@@ -49,7 +60,7 @@ const BottomTabNavigator = () => {
               size={24}
               style={{ marginRight: 10 }} // Add some margin to the right
               onPress={() => {
-                navigation.navigate('Settings');
+                navigation.navigate('ShoppingCart');
                 console.log('Shopping cart pressed');
                 // Add navigation or other logic here if needed
               }}
@@ -106,3 +117,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+

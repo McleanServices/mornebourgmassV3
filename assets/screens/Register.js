@@ -8,6 +8,7 @@ import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import validator from "validator";
 
+
 import { theme } from "../core/Theme";
 
 // Commenting out the validator imports for now
@@ -30,56 +31,59 @@ export default function RegisterScreen({ navigation }) {
 
     
   
-  const onSignUpPressed = async () => {
-      // Removed validation logic
-      if (!acceptTerms) {
-        alert("You must accept the terms and conditions.");
-        return;
-      }
+  // const onSignUpPressed = async () => {
+  //     // Removed validation logic
+  //     if (!acceptTerms) {
+  //       alert("You must accept the terms and conditions.");
+  //       return;
+  //     }
   
-      if (!validator.isEmail(email.value)) {
-        setEmail({ ...email, color: "red", error: "Please enter a valid email address." });
-        return;
-      }
+  //     if (!validator.isEmail(email.value)) {
+  //       setEmail({ ...email, color: "red", error: "Please enter a valid email address." });
+  //       return;
+  //     }
 
-      if (!validator.isStrongPassword(password.value)) {
-        setPassword({ ...password, color: "red", error: "Password must be at least 8 characters long and contain a number." });
-        return;
-      }
-      if (!validator.isAlpha(firstName.value)) {
-        setFirstName({ ...firstName, color: "red", error: "Please enter a valid first name." });
-        return;
-      }
+  //     if (!validator.isStrongPassword(password.value)) {
+  //       setPassword({ ...password, color: "red", error: "Password must be at least 8 characters long and contain a number." });
+  //       return;
+  //     }
+  //     if (!validator.isAlpha(firstName.value)) {
+  //       setFirstName({ ...firstName, color: "red", error: "Please enter a valid first name." });
+  //       return;
+  //     }
       
-      if (!validator.isDate(dateOfBirth.value)) {
-        setDateOfBirth({ ...dateOfBirth, color: "red", error: "Please enter a valid date of birth." });
-        return;
-      }
-      if (!validator.isMobilePhone(phoneNumber.value)) {
-        setPhoneNumber({ ...phoneNumber, color: "red"});
-        return;
-      }
+  //     if (!validator.isDate(dateOfBirth.value)) {
+  //       setDateOfBirth({ ...dateOfBirth, color: "red", error: "Please enter a valid date of birth." });
+  //       return;
+  //     }
+  //     if (!validator.isMobilePhone(phoneNumber.value)) {
+  //       setPhoneNumber({ ...phoneNumber, color: "red"});
+  //       return;
+  //     }
   
-      try {
-        const response = await fetch("http://localhost:3000/register", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: email.value, // Use email as the username
-            firstName: firstName.value,
-            lastName: lastName.value,
-          }),
-        });
+  //     try {
+  //       const response = await fetch("http://localhost:3000/register", {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({
+  //           username: email.value, // Use email as the username
+  //           firstName: firstName.value,
+  //           lastName: lastName.value,
+  //         }),
+  //       });
   
-        // Handle response here
+  //       // Handle response here
   
-      } catch (error) {
-        console.error("Error during registration:", error);
-      }
-  };
+  //     } catch (error) {
+  //       console.error("Error during registration:", error);
+  //     }
+  // };
 
+  const onSignUpPressed = () => {
+    navigation.navigate("Home");
+  };
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <BackButton goBack={navigation.goBack} />
@@ -142,14 +146,14 @@ export default function RegisterScreen({ navigation }) {
       />
 
       {/* Date of Birth Input */}
-      {/* <TextInput
+      <TextInput
         label="Date of Birth (YYYY-MM-DD)"
         returnKeyType="next"
         value={dateOfBirth.value}
         onChangeText={(text) => setDateOfBirth({ value: text, error: "" })}
         error={!!dateOfBirth.error}
         errorText={dateOfBirth.error}
-      /> */}
+      />
       
 
       {/* Phone Number Input */}
@@ -162,16 +166,7 @@ export default function RegisterScreen({ navigation }) {
         errorText={phoneNumber.error}
       />
 
-<div>
-      <DatePicker
-        selected={dateOfBirth.value}
-        onChange={handleDateChange}
-        dateFormat="yyyy-MM-dd"
-        placeholderText="Select your date of birth"
-      />
-      {dateOfBirth.error && <div style={{ color: dateOfBirth.color }}>{dateOfBirth.error}</div>}
-      <button onClick={handleSubmit}>Submit</button>
-    </div>
+
 
       {/* Terms and Conditions Checkbox */}
       <View style={styles.termsContainer}>
