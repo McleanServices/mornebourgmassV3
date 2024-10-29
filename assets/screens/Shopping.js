@@ -3,9 +3,8 @@ import { View, Text, FlatList, StyleSheet, Button } from 'react-native';
 
 const ShoppingCart = () => {
     const [cartItems, setCartItems] = useState([
-        { id: '1', name: 'Item 1', price: 29.99, description: 'Description for item 1' },
-        { id: '2', name: 'Item 2', price: 49.99, description: 'Description for item 2' },
-        { id: '3', name: 'Item 3', price: 19.99, description: 'Description for item 3' },
+          { id: '2', name: 'Article 2', price: 49.99, description: 'Description pour l\'article 2' },
+        { id: '3', name: 'Article 3', price: 19.99, description: 'Description pour l\'article 3' },
     ]);
 
     const renderItem = ({ item }) => (
@@ -29,7 +28,7 @@ const ShoppingCart = () => {
             />
             <View style={styles.totalContainer}>
                 <Text style={styles.totalText}>Total: ${getTotalPrice()}</Text>
-                <Button title="Checkout" onPress={() => alert('Proceed to Checkout')} />
+                <Button title="Passer à la caisse" onPress={() => alert('Procéder au paiement')} />
             </View>
         </View>
     );

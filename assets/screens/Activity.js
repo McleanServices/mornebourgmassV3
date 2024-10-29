@@ -99,7 +99,8 @@ import { View, Text, StyleSheet} from 'react-native';
 const Activity = () => {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Hello</Text>
+            <Text style={styles.text}>Page en développement</Text>
+            <Text style={styles.subtext}>Cette fonctionnalité est encore en cours de développement. Revenez plus tard pour plus de détails.</Text>
         </View>
     );
 };
@@ -109,10 +110,18 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        textAlign: 'center',
     },
     text: {
-        fontSize: 24,
+        fontSize: 19,
         fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    subtext: {
+        fontSize: 16,
+        color: '#888',
+        marginTop: 10,
+        textAlign: 'center',
     },
 });
 

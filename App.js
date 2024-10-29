@@ -14,6 +14,8 @@ import RegisterScreen from './assets/screens/Register';
 import ActivityScreen from './assets/screens/Activity';
 import AuthLoadingScreen from './assets/screens/AuthLoadingScreen';
 import ShoppingCart from './assets/screens/Shopping';
+import ScanCodeScreen from './assets/screens/ScanCodeScreen';
+import UserDetails from './assets/screens/UserDetails';
 
 //testing
 
@@ -28,7 +30,7 @@ const BottomTabNavigator = () => {
       }}
     >
       <Tab.Screen
-        name="HomeScreen"
+        name="Accueil"
         component={HomeScreen}
         options={{
           tabBarIcon: ({ color, focused }) => (
@@ -103,6 +105,8 @@ export default function App() {
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="ShoppingCart" component={ShoppingCart} />
+        <Stack.Screen name="scancode" component={ScanCodeScreen} />
+        <Stack.Screen name="UserDetails" component={UserDetails} />
       </Stack.Navigator>
       <StatusBar />
     </NavigationContainer>
