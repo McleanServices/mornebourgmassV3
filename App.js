@@ -16,6 +16,8 @@ import AuthLoadingScreen from './assets/screens/AuthLoadingScreen';
 import ShoppingCart from './assets/screens/Shopping';
 import ScanCodeScreen from './assets/screens/ScanCodeScreen';
 import UserDetails from './assets/screens/UserDetails';
+import EditPage from './assets/screens/EditPage';
+import EditHome from './assets/screens/AdminEdit/EditHome/EditHome';
 
 //testing
 
@@ -107,6 +109,8 @@ export default function App() {
         <Stack.Screen name="ShoppingCart" component={ShoppingCart} />
         <Stack.Screen name="scancode" component={ScanCodeScreen} />
         <Stack.Screen name="UserDetails" component={UserDetails} />
+        <Stack.Screen name="EditPage" component={EditPage} />
+        <Stack.Screen name="EditHome" component={EditHome} />
       </Stack.Navigator>
       <StatusBar />
     </NavigationContainer>

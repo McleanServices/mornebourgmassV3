@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import axios from "axios";
 
 const HomeScreen = () => {
   // Array of image sources
@@ -19,14 +20,27 @@ const HomeScreen = () => {
     require("../images/photo4.jpg"),
   ];
 
+  const [activities, setActivities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, 5000); // Change image every 3 seconds
-
     return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const response = await axios.get("https://mornebourgmass.com/api/activity"); // Replace with your server URL
+        setActivities(response.data);
+      } catch (error) {
+        console.error("Error fetching activities:", error);
+      }
+    };
+
+    fetchActivities();
   }, []);
 
   const screenWidth = Dimensions.get("window").width;
@@ -52,10 +66,16 @@ const HomeScreen = () => {
 
       {/* Recent Activity Section */}
       <View style={styles.activitySection}>
-        <Text style={styles.sectionTitle}>Activité récente</Text>
-        <Text style={styles.activityDescription}>
-          Découvrez nos dernières mises à jour et fonctionnalités ! Restez engagé avec la communauté.
-        </Text>
+        {activities.length > 0 ? (
+          activities.map((activity, index) => (
+            <View key={index} style={styles.activityCard}>
+              <Text style={styles.sectionTitle}>{activity.title}</Text>
+              <Text style={styles.activityDescription}>{activity.description}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noActivityText}>Aucune activité récente.</Text>
+        )}
         <TouchableOpacity style={styles.ctaButton}>
           <Text style={styles.ctaText}>Explorez maintenant</Text>
         </TouchableOpacity>
