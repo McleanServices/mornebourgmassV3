@@ -1,23 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { Text } from "react-native-paper";
-import Logo from "../components/Logo";
 import Header from "../components/Header";
 import Button from "../components/Button";
-import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import validator from "validator";
 
-
 import { theme } from "../core/Theme";
-
-// Commenting out the validator imports for now
-// import { emailValidator } from "../helpers/EmailValidator";
-// import { passwordValidator } from "../helpers/PasswordValidator";
-// import { nameValidator } from "../helpers/NameValidator";
-// import { usernameValidator } from "../helpers/UsernameValidator"; // New helper for username
-// import { phoneValidator } from "../helpers/PhoneValidator"; // New helper for phone validation
-// import { dateOfBirthValidator } from "../helpers/DateOfBirthValidator"; // New helper for DOB validation
 
 export default function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState({ value: "", error: "" });
@@ -27,191 +16,174 @@ export default function RegisterScreen({ navigation }) {
   const [lastName, setLastName] = useState({ value: "", error: "" });
   const [dateOfBirth, setDateOfBirth] = useState({ value: "", error: "" });
   const [phoneNumber, setPhoneNumber] = useState({ value: "", error: "" });
-  const [acceptTerms, setAcceptTerms] = useState(false); // State for checkbox
+  const [role, setRole] = useState("user"); // Default role
+  const [loading, setLoading] = useState(false); // State for loading indicator
+  const [successMessage, setSuccessMessage] = useState(""); // State for success message
 
-    
-  
-  // const onSignUpPressed = async () => {
-  //     // Removed validation logic
-  //     if (!acceptTerms) {
-  //       alert("You must accept the terms and conditions.");
-  //       return;
-  //     }
-  
-  //     if (!validator.isEmail(email.value)) {
-  //       setEmail({ ...email, color: "red", error: "Please enter a valid email address." });
-  //       return;
-  //     }
+  const onSignUpPressed = async () => {
+    if (!validator.isEmail(email.value)) {
+      setEmail({ ...email, color: "red", error: "Veuillez entrer une adresse email valide." });
+      return;
+    }
+    if (!validator.isAlpha(firstName.value)) {
+      setFirstName({ ...firstName, color: "red", error: "Veuillez entrer un prénom valide." });
+      return;
+    }
+    if (!validator.isDate(dateOfBirth.value)) {
+      setDateOfBirth({ ...dateOfBirth, color: "red", error: "Veuillez entrer une date de naissance valide." });
+      return;
+    }
+    if (!validator.isMobilePhone(phoneNumber.value)) {
+      setPhoneNumber({ ...phoneNumber, color: "red", error: "Veuillez entrer un numéro de t��léphone valide." });
+      return;
+    }
 
-  //     if (!validator.isStrongPassword(password.value)) {
-  //       setPassword({ ...password, color: "red", error: "Password must be at least 8 characters long and contain a number." });
-  //       return;
-  //     }
-  //     if (!validator.isAlpha(firstName.value)) {
-  //       setFirstName({ ...firstName, color: "red", error: "Please enter a valid first name." });
-  //       return;
-  //     }
-      
-  //     if (!validator.isDate(dateOfBirth.value)) {
-  //       setDateOfBirth({ ...dateOfBirth, color: "red", error: "Please enter a valid date of birth." });
-  //       return;
-  //     }
-  //     if (!validator.isMobilePhone(phoneNumber.value)) {
-  //       setPhoneNumber({ ...phoneNumber, color: "red"});
-  //       return;
-  //     }
-  
-  //     try {
-  //       const response = await fetch("http://localhost:3000/register", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           username: email.value, // Use email as the username
-  //           firstName: firstName.value,
-  //           lastName: lastName.value,
-  //         }),
-  //       });
-  
-  //       // Handle response here
-  
-  //     } catch (error) {
-  //       console.error("Error during registration:", error);
-  //     }
-  // };
+    setLoading(true); // Show loading indicator
 
-  const onSignUpPressed = () => {
-    navigation.navigate("Home");
+    try {
+      console.log("Sending registration request with data:", {
+        identifiant: email.value,
+        nom: lastName.value,
+        prenom: firstName.value,
+        role: role,
+      });
+
+      const response = await fetch("https://mornebourgmass.com/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          identifiant: email.value, // Use email as the identifiant
+          nom: lastName.value,
+          prenom: firstName.value,
+          email: email.value,
+          password: password.value,
+          numero_telephone: phoneNumber.value, // Updated field name
+          date_naissance: dateOfBirth.value,
+          role: role,
+        }),
+      });
+
+      const responseData = await response.json();
+      console.log("Registration response:", responseData);
+
+      setLoading(false); // Hide loading indicator
+
+      if (response.ok) {
+        setSuccessMessage("Utilisateur enregistré avec succès."); // Set success message
+        Alert.alert("Succès", "Utilisateur enregistré avec succès.");
+      } else {
+        setSuccessMessage(""); // Clear success message
+        Alert.alert("Erreur", `Une erreur s'est produite lors de l'enregistrement: ${responseData.message}`);
+      }
+    } catch (error) {
+      setLoading(false); // Hide loading indicator
+      console.error("Error during registration:", error);
+      Alert.alert("Erreur", `Une erreur s'est produite lors de l'enregistrement: ${error.message}`);
+    }
   };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <BackButton goBack={navigation.goBack} />
-      <Logo />
-      <Header>Welcome.</Header>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <BackButton goBack={navigation.goBack} />
+        <Header>Bienvenue.</Header>
 
-      {/* Username Input */}
-      <TextInput
-        label="Username"
-        returnKeyType="next"
-        value={username.value}
-        onChangeText={(text) => setUsername({ value: text, error: "" })}
-        error={!!username.error}
-        errorText={username.error}
-        autoCapitalize="none"></TextInput>
+        <TextInput
+          placeholder="Nom d'utilisateur"
+          returnKeyType="next"
+          value={username.value}
+          onChangeText={(text) => setUsername({ value: text, error: "" })}
+          style={styles.input}
+        />
 
-      {/* First Name Input */}
-      <TextInput
-        label="First Name"
-        returnKeyType="next"
-        value={firstName.value}
-        onChangeText={(text) => setFirstName({ value: text, error: "" })}
-        error={!!firstName.error}
-        errorText={firstName.error}
-      />
+        <TextInput
+          placeholder="Prénom"
+          returnKeyType="next"
+          value={firstName.value}
+          onChangeText={(text) => setFirstName({ value: text, error: "" })}
+          style={styles.input}
+        />
 
-      {/* Last Name Input */}
-      <TextInput
-        label="Last Name"
-        returnKeyType="next"
-        value={lastName.value}
-        onChangeText={(text) => setLastName({ value: text, error: "" })}
-        error={!!lastName.error}
-        errorText={lastName.error}
-      />
+        <TextInput
+          placeholder="Nom"
+          returnKeyType="next"
+          value={lastName.value}
+          onChangeText={(text) => setLastName({ value: text, error: "" })}
+          style={styles.input}
+        />
 
-      {/* Email Input */}
-      <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: "" })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      />
+        <TextInput
+          placeholder="Email"
+          returnKeyType="next"
+          value={email.value}
+          onChangeText={(text) => setEmail({ value: text, error: "" })}
+          style={styles.input}
+          autoCapitalize="none"
+          autoCompleteType="email"
+          textContentType="emailAddress"
+          keyboardType="email-address"
+        />
 
-      {/* Password Input */}
-      <TextInput
-        label="Password"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: "" })}
-        error={!!password.error}
-        errorText={password.error}
-        secureTextEntry
-      />
+        <TextInput
+          placeholder="Mot de passe"
+          returnKeyType="done"
+          value={password.value}
+          onChangeText={(text) => setPassword({ value: text, error: "" })}
+          style={styles.input}
+          secureTextEntry
+        />
 
-      {/* Date of Birth Input */}
-      <TextInput
-        label="Date of Birth (YYYY-MM-DD)"
-        returnKeyType="next"
-        value={dateOfBirth.value}
-        onChangeText={(text) => setDateOfBirth({ value: text, error: "" })}
-        error={!!dateOfBirth.error}
-        errorText={dateOfBirth.error}
-      />
-      
+        <TextInput
+          placeholder="Date de naissance (YYYY-MM-DD)"
+          returnKeyType="next"
+          value={dateOfBirth.value}
+          onChangeText={(text) => setDateOfBirth({ value: text, error: "" })}
+          style={styles.input}
+        />
 
-      {/* Phone Number Input */}
-      <TextInput
-        label="Phone Number"
-        returnKeyType="next"
-        value={phoneNumber.value}
-        onChangeText={(text) => setPhoneNumber({ value: text, error: "" })}
-        error={!!phoneNumber.error}
-        errorText={phoneNumber.error}
-      />
+        <TextInput
+          placeholder="Numéro de téléphone"
+          returnKeyType="next"
+          value={phoneNumber.value}
+          onChangeText={(text) => setPhoneNumber({ value: text, error: "" })}
+          style={styles.input}
+        />
 
-
-
-      {/* Terms and Conditions Checkbox */}
-      <View style={styles.termsContainer}>
-        <TouchableOpacity
-          onPress={() => setAcceptTerms(!acceptTerms)}
-          style={styles.checkbox}
-        >
-          <Text style={acceptTerms ? styles.checked : styles.unchecked}>
-            {acceptTerms ? "☑" : "☐"}
-          </Text>
-        </TouchableOpacity>
-        <Text style={styles.termsText}>
-          I accept the{" "}
-          <TouchableOpacity onPress={() => navigation.navigate("PrivacyPolicy")}>
-            <Text style={styles.link}>terms and conditions</Text>
-          </TouchableOpacity>{" "}
-          and{" "}
-          <TouchableOpacity onPress={() => navigation.navigate("PrivacyPolicy")}>
-            <Text style={styles.link}>privacy policy</Text>
-          </TouchableOpacity>
-          .
-        </Text>
-      </View>
-
-      {/* Sign Up Button */}
-      <Button
-        mode="contained"
-        onPress={onSignUpPressed}
-        style={{ marginTop: 24 }}
-      >
-        Next
-      </Button>
-      <View style={styles.row}>
-        <Text>I already have an account!</Text>
-      </View>
-      <View style={styles.row}>
-        <TouchableOpacity onPress={() => navigation.replace("LoginScreen")}>
-          <Text style={styles.link}>Log in</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        {loading ? (
+          <ActivityIndicator size="large" color="#0000ff" />
+        ) : (
+          <>
+            <Button mode="contained" onPress={onSignUpPressed} style={{ marginTop: 24 }}>
+              Ajouter
+            </Button>
+            {successMessage ? (
+              <Text style={styles.successMessage}>{successMessage}</Text>
+            ) : null}
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: theme.colors.background,
+    padding: 20,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 10,
+  },
   row: {
     flexDirection: "row",
     marginTop: 4,
@@ -220,28 +192,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: theme.colors.primary,
   },
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: theme.colors.background,
-    justifyContent: "center",
-  },
-  termsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 20,
-  },
-  checkbox: {
-    marginRight: 10,
-  },
-  checked: {
-    fontSize: 18,
-  },
-  unchecked: {
-    fontSize: 18,
-    opacity: 0.5,
-  },
-  termsText: {
-    flex: 1,
+  successMessage: {
+    color: "green",
+    marginTop: 10,
+    textAlign: "center",
   },
 });

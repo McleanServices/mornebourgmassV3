@@ -10,6 +10,7 @@ import {
   FlatList,
 } from "react-native";
 import axios from "axios";
+import { useCookies } from 'react-cookie'; // Import useCookies from react-cookie
 
 const HomeScreen = () => {
   // Array of image sources
@@ -22,6 +23,8 @@ const HomeScreen = () => {
 
   const [activities, setActivities] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cookies, setCookie] = useCookies(['cookieConsent']); // Use react-cookie to manage cookie consent
+  const [showCookieBanner, setShowCookieBanner] = useState(!cookies.cookieConsent);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -43,10 +46,25 @@ const HomeScreen = () => {
     fetchActivities();
   }, []);
 
+  const handleAcceptCookies = () => {
+    setCookie('cookieConsent', true, { path: '/', sameSite: 'None', secure: true });
+    setShowCookieBanner(false);
+  };
+
   const screenWidth = Dimensions.get("window").width;
 
   return (
     <ScrollView style={styles.container}>
+      {/* Cookie Consent Banner */}
+      {showCookieBanner && (
+        <View style={styles.cookieBanner}>
+          <Text style={styles.cookieText}>We use cookies to improve your experience. By using our site, you agree to our use of cookies.</Text>
+          <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptCookies}>
+            <Text style={styles.acceptButtonText}>Accept</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Image Carousel Section */}
       <Image
         source={images[currentIndex]}
@@ -214,6 +232,31 @@ const styles = StyleSheet.create({
     height: 300,
     resizeMode: "cover",
     alignSelf: "center", // Center the image horizontally
+  },
+  cookieBanner: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#000',
+    padding: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cookieText: {
+    color: '#fff',
+    flex: 1,
+    marginRight: 10,
+  },
+  acceptButton: {
+    backgroundColor: '#3498DB',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+  },
+  acceptButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

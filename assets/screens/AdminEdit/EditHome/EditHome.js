@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
 
 const EditHome = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchActivity = async () => {
@@ -30,6 +31,7 @@ const EditHome = () => {
     }, []);
 
     const handleUpdate = async () => {
+        setLoading(true);
         try {
             const response = await fetch('https://mornebourgmass.com/api/activity', {
                 method: 'PUT',
@@ -40,13 +42,30 @@ const EditHome = () => {
             });
 
             if (response.ok) {
+                if (Platform.OS === 'web') {
+                    alert('Succès: Activité Recente mise à jour avec succès');
+                } else {
+                    Alert.alert('Succès', 'Activité Recente mise à jour avec succès');
+                }
                 // Handle successful update, maybe navigate back or show a success message
             } else {
                 const errorData = await response.json();
-                console.error('Update failed:', errorData.message);
+                console.error('Échec de la mise à jour:', errorData.message);
+                if (Platform.OS === 'web') {
+                    alert('Erreur: Échec de la mise à jour de l\'activité');
+                } else {
+                    Alert.alert('Erreur', 'Échec de la mise à jour de l\'activité');
+                }
             }
         } catch (error) {
-            console.error('Error updating activity:', error);
+            console.error('Erreur lors de la mise à jour de l\'activité:', error);
+            if (Platform.OS === 'web') {
+                alert('Erreur: Une erreur s\'est produite lors de la mise à jour de l\'activité');
+            } else {
+                Alert.alert('Erreur', 'Une erreur s\'est produite lors de la mise à jour de l\'activité');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -56,18 +75,22 @@ const EditHome = () => {
                 style={styles.input}
                 value={title}
                 onChangeText={setTitle}
-                placeholder="Enter title"
+                placeholder="Entrez le titre"
                 placeholderTextColor="#999"
             />
             <TextInput
                 style={styles.input}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Enter description"
+                placeholder="Entrez la description"
                 placeholderTextColor="#999"
                 multiline
             />
-            <Button title="Update Activity" onPress={handleUpdate} />
+            {loading ? (
+                <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
+                <Button title="Mettre à jour l'activité" onPress={handleUpdate} />
+            )}
         </View>
     );
 };
