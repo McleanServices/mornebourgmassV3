@@ -8,6 +8,7 @@ import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import axios from 'axios';
+import { useCookies } from 'react-cookie'; // Import useCookies from react-cookie
 
 import { theme } from "../core/Theme";
 
@@ -17,12 +18,11 @@ import { TouchableOpacity } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [error, setError] = useState("");
+  const [cookies, setCookie] = useCookies(['token']); // Use react-cookie to get and set the token
 
   const onLoginPressed = async () => {
     const usernameError = usernameValidator(username.value);
@@ -35,13 +35,13 @@ const Login = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch("https://keigonwilson.com/api/user/login", {
+      const response = await fetch("https://mornebourgmass.com/api/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: username.value,
+          identifiant: username.value,
           password: password.value,
         }),
       });
@@ -49,10 +49,15 @@ const Login = ({ navigation }) => {
       const data = await response.json();
 
       if (response.ok) {
-        const { token, userId } = data;
-        // Save token and userId to AsyncStorage
+        const { token, userId, userRole } = data;
+        // Save token, userId, and userRole to AsyncStorage
         await AsyncStorage.setItem("token", token);
         await AsyncStorage.setItem("userId", userId.toString());
+        if (userRole) {
+          await AsyncStorage.setItem("userRole", userRole);
+          console.log("Stored User Role:", userRole);
+        }
+        setCookie('token', token, { path: '/', sameSite: 'None', secure: true }); // Set the token in cookies with sameSite and secure attributes
         // Handle successful login
         console.log("Login successful", data);
         navigation.navigate("Home");
