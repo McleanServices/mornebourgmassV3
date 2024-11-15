@@ -21,40 +21,30 @@
         "foregroundImage": "./assets/logo1.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.mcleantyrece.mornebourgmass",
+      "package": "com.tyreceexpo.mynewproject2",
       "jsEngine": "hermes"
-    },
-    "experiments": {
-      "baseUrl": "/mobile"
     },
     "web": {
       "favicon": "./assets/logo1.png",
-      "assetPrefix": "/mobile"
+      "baseUrl": "/mobile"
     },
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
-    "plugins": [
-      "expo-asset",
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "buildProperties": {
-              "buildToolsVersion": "30.0.3",
-              "compileSdkVersion": 30,
-              "enablePngCrunchInReleaseBuilds": true,
-              "enableProguardInReleaseBuilds": true,
-              "enableShrinkResourcesInReleaseBuilds": true
-            }
-          }
-        }
-      ]
-    ],
     "extra": {
       "eas": {
-        "projectId": "90e71ec1-e2fe-40ee-a351-cd4a4fbf5e21"
+        "projectId": "0c3f7964-199f-421e-ab17-198009cb4307"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/0c3f7964-199f-421e-ab17-198009cb4307"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-build-properties"
+    ],
+    "experiments": {
+      "baseUrl": "/mobile"
     }
   }
 }

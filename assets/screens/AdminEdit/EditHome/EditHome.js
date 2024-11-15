@@ -4,12 +4,13 @@ import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform
 const EditHome = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [notreMission, setNotreMission] = useState(''); // Add state for NotreMission
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchActivity = async () => {
             try {
-                const response = await fetch('https://mornebourgmass.com/api/activity');
+                const response = await fetch('https://mornebourgmass.com/api/homescreen');
                 if (!response.ok) {
                     throw new Error('Failed to fetch activity data');
                 }
@@ -19,6 +20,7 @@ const EditHome = () => {
                 if (data.length > 0) {
                     setTitle(data[0].title);
                     setDescription(data[0].description);
+                    setNotreMission(data[0].NotreMission); // Ensure NotreMission is set from response
                 } else {
                     console.warn('No data found'); // Log a warning if the array is empty
                 }
@@ -38,7 +40,7 @@ const EditHome = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ title, description }),
+                body: JSON.stringify({ title, description, NotreMission: notreMission }), // Ensure NotreMission is included in request body
             });
 
             if (response.ok) {
@@ -83,6 +85,14 @@ const EditHome = () => {
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Entrez la description"
+                placeholderTextColor="#999"
+                multiline
+            />
+            <TextInput
+                style={styles.input}
+                value={notreMission}
+                onChangeText={setNotreMission}
+                placeholder="Entrez la mission"
                 placeholderTextColor="#999"
                 multiline
             />

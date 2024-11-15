@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { Text } from "react-native-paper";
-import Header from "../components/Header";
-import Button from "../components/Button";
-import BackButton from "../components/BackButton";
+import Header from "../../../components/Header";
+import Button from "../../../components/Button";
+import BackButton from "../../../components/BackButton";
 import validator from "validator";
 
-import { theme } from "../core/Theme";
+import { theme } from "../../../core/Theme";
 
 export default function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState({ value: "", error: "" });

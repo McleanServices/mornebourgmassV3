@@ -25,6 +25,8 @@ const HomeScreen = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cookies, setCookie] = useCookies(['cookieConsent']); // Use react-cookie to manage cookie consent
   const [showCookieBanner, setShowCookieBanner] = useState(!cookies.cookieConsent);
+  const [notreMission, setNotreMission] = useState(''); // Add state for NotreMission
+  const [palmares, setPalmares] = useState([]); // Add state for Palmares
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,14 +38,30 @@ const HomeScreen = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await axios.get("https://mornebourgmass.com/api/activity"); // Replace with your server URL
+        const response = await axios.get("https://mornebourgmass.com/api/homescreen"); // Replace with your server URL
         setActivities(response.data);
+        if (response.data.length > 0) {
+          setNotreMission(response.data[0].NotreMission); // Set NotreMission from response
+        }
       } catch (error) {
         console.error("Error fetching activities:", error);
       }
     };
 
     fetchActivities();
+  }, []);
+
+  useEffect(() => {
+    const fetchPalmares = async () => {
+      try {
+        const response = await axios.get("https://mornebourgmass.com/api/palmares"); // Replace with your server URL
+        setPalmares(response.data);
+      } catch (error) {
+        console.error("Error fetching palmares:", error);
+      }
+    };
+
+    fetchPalmares();
   }, []);
 
   const handleAcceptCookies = () => {
@@ -54,7 +72,7 @@ const HomeScreen = () => {
   const screenWidth = Dimensions.get("window").width;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} pointerEvents="auto">
       {/* Cookie Consent Banner */}
       {showCookieBanner && (
         <View style={styles.cookieBanner}>
@@ -69,6 +87,7 @@ const HomeScreen = () => {
       <Image
         source={images[currentIndex]}
         style={[styles.image, { width: screenWidth * 1 }]} // 90% of screen width
+        resizeMode="cover"
       />
       <View>
         <FlatList
@@ -105,7 +124,7 @@ const HomeScreen = () => {
         <View style={styles.aboutCard}>
           <Text style={styles.aboutTitle}>Notre mission</Text>
           <Text style={styles.aboutDescription}>
-            Nous sommes dédiés à la création d'une communauté dynamique qui célèbre l'esprit du carnaval. Notre objectif est d'autonomiser les individus en offrant des opportunités d'expression artistique, de travail d'équipe et d'enrichissement culturel. Rejoignez-nous pour partager notre passion pour le carnaval tout en favorisant un environnement accueillant et solidaire pour tous. Ensemble, nous pouvons créer des expériences inoubliables et des connexions durables !
+            {notreMission} {/* Display NotreMission */}
           </Text>
         </View>
       </View>
@@ -114,12 +133,7 @@ const HomeScreen = () => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Palmarès</Text>
         <View style={styles.grid}>
-          {[
-            { title: "Meilleur contributeur 2023", description: "Récompensé pour avoir apporté les ressources et les idées les plus précieuses à la communauté en 2023." },
-            { title: "Prix du meilleur design", description: "Reconnu pour la création d'un design d'application innovant et centré sur l'utilisateur, augmentant l'engagement des utilisateurs." },
-            { title: "Excellence en leadership", description: "Présenté pour avoir démontré un leadership exceptionnel et avoir guidé plusieurs projets réussis." },
-            { title: "Engagement communautaire", description: "Honoré pour son engagement actif avec la communauté, l'organisation d'événements et la promotion de la collaboration." },
-          ].map((item, index) => (
+          {palmares.map((item, index) => (
             <View key={index} style={styles.card}>
               <Text style={styles.cardTitle}>{item.title}</Text>
               <Text style={styles.cardDescription}>{item.description}</Text>
@@ -185,10 +199,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
     elevation: 5,
   },
   aboutTitle: {
@@ -212,10 +223,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
     elevation: 5,
   },
   cardTitle: {

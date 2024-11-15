@@ -1,10 +1,12 @@
 import React from "react";
 import { TouchableOpacity, Image, StyleSheet } from "react-native";
-import { getStatusBarHeight } from "react-native-status-bar-height";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function BackButton({ goBack }) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <TouchableOpacity onPress={goBack} style={styles.container}>
+    <TouchableOpacity onPress={goBack} style={[styles.container, { top: insets.top + 10 }]}>
       {/* <Image
         style={styles.image}
         source={require("../../assets/items/back.png")}
@@ -16,7 +18,6 @@ export default function BackButton({ goBack }) {
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
-    top: 10 + getStatusBarHeight(),
     left: 4,
   },
   image: {

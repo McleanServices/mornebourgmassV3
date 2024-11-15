@@ -5,21 +5,25 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
-import Welcome from './assets/screens/Welcome';
+import Welcome from './assets/screens/Auth/Welcome';
 import Login from './assets/screens/Login';
-import HomeScreen from './assets/screens/HomeScreen';
-import Profile from './assets/screens/Profile';
-import SettingsScreen from './assets/screens/Settings';
-import RegisterScreen from './assets/screens/Register';
-import ActivityScreen from './assets/screens/Activity';
-import AuthLoadingScreen from './assets/screens/AuthLoadingScreen';
-import ShoppingCart from './assets/screens/Shopping';
-import ScanCodeScreen from './assets/screens/ScanCodeScreen';
-import UserDetails from './assets/screens/UserDetails';
-import EditPage from './assets/screens/EditPage';
+import HomeScreen from './assets/screens/Main/Home';
+import Profile from './assets/screens/Main/Profile';
+import SettingsScreen from './assets/screens/Main/Settings';
+import RegisterScreen from './assets/screens/AdminEdit/EditUsers/Register';
+import ActivityScreen from './assets/screens/Main/Activity';
+import AuthLoadingScreen from './assets/screens/Auth/AuthLoadingScreen';
+import ShoppingCart from './assets/screens/Main/Shopping';
+import ScanCodeScreen from './assets/screens/Main/ScanCodeScreen';
+import UserDetails from './assets/screens/AdminEdit/EditUsers/UserDetails';
+import EditPage from './assets/screens/AdminEdit/EditPage';
 import EditHome from './assets/screens/AdminEdit/EditHome/EditHome';
 import ViewUsers from './assets/screens/AdminEdit/EditHome/ViewUsers';
-
+import EditActivityScreen from './assets/screens/AdminEdit/EditActivity/EditActivityScreen';
+import ViewActivities from './assets/screens/AdminEdit/EditActivity/ViewActivities';
+import AddPalmares from './assets/screens/AdminEdit/EditPalmares/AddPalmares';
+import EditPalmares from './assets/screens/AdminEdit/EditPalmares/EditPalmares';
+import ViewPalmares from './assets/screens/AdminEdit/EditPalmares/ViewPalmares';
 //testing
 
 const Stack = createStackNavigator();
@@ -101,18 +105,23 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-      <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Home" component={BottomTabNavigator} options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="Inscription" component={RegisterScreen} />
         <Stack.Screen name="ShoppingCart" component={ShoppingCart} />
         <Stack.Screen name="scancode" component={ScanCodeScreen} />
         <Stack.Screen name="UserDetails" component={UserDetails} />
         <Stack.Screen name="Administration" component={EditPage} />
         <Stack.Screen name="EditHome" component={EditHome} />
         <Stack.Screen name="ViewUsers" component={ViewUsers} />
+        <Stack.Screen name="EditActivityScreen" component={EditActivityScreen} />
+        <Stack.Screen name="ViewActivities" component={ViewActivities} />
+        <Stack.Screen name="AddPalmares" component={AddPalmares} />
+        <Stack.Screen name="EditPalmares" component={EditPalmares} /> 
+        <Stack.Screen name="ViewPalmares" component={ViewPalmares} /> 
       </Stack.Navigator>
       <StatusBar />
     </NavigationContainer>
