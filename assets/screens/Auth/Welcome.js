@@ -37,7 +37,7 @@ return (
       style={styles.container}
     >
         <Image
-        source={require('../images/logo.png')}
+        source={require('../Screenimages/logo.webp')}
         style={styles.reactLogo}
       />
     {/* <Button
@@ -69,28 +69,31 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: '#89CFF0', // Set a solid background color to avoid gradient rendering delay
     },
     reactLogo: {
         width: 350,
         height: 350,
         resizeMode: 'contain',
-      },
-      button: {
+        marginBottom: 20, // Add margin to separate elements
+    },
+    button: {
         backgroundColor: '#4C4C9D', // Blue color
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
+        elevation: 3, // Add elevation for better visibility
     },
     buttonTextContainer: {
         alignItems: 'center',
     },
     buttonText: {
-        color: '#FFFFFF', // White text color
-        fontSize: 16,
+        color: '#FFFFFF', // High contrast color
+        fontSize: 20,
+        fontWeight: 'bold', // Make text bold for better readability
     },
-    
-  });
-  
+});
+
 
 
 

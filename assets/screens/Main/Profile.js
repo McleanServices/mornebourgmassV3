@@ -10,7 +10,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import QRCode from "react-native-qrcode-svg";
 import { useNavigation } from "@react-navigation/native";
-
+import * as LocalAuthentication from 'expo-local-authentication';
 const Profile = () => {
   const [userId, setUserId] = useState(null);
   const [userRole, setUserRole] = useState(null); // Add state for user role
@@ -75,9 +75,9 @@ const Profile = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate("Administration")}
+                onPress={() => navigation.navigate("EditPage")}
               >
-                <Text style={styles.buttonText}>Administration testing</Text>
+                <Text style={styles.buttonText}>Administration</Text>
               </TouchableOpacity>
             </>
           )}

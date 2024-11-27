@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Alert, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, FlatList, Alert, ActivityIndicator, TextInput, Platform, Modal, Pressable } from "react-native";
 import { Text } from "react-native-paper";
-import Header from "../../../components/Header";
-import Button from "../../../components/Button";
-import BackButton from "../../../components/BackButton";
+import Header from "../../components/Header";
+import Button from "../../components/Button";
+import BackButton from "../../components/BackButton";
 import validator from "validator";
 
-import { theme } from "../../../core/Theme";
+import { theme } from "../../core/Theme";
 
 export default function RegisterScreen({ navigation }) {
   const [username, setUsername] = useState({ value: "", error: "" });
@@ -19,6 +19,22 @@ export default function RegisterScreen({ navigation }) {
   const [role, setRole] = useState("user"); // Default role
   const [loading, setLoading] = useState(false); // State for loading indicator
   const [successMessage, setSuccessMessage] = useState(""); // State for success message
+  const [userId, setUserId] = useState({ value: "", error: "" }); // New state for user ID
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchNextUserId = async () => {
+      try {
+        const response = await fetch("https://mornebourgmass.com/api/nextUserId");
+        const data = await response.json();
+        setUserId({ value: data.nextUserId.toString(), error: "" });
+      } catch (error) {
+        console.error("Error fetching next user ID:", error);
+      }
+    };
+
+    fetchNextUserId();
+  }, []);
 
   const onSignUpPressed = async () => {
     if (!validator.isEmail(email.value)) {
@@ -34,7 +50,7 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
     if (!validator.isMobilePhone(phoneNumber.value)) {
-      setPhoneNumber({ ...phoneNumber, color: "red", error: "Veuillez entrer un numéro de t��léphone valide." });
+      setPhoneNumber({ ...phoneNumber, color: "red", error: "Veuillez entrer un numéro de téléphone valide." });
       return;
     }
 
@@ -72,7 +88,7 @@ export default function RegisterScreen({ navigation }) {
 
       if (response.ok) {
         setSuccessMessage("Utilisateur enregistré avec succès."); // Set success message
-        Alert.alert("Succès", "Utilisateur enregistré avec succès.");
+        setModalVisible(true); // Show success modal
       } else {
         setSuccessMessage(""); // Clear success message
         Alert.alert("Erreur", `Une erreur s'est produite lors de l'enregistrement: ${responseData.message}`);
@@ -84,90 +100,85 @@ export default function RegisterScreen({ navigation }) {
     }
   };
 
+  const formFields = [
+    { placeholder: "Numéro d'adhérent", value: userId, setValue: setUserId, editable: false }, // New input field
+    { placeholder: "Nom d'utilisateur", value: username, setValue: setUsername },
+    { placeholder: "Prénom", value: firstName, setValue: setFirstName },
+    { placeholder: "Nom", value: lastName, setValue: setLastName },
+    { placeholder: "Email", value: email, setValue: setEmail, autoCapitalize: "none", autoCompleteType: "email", textContentType: "emailAddress", keyboardType: "email-address" },
+    { placeholder: "Mot de passe", value: password, setValue: setPassword, secureTextEntry: true },
+    { placeholder: "Date de naissance (YYYY-MM-DD)", value: dateOfBirth, setValue: setDateOfBirth },
+    { placeholder: "Numéro de téléphone", value: phoneNumber, setValue: setPhoneNumber },
+  ];
+
+  const renderItem = ({ item }) => (
+    <View style={styles.inputContainer}>
+      <Text style={styles.inputLabel}>{item.placeholder}</Text>
+      <TextInput
+        returnKeyType="next"
+        value={item.value.value}
+        onChangeText={(text) => item.setValue({ value: text, error: "" })}
+        style={styles.input}
+        autoCapitalize={item.autoCapitalize}
+        autoCompleteType={item.autoCompleteType}
+        textContentType={item.textContentType}
+        keyboardType={item.keyboardType}
+        secureTextEntry={item.secureTextEntry}
+        editable={item.editable !== false} // Set editable property
+      />
+    </View>
+  );
+
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <BackButton goBack={navigation.goBack} />
-        <Header>Bienvenue.</Header>
-
-        <TextInput
-          placeholder="Nom d'utilisateur"
-          returnKeyType="next"
-          value={username.value}
-          onChangeText={(text) => setUsername({ value: text, error: "" })}
-          style={styles.input}
-        />
-
-        <TextInput
-          placeholder="Prénom"
-          returnKeyType="next"
-          value={firstName.value}
-          onChangeText={(text) => setFirstName({ value: text, error: "" })}
-          style={styles.input}
-        />
-
-        <TextInput
-          placeholder="Nom"
-          returnKeyType="next"
-          value={lastName.value}
-          onChangeText={(text) => setLastName({ value: text, error: "" })}
-          style={styles.input}
-        />
-
-        <TextInput
-          placeholder="Email"
-          returnKeyType="next"
-          value={email.value}
-          onChangeText={(text) => setEmail({ value: text, error: "" })}
-          style={styles.input}
-          autoCapitalize="none"
-          autoCompleteType="email"
-          textContentType="emailAddress"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          placeholder="Mot de passe"
-          returnKeyType="done"
-          value={password.value}
-          onChangeText={(text) => setPassword({ value: text, error: "" })}
-          style={styles.input}
-          secureTextEntry
-        />
-
-        <TextInput
-          placeholder="Date de naissance (YYYY-MM-DD)"
-          returnKeyType="next"
-          value={dateOfBirth.value}
-          onChangeText={(text) => setDateOfBirth({ value: text, error: "" })}
-          style={styles.input}
-        />
-
-        <TextInput
-          placeholder="Numéro de téléphone"
-          returnKeyType="next"
-          value={phoneNumber.value}
-          onChangeText={(text) => setPhoneNumber({ value: text, error: "" })}
-          style={styles.input}
-        />
-
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : (
+    <>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Utilisateur enregistré avec succès</Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.textStyle}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+      <FlatList
+        data={formFields}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.placeholder}
+        ListHeaderComponent={<BackButton goBack={navigation.goBack} />}
+        ListFooterComponent={
           <>
-            <Button mode="contained" onPress={onSignUpPressed} style={{ marginTop: 24 }}>
-              Ajouter
-            </Button>
-            {successMessage ? (
-              <Text style={styles.successMessage}>{successMessage}</Text>
-            ) : null}
+            {loading ? (
+              <ActivityIndicator size="large" color="#0000ff" />
+            ) : (
+              <>
+                <Button mode="contained" onPress={onSignUpPressed} style={{ marginTop: 24 }}>
+                  Ajouter
+                </Button>
+                {successMessage ? (
+                  <Text style={styles.successMessage}>{successMessage}</Text>
+                ) : null}
+                {/* Temporary button to trigger the modal */}
+                {/* <Button mode="contained" onPress={() => setModalVisible(true)} style={{ marginTop: 24 }}>
+                  Show Modal
+                </Button> */}
+              </>
+            )}
           </>
-        )}
-      </ScrollView>
-    </KeyboardAvoidingView>
+        }
+        contentContainerStyle={styles.scrollContainer}
+      />
+    </>
   );
 }
 
@@ -177,11 +188,21 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     padding: 20,
   },
+  inputContainer: {
+    marginBottom: 20, // Increased spacing between inputs
+  },
+  inputLabel: {
+    position: "absolute",
+    left: 10,
+    top: -10,
+    backgroundColor: theme.colors.background,
+    paddingHorizontal: 5,
+    zIndex: 1,
+  },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 12,
     paddingHorizontal: 10,
   },
   row: {
@@ -196,5 +217,36 @@ const styles = StyleSheet.create({
     color: "green",
     marginTop: 10,
     textAlign: "center",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });

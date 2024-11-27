@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 
 const ViewUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -36,7 +38,13 @@ const ViewUsers = () => {
         title={`${item.prenom} ${item.nom}`}
         subtitle={item.email}
         left={(props) => <Avatar.Icon {...props} icon="account" />}
-        right={(props) => <IconButton {...props} icon="eye" onPress={() => { /* Navigate to user details */ }} />}
+        right={(props) => (
+          <IconButton 
+            {...props} 
+            icon="eye" 
+            onPress={() => navigation.navigate('EditUser', { userId: item.id_user })} // Navigate to EditUser
+          />
+        )}
         titleStyle={styles.cardTitle}
         subtitleStyle={styles.cardSubtitle}
       />

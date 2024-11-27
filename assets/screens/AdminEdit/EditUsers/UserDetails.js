@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const UserDetails = ({ route }) => {
   const { userInfo } = route.params;
+  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>
@@ -13,6 +15,13 @@ const UserDetails = ({ route }) => {
           <Text style={styles.infoText}>Nom d'utilisateur: <Text style={styles.infoValue}>{userInfo.username}</Text></Text>
           <Text style={styles.infoText}>Email: <Text style={styles.infoValue}>{userInfo.email}</Text></Text>
           <Text style={styles.successMessage}>Scan réussi avec succès !</Text>
+          <Button
+            title="Edit User"
+            onPress={() => {
+              console.log('Navigating to EditUser with userId:', userInfo.id); // Log the navigation action
+              navigation.navigate('EditUser', { userId: userInfo.id });
+            }}
+          />
         </>
       ) : (
         <Text style={styles.errorMessage}>Aucune information utilisateur trouvée.</Text>

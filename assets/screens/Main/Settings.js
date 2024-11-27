@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Switch, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, Switch, StyleSheet, Button, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = ({ navigation }) => {
@@ -13,14 +13,22 @@ const SettingsScreen = ({ navigation }) => {
             await AsyncStorage.removeItem('token');
             await AsyncStorage.removeItem('userId');
 
-            // Navigate to the login screen
-            navigation.navigate('Welcome');
+            // Handle successful logout
             Alert.alert("Logout successful", "You have been logged out.");
+            if (Platform.OS === 'web') {
+                window.location.reload(); // Reload the page if on web
+            } else {
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Auth' }],
+                }); // Reset the navigation state and navigate to the Auth stack if on mobile
+            }
         } catch (error) {
             Alert.alert("Logout failed", "An error occurred while logging out.");
             console.error("Logout error:", error);
         }
     };
+
     const testApiGet = async () => {
         try {
           const response = await fetch("http://145.223.73.21:80/api/test");

@@ -4,267 +4,237 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   Dimensions,
   TouchableOpacity,
   FlatList,
+  Image,
 } from "react-native";
-import axios from "axios";
-import { useCookies } from 'react-cookie'; // Import useCookies from react-cookie
+import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-const HomeScreen = () => {
-  // Array of image sources
-  const images = [
-    require("../images/photo1.jpg"),
-    require("../images/photo2.jpg"),
-    require("../images/photo3.jpg"),
-    require("../images/photo4.jpg"),
-  ];
-
-  const [activities, setActivities] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [cookies, setCookie] = useCookies(['cookieConsent']); // Use react-cookie to manage cookie consent
-  const [showCookieBanner, setShowCookieBanner] = useState(!cookies.cookieConsent);
-  const [notreMission, setNotreMission] = useState(''); // Add state for NotreMission
-  const [palmares, setPalmares] = useState([]); // Add state for Palmares
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000); // Change image every 3 seconds
-    return () => clearInterval(interval); // Cleanup interval on component unmount
-  }, []);
-
-  useEffect(() => {
-    const fetchActivities = async () => {
-      try {
-        const response = await axios.get("https://mornebourgmass.com/api/homescreen"); // Replace with your server URL
-        setActivities(response.data);
-        if (response.data.length > 0) {
-          setNotreMission(response.data[0].NotreMission); // Set NotreMission from response
-        }
-      } catch (error) {
-        console.error("Error fetching activities:", error);
-      }
-    };
-
-    fetchActivities();
-  }, []);
-
-  useEffect(() => {
-    const fetchPalmares = async () => {
-      try {
-        const response = await axios.get("https://mornebourgmass.com/api/palmares"); // Replace with your server URL
-        setPalmares(response.data);
-      } catch (error) {
-        console.error("Error fetching palmares:", error);
-      }
-    };
-
-    fetchPalmares();
-  }, []);
-
-  const handleAcceptCookies = () => {
-    setCookie('cookieConsent', true, { path: '/', sameSite: 'None', secure: true });
-    setShowCookieBanner(false);
-  };
-
+const HomeScreen = ({ navigation }) => {
   const screenWidth = Dimensions.get("window").width;
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
+      e.preventDefault();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const categories = [
+    { id: "1", name: "Billet", icon: "ticket" },
+    { id: "2", name: "Événement", icon: "calendar", onPress: () => navigation.navigate('Activité') },
+    { id: "3", name: "Actualités", icon: "newspaper" },
+    { id: "4", name: "Palmarès", icon: "trophy", onPress: () => navigation.navigate('Palmares') },
+    { id: "5", name: "À propos", icon: "information-circle", onPress: () => navigation.navigate('About') },
+  ];
+
+  const recommendations = [
+    {
+      id: "1",
+      title: "Costumes de MorneBourgMass",
+      description: "Découvrez les meilleurs costumes pour MorneBourgMass.",
+      color: "#89CFF0",
+    },
+    {
+      id: "2",
+      title: "Musique de MorneBourgMass",
+      description: "Écoutez les meilleurs morceaux pour MorneBourgMass.",
+      color: "#FFA500",
+    }
+  ];
+
   return (
-    <ScrollView style={styles.container} pointerEvents="auto">
-      {/* Cookie Consent Banner */}
-      {showCookieBanner && (
-        <View style={styles.cookieBanner}>
-          <Text style={styles.cookieText}>We use cookies to improve your experience. By using our site, you agree to our use of cookies.</Text>
-          <TouchableOpacity style={styles.acceptButton} onPress={handleAcceptCookies}>
-            <Text style={styles.acceptButtonText}>Accept</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.scrollView}>
+          <Text style={styles.sectionHeader}>Explorer</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesContainer}
+          >
+            {categories.map((category) => (
+              <TouchableOpacity key={category.id} style={styles.categoryCard} onPress={category.onPress}>
+                <Ionicons name={category.icon} size={30} color="#2C3E50" style={styles.categoryIcon} />
+                <Text style={styles.categoryText}>{category.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
-      {/* Image Carousel Section */}
-      <Image
-        source={images[currentIndex]}
-        style={[styles.image, { width: screenWidth * 1 }]} // 90% of screen width
-        resizeMode="cover"
-      />
-      <View>
-        <FlatList
-          data={images}
-          
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item, index) => index.toString()}
-          pagingEnabled
-          style={styles.carousel}
-        />
-      </View>
+          <View style={styles.sectionSeparator} />
+          <View style={styles.eventCard}>
+            <Text style={styles.eventTitle}>Prêt pour le prochain événement de MorneBourgMass?</Text>
+            <Text style={styles.eventDetails}>Événement: Parade de MorneBourgMass</Text>
+            <TouchableOpacity
+              style={styles.joinButton}
+              onPress={() => navigation.navigate('Auth')}
+            >
+              <Text style={styles.joinButtonText}>REJOINDRE</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Recent Activity Section */}
-      <View style={styles.activitySection}>
-        {activities.length > 0 ? (
-          activities.map((activity, index) => (
-            <View key={index} style={styles.activityCard}>
-              <Text style={styles.sectionTitle}>{activity.title}</Text>
-              <Text style={styles.activityDescription}>{activity.description}</Text>
+          <View style={styles.recommendationsContainer}>
+            <Text style={styles.sectionTitle}>Recommandé pour vous</Text>
+            <FlatList
+              data={recommendations}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <View
+                  key={item.id}
+                  style={[styles.recommendationCard, { backgroundColor: item.color }]}
+                >
+                  <Text style={styles.recommendationTitle}>{item.title}</Text>
+                  <Text style={styles.recommendationDescription}>{item.description}</Text>
+                </View>
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          </View>
+
+          <View style={styles.customRecommendationsContainer}>
+            <Text style={styles.sectionTitle}>Nos Suggestions</Text>
+            <View style={styles.customRecommendationCard}>
+              <Ionicons name="musical-notes" size={50} color="#89CFF0" />
+              <Text style={styles.customRecommendationText}>Écoutez de la musique de MorneBourgMass</Text>
             </View>
-          ))
-        ) : (
-          <Text style={styles.noActivityText}>Aucune activité récente.</Text>
-        )}
-        <TouchableOpacity style={styles.ctaButton}>
-          <Text style={styles.ctaText}>Explorez maintenant</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* About Us Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>À propos de nous</Text>
-        <View style={styles.aboutCard}>
-          <Text style={styles.aboutTitle}>Notre mission</Text>
-          <Text style={styles.aboutDescription}>
-            {notreMission} {/* Display NotreMission */}
-          </Text>
-        </View>
-      </View>
-
-      {/* Achievements Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Palmarès</Text>
-        <View style={styles.grid}>
-          {palmares.map((item, index) => (
-            <View key={index} style={styles.card}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardDescription}>{item.description}</Text>
+            <View style={styles.customRecommendationCard}>
+              <Ionicons name="book" size={50} color="#89CFF0" />
+              <Text style={styles.customRecommendationText}>Lisez l'histoire de MorneBourgMass</Text>
             </View>
-          ))}
-        </View>
-      </View>
-    </ScrollView>
+            <View style={styles.customRecommendationCard}>
+              <Ionicons name="walk" size={50} color="#FFA500" />
+              <Text style={styles.customRecommendationText}>Participez à une marche de MorneBourgMass</Text>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f4f4",
+    backgroundColor: "#F4F4F4",
   },
-  imageSection: {
-    height: 220,
-    marginBottom: 30,
-    justifyContent: "center",
+  scrollView: {
+    flex: 1,
+  },
+  sectionHeader: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#2C3E50",
+    paddingHorizontal: 16,
+    marginVertical: 16,
+  },
+  categoriesContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    justifyContent: "center", // Center horizontally
+  },
+  categoryCard: {
     alignItems: "center",
+    marginHorizontal: 8, // Adjust margin to center items
   },
-  carousel: {
-    flexGrow: 0,
+  categoryIcon: {
+    marginBottom: 8,
   },
-  carouselImage: {
-    width: 300, // Adjust width as needed
-    height: "100%",
+  categoryText: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#2C3E50",
+  },
+  sectionSeparator: {
+    height: 20,
+  },
+  eventCard: {
+    backgroundColor: "#E6E6FA",
     borderRadius: 20,
-  },
-  activitySection: {
     padding: 16,
-    marginBottom: 30,
+    marginHorizontal: 16,
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  eventTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2C3E50",
+    marginBottom: 8,
+  },
+  eventDetails: {
+    fontSize: 14,
+    color: "#2C3E50",
+    marginBottom: 16,
+  },
+  eventImageContainer: {
+    width: "100%",
+    height: 200,
+    marginBottom: 16,
+  },
+  eventImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
+  },
+  joinButton: {
+    backgroundColor: "#8A2BE2",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+  },
+  joinButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  recommendationsContainer: {
+    paddingHorizontal: 16,
   },
   sectionTitle: {
-    fontSize: 24, // Increased size for better visibility
-    fontWeight: "bold",
-    marginBottom: 10,
-    color: "#2C3E50", // Changed to a deeper color for contrast
-  },
-  activityDescription: {
-    fontSize: 16,
-    color: "#7F8C8D", // Softer color
-    marginBottom: 15,
-  },
-  ctaButton: {
-    backgroundColor: "#3498DB", // Changed to a different shade
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 25,
-    alignSelf: "flex-start",
-  },
-  ctaText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  section: {
-    paddingHorizontal: 16,
-    marginBottom: 20,
-  },
-  aboutCard: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 15,
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
-    elevation: 5,
-  },
-  aboutTitle: {
-    fontSize: 20, // Increased size for the title
-    fontWeight: "bold",
-    color: "#2C3E50", // Changed to a deeper color
-    marginBottom: 10,
-  },
-  aboutDescription: {
-    fontSize: 14,
-    color: "#7F8C8D",
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  card: {
-    backgroundColor: "#fff",
-    width: "48%",
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 15,
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
-    elevation: 5,
-  },
-  cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#2C3E50",
-    marginBottom: 5
+    marginBottom: 12,
   },
-  cardDescription: {
+  recommendationCard: {
+    width: 200,
+    borderRadius: 15,
+    padding: 12,
+    marginRight: 12,
+    justifyContent: "center",
+  },
+  recommendationTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    marginBottom: 8,
+  },
+  recommendationDescription: {
     fontSize: 14,
-    color: "#7F8C8D",
+    color: "#FFFFFF",
   },
-  image: {
-    height: 300,
-    resizeMode: "cover",
-    alignSelf: "center", // Center the image horizontally
+  customRecommendationsContainer: {
+    paddingHorizontal: 16,
+    marginTop: 16,
   },
-  cookieBanner: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: '#000',
-    padding: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  customRecommendationCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 16,
+    alignItems: "center",
+    marginBottom: 16,
+    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
+    flexDirection: "row",
   },
-  cookieText: {
-    color: '#fff',
-    flex: 1,
-    marginRight: 10,
-  },
-  acceptButton: {
-    backgroundColor: '#3498DB',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-  },
-  acceptButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  customRecommendationText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2C3E50",
+    marginLeft: 16,
   },
 });
 

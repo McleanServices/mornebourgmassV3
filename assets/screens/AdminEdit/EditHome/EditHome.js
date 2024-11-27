@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform, Modal, Pressable } from 'react-native';
 
 const EditHome = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [notreMission, setNotreMission] = useState(''); // Add state for NotreMission
     const [loading, setLoading] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
 
     useEffect(() => {
         const fetchActivity = async () => {
@@ -44,11 +45,7 @@ const EditHome = () => {
             });
 
             if (response.ok) {
-                if (Platform.OS === 'web') {
-                    alert('Succès: Activité Recente mise à jour avec succès');
-                } else {
-                    Alert.alert('Succès', 'Activité Recente mise à jour avec succès');
-                }
+                setModalVisible(true); // Show success modal
                 // Handle successful update, maybe navigate back or show a success message
             } else {
                 const errorData = await response.json();
@@ -73,29 +70,52 @@ const EditHome = () => {
 
     return (
         <View style={styles.container}>
-            <TextInput
-                style={styles.input}
-                value={title}
-                onChangeText={setTitle}
-                placeholder="Entrez le titre"
-                placeholderTextColor="#999"
-            />
-            <TextInput
-                style={styles.input}
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Entrez la description"
-                placeholderTextColor="#999"
-                multiline
-            />
-            <TextInput
-                style={styles.input}
-                value={notreMission}
-                onChangeText={setNotreMission}
-                placeholder="Entrez la mission"
-                placeholderTextColor="#999"
-                multiline
-            />
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>Activité Recente mise à jour avec succès</Text>
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => setModalVisible(false)}
+                        >
+                            <Text style={styles.textStyle}>OK</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+            <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Titre</Text>
+                <TextInput
+                    style={styles.input}
+                    value={title}
+                    onChangeText={setTitle}
+                />
+            </View>
+            <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Description</Text>
+                <TextInput
+                    style={styles.input}
+                    value={description}
+                    onChangeText={setDescription}
+                    multiline
+                />
+            </View>
+            <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Mission</Text>
+                <TextInput
+                    style={styles.input}
+                    value={notreMission}
+                    onChangeText={setNotreMission}
+                    multiline
+                />
+            </View>
             {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
             ) : (
@@ -110,14 +130,55 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#f4f4f4',
     },
+    inputContainer: {
+        marginBottom: 20,
+    },
+    inputLabel: {
+        position: "absolute",
+        left: 10,
+        top: -10,
+        backgroundColor: '#f4f4f4',
+        paddingHorizontal: 5,
+        zIndex: 1,
+    },
     input: {
         height: 60,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 10,
-        marginBottom: 15,
         fontSize: 16,
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
+        elevation: 5,
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+    },
+    buttonClose: {
+        backgroundColor: '#2196F3',
+    },
+    textStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
     },
 });
 

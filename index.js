@@ -4,7 +4,7 @@ import App from './App';
 import logo from './assets/images/logo.png';
 
 // Add passive event listener for 'wheel' event
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && window.addEventListener) {
   window.addEventListener('wheel', (event) => {}, { passive: true });
 }
 

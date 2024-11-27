@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Platform } from "react-native";
 import { Text } from "react-native-paper";
 
 import Logo from "../components/Logo";
@@ -60,7 +60,11 @@ const Login = ({ navigation }) => {
         setCookie('token', token, { path: '/', sameSite: 'None', secure: true }); // Set the token in cookies with sameSite and secure attributes
         // Handle successful login
         console.log("Login successful", data);
-        navigation.navigate("Home");
+        if (Platform.OS === 'web') {
+          navigation.navigate('Home'); // Navigate to the Accueil screen for web
+        } else {
+          navigation.navigate('Home'); // Navigate to HomeAccueil in the nested navigator
+        }
       } else {
         // Handle login error
         setError(data.message || "Login failed");

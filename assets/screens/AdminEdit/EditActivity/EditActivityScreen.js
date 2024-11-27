@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
+import { fr } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons'; // Add this import statement
+
+// Register French locale
+registerLocale('fr', fr);
 
 const EditActivityScreen = () => {
   const route = useRoute();
@@ -11,7 +19,7 @@ const EditActivityScreen = () => {
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [time, setTime] = useState('00:00'); // Initialize with a valid time string
   const [selectedImage, setSelectedImage] = useState(null);
   const navigation = useNavigation();
 
@@ -28,7 +36,8 @@ const EditActivityScreen = () => {
           setDescription(data.description);
           setImageUrl(data.imageUrl);
           setDate(data.date.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, '')); // Remove trailing time and milliseconds
-          setTime(data.time);
+          setTime(data.time || '00:00'); // Ensure time is set to a valid string
+          console.log('Fetched activity data:', data); // Log fetched data
         } catch (error) {
           console.error('Error fetching activity:', error);
         }
@@ -125,6 +134,8 @@ const EditActivityScreen = () => {
         console.error('Update error:', error);
         Alert.alert('Update error', 'An error occurred while updating the activity');
       }
+    } else {
+      console.log('New image URL is null, update aborted'); // Log if newImageUrl is null
     }
   };
 
@@ -142,17 +153,33 @@ const EditActivityScreen = () => {
         value={description || ''}
         onChangeText={setDescription}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Date"
-        value={date || ''} 
-        onChangeText={setDate}
+      <Text style={styles.label}>Date</Text>
+      <DatePicker
+        selected={date ? new Date(date) : null}
+        onChange={(selectedDate) => setDate(selectedDate.toISOString().split('T')[0])}
+        minDate={new Date()}
+        dateFormat="yyyy-MM-dd"
+        locale="fr"
+        customInput={
+          <TextInput
+            style={styles.input}
+            value={date}
+            placeholder="Select Date"
+            editable={false}
+          />
+        }
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Time"
-        value={time || ''}
-        onChangeText={setTime}
+      <Text style={styles.label}>Time</Text>
+      <TimePicker
+        onChange={(newTime) => {
+          console.log('TimePicker onChange:', newTime); // Log new time value
+          setTime(newTime || '00:00');
+        }}
+        value={time}
+        disableClock={true}
+        format="HH:mm"
+        clearIcon={null}
+        clockIcon={null}
       />
       <TextInput
         style={styles.input}
