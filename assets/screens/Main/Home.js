@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -8,28 +8,55 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
+  Animated, // Import Animated
 } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { IconButton } from 'react-native-paper'; // Add this import
 
 const HomeScreen = ({ navigation }) => {
   const screenWidth = Dimensions.get("window").width;
+  const slideAnim1 = useRef(new Animated.Value(-1000)).current; // Initial value for first view slide animation
+  const slideAnim2 = useRef(new Animated.Value(-1000)).current; // Initial value for second view slide animation
+  const slideAnim3 = useRef(new Animated.Value(-1000)).current; // Initial value for third view slide animation
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('beforeRemove', (e) => {
       e.preventDefault();
     });
+
+    // Start slide animations one after the other
+    Animated.sequence([
+      Animated.timing(slideAnim1, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim2, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim3, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     return unsubscribe;
   }, [navigation]);
 
   const categories = [
-    { id: "1", name: "Billet", icon: "ticket" },
-    { id: "2", name: "Événement", icon: "calendar", onPress: () => navigation.navigate('Activité') },
-    { id: "3", name: "Actualités", icon: "newspaper" },
+    { id: "1", name: "Billet", icon: "ticket", onPress: () => navigation.navigate('Billet')  },
+    { id: "2", name: "Événement", icon: "calendar", onPress: () => navigation.navigate('ActivityMain') },
+    { id: "3", name: "Actualités", icon: "newspaper",  onPress: () => navigation.navigate('Reglementation')},
     { id: "4", name: "Palmarès", icon: "trophy", onPress: () => navigation.navigate('Palmares') },
     { id: "5", name: "À propos", icon: "information-circle", onPress: () => navigation.navigate('About') },
   ];
+
+  const iconColor = "#B19CD9"; // Even lighter shade of #8A2BE2
 
   const recommendations = [
     {
@@ -50,66 +77,75 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
-          <Text style={styles.sectionHeader}>Explorer</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContainer}
-          >
-            {categories.map((category) => (
-              <TouchableOpacity key={category.id} style={styles.categoryCard} onPress={category.onPress}>
-                <Ionicons name={category.icon} size={30} color="#2C3E50" style={styles.categoryIcon} />
-                <Text style={styles.categoryText}>{category.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <View style={styles.sectionSeparator} />
-          <View style={styles.eventCard}>
-            <Text style={styles.eventTitle}>Prêt pour le prochain événement de MorneBourgMass?</Text>
-            <Text style={styles.eventDetails}>Événement: Parade de MorneBourgMass</Text>
-            <TouchableOpacity
-              style={styles.joinButton}
-              onPress={() => navigation.navigate('Auth')}
-            >
-              <Text style={styles.joinButtonText}>REJOINDRE</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.recommendationsContainer}>
-            <Text style={styles.sectionTitle}>Recommandé pour vous</Text>
-            <FlatList
-              data={recommendations}
+          <Animated.View style={{ transform: [{ translateX: slideAnim1 }] }}>
+            <Text style={styles.sectionHeader}>Explorer</Text>
+            <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <View
-                  key={item.id}
-                  style={[styles.recommendationCard, { backgroundColor: item.color }]}
-                >
-                  <Text style={styles.recommendationTitle}>{item.title}</Text>
-                  <Text style={styles.recommendationDescription}>{item.description}</Text>
-                </View>
-              )}
-              keyExtractor={(item) => item.id}
-            />
-          </View>
+              contentContainerStyle={styles.categoriesContainer}
+            >
+              {categories.map((category) => (
+                <TouchableOpacity key={category.id} style={styles.categoryCard} onPress={category.onPress}>
+                  <Ionicons name={category.icon} size={30} color={iconColor} style={styles.categoryIcon} />
+                  <Text style={styles.categoryText}>{category.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </Animated.View>
 
-          <View style={styles.customRecommendationsContainer}>
-            <Text style={styles.sectionTitle}>Nos Suggestions</Text>
-            <View style={styles.customRecommendationCard}>
-              <Ionicons name="musical-notes" size={50} color="#89CFF0" />
-              <Text style={styles.customRecommendationText}>Écoutez de la musique de MorneBourgMass</Text>
+          <View style={styles.spacing} />
+
+          <Animated.View style={{ transform: [{ translateX: slideAnim3 }] }}>
+            <View style={styles.recommendationsContainer}>
+              <Text style={styles.sectionTitle}>Recommandé pour vous</Text>
+              <FlatList
+                data={recommendations}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                renderItem={({ item }) => (
+                  <View
+                    key={item.id}
+                    style={[styles.recommendationCard, { backgroundColor: item.color }]}
+                  >
+                    <Text style={styles.recommendationTitle}>{item.title}</Text>
+                    <Text style={styles.recommendationDescription}>{item.description}</Text>
+                  </View>
+                )}
+                keyExtractor={(item) => item.id}
+              />
             </View>
-            <View style={styles.customRecommendationCard}>
-              <Ionicons name="book" size={50} color="#89CFF0" />
-              <Text style={styles.customRecommendationText}>Lisez l'histoire de MorneBourgMass</Text>
+
+            <Animated.View style={{ transform: [{ translateX: slideAnim2 }] }}>
+              <View style={styles.sectionSeparator} />
+              <View style={styles.eventCard}>
+                <Text style={styles.eventTitle}>Prêt pour le prochain événement de MorneBourgMass?</Text>
+                
+                <TouchableOpacity
+                  style={styles.joinButton}
+                  onPress={() => navigation.navigate('Activite')}
+                >
+                  <Text style={styles.joinButtonText}>Inscrire</Text>
+                </TouchableOpacity>
+              </View>
+            </Animated.View>
+
+            <View style={styles.customRecommendationsContainer}>
+              <Text style={styles.sectionTitle}>Nos Suggestions</Text>
+              <View style={styles.customRecommendationCard}>
+                <Ionicons name="document-text" size={50} color="#89CFF0" />
+                <Text style={styles.customRecommendationText}>Lisez la réglementation de MorneBourgMass</Text>
+                <IconButton icon="chevron-right" onPress={() => navigation.navigate('Reglementation')} />
+              </View>
+              <View style={styles.customRecommendationCard}>
+                <Ionicons name="book" size={50} color="#89CFF0" />
+                <Text style={styles.customRecommendationText}>Lisez l'histoire de MorneBourgMass</Text>
+              </View>
+              <View style={styles.customRecommendationCard}>
+                <Ionicons name="walk" size={50} color="#FFA500" />
+                <Text style={styles.customRecommendationText}>Participez à une marche de MorneBourgMass</Text>
+              </View>
             </View>
-            <View style={styles.customRecommendationCard}>
-              <Ionicons name="walk" size={50} color="#FFA500" />
-              <Text style={styles.customRecommendationText}>Participez à une marche de MorneBourgMass</Text>
-            </View>
-          </View>
+          </Animated.View>
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -164,6 +200,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2C3E50",
     marginBottom: 8,
+    textAlign: "left", // Align text to the left
+    alignSelf: "stretch", // Ensure the text takes the full width
   },
   eventDetails: {
     fontSize: 14,
@@ -229,12 +267,20 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
     flexDirection: "row",
+    justifyContent: "space-between", // Add this line to space out the items
   },
   customRecommendationText: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#2C3E50",
     marginLeft: 16,
+    flex: 1, // Add this line to take available space
+  },
+  spacing: {
+    height: 40, // Adjust the height as needed for spacing
+  },
+  arrowIcon: {
+    marginLeft: 'auto', // Align the arrow icon to the right
   },
 });
 

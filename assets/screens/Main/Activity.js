@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Button, Linking, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 const Activity = () => {
     const [activities, setActivities] = useState([]);
     const [username, setUsername] = useState('');
     const slideAnim = useRef(new Animated.Value(-1000)).current; // Initial value for slide animation
+    const navigation = useNavigation(); // Initialize navigation
 
     useEffect(() => {
         const fetchActivities = async () => {
@@ -39,19 +41,12 @@ const Activity = () => {
         Animated.timing(slideAnim, {
             toValue: 0,
             duration: 500,
+            useNativeDriver: true, // Add this line
         }).start();
     }, []);
 
-    const handleInscrirePress = async () => {
-        const paymentUrl = `https://pay.sumup.com/b2c/X4GK0WEX1S?name=${encodeURIComponent(username)}`;
-        const supported = await Linking.canOpenURL(paymentUrl);
-
-        if (supported) {
-            await Linking.openURL(paymentUrl);
-            alert('Paiement réussi ! Redirection...');
-        } else {
-            alert(`Je ne sais pas comment ouvrir cette URL : ${paymentUrl}`);
-        }
+    const handleInscrirePress = () => {
+        navigation.navigate('Shopping'); // Navigate to Shopping screen
     };
 
     const formatDate = (dateString) => {

@@ -34,19 +34,26 @@ import EditUser from './assets/screens/AdminEdit/EditUsers/EditUser';
 import Palmares from './assets/screens/Main/Palmares';
 import About from './assets/screens/Main/About';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-
+import EditActivityMobile from './assets/screens/AdminEdit/EditActivity/EditActivityMobile';
+import BilletScreen from './assets/screens/Main/Billet'; 
+import Reglementation from './assets/screens/Main/Reglementation';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const HomeStack = () => (
   <Stack.Navigator initialRouteName="Home" screenOptions={{ gestureEnabled: false }}>
     <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-    <Stack.Screen name="About" component={About} options={{ headerShown: false }} />
+    <Stack.Screen name="About" component={About} />
     <Stack.Screen name="Palmares" component={Palmares} options={{ headerTitle: '' }} />
+    <Stack.Screen name="Shopping" component={ShoppingCart} options={{ headerTitle: '' }} />
+    <Stack.Screen name="ActivityMain" component={ActivityScreen} />
+    <Stack.Screen name="Billet" component={BilletScreen} options={{ headerTitle: ''}} />
+    <Stack.Screen name='Reglementation' component={Reglementation} options={{ headerTitle: ''}} />
+    <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerTitle: '' }} />
   </Stack.Navigator>
 );
 
-const ActivityStack = () => (
+const ActivityStack = ({ navigation }) => (
   <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
     <Stack.Screen name="ActivityMain" component={ActivityScreen} options={{ headerShown: false }} />
     <Stack.Screen name="Shopping" component={ShoppingCart} options={{ headerTitle: '' }} />
@@ -63,7 +70,7 @@ const ProfileStack = () => (
     <Stack.Screen name="Register" component={RegisterScreen} options={{ headerTitle: '' }} />
     <Stack.Screen name="UserDetails" component={UserDetails} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditUser" component={EditUser} options={{ headerTitle: '' }} />
-    <Stack.Screen name="EditActivity" component={EditActivityScreen} options={{ headerTitle: '' }} />
+    <Stack.Screen name="EditActivity" component={Platform.OS === 'web' ? EditActivityScreen : EditActivityMobile}  options={{ headerTitle: '' }} />
     <Stack.Screen name="ViewActivities" component={ViewActivities} options={{ headerTitle: '' }} />
     <Stack.Screen name="AddPalmares" component={AddPalmares} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditPalmares" component={EditPalmares} options={{ headerTitle: '' }} />
@@ -77,7 +84,7 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
-const MoreTabs = () => {
+const MoreTabs = ({ navigation }) => {
   const [adminName, setAdminName] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -100,11 +107,33 @@ const MoreTabs = () => {
       }
     };
 
-    loadAdminName();
+    if (Platform.OS === 'web') {
+      if (typeof document !== 'undefined') {
+        loadAdminName();
+      }
+    } else {
+      loadAdminName();
+    }
   }, []);
 
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color }) => {
+          let iconName;
+          if (route.name === 'Accueil') {
+            iconName = 'home';
+          } else if (route.name === 'Activite') {
+            iconName = 'musical-notes';
+          } else if (route.name === 'Profil') {
+            iconName = 'user';
+          }
+          return <FontAwesome name={iconName} size={28} color={color} />;
+        },
+        tabBarActiveTintColor: '#8A2BE2',
+        tabBarInactiveTintColor: 'gray',
+      })}
+    >
       <Tab.Screen
         name="Accueil"
         component={HomeStack}
@@ -125,32 +154,22 @@ const MoreTabs = () => {
           ),
           headerRight: () => (
             <Ionicons 
-              name="notifications-outline"
+              name="settings-outline" // Changed from "notifications-outline" to "settings-outline"
               size={24}
               style={{ marginRight: 10 }}
               onPress={() => {
-                console.log('Notifications pressed');
+                navigation.navigate('Settings');
               }}
             />
           )
         }}
       />
       <Tab.Screen
-        name="Activité"
+        name="Activite"
         component={ActivityStack}
         options={{
           title: 'Activity',
           tabBarIcon: ({ color }) => <Ionicons name="musical-notes" size={28} color={color} />,
-          headerRight: () => (
-            <Ionicons 
-              name="cart-outline"
-              size={24}
-              style={{ marginRight: 10 }}
-              onPress={() => {
-                console.log('Shopping cart pressed');
-              }}
-            />
-          ),
         }}
       />
       <Tab.Screen
@@ -159,7 +178,17 @@ const MoreTabs = () => {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
-          headerShown: false,
+        
+          headerRight: () => (
+            <Ionicons 
+              name="settings-outline" // Changed from "notifications-outline" to "settings-outline"
+              size={24}
+              style={{ marginRight: 10 }}
+              onPress={() => {
+                navigation.navigate('Settings');
+              }}
+            />
+          )
         }}
       />
     </Tab.Navigator>
@@ -167,15 +196,34 @@ const MoreTabs = () => {
 };
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        setIsAuthenticated(!!token);
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+      }
+    };
+    checkAuth();
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
-          <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-          <Stack.Screen name="Loading" component={Loading} options={{ headerShown: false }} />
-          <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-          <Stack.Screen name="AuthLoading" component={AuthLoadingScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="Home" component={MoreTabs} options={{ headerShown: false }} />
+          {!isAuthenticated ? (
+            <>
+              <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
+              <Stack.Screen name="Loading" component={Loading} options={{ headerShown: false }} />
+              <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
+              <Stack.Screen name="Home" component={MoreTabs} options={{ headerShown: false }} />
+            </>
+          ) : (
+            <Stack.Screen name="Home" component={MoreTabs} options={{ headerShown: false }} />
+          )}
         </Stack.Navigator>
         <StatusBar />
       </NavigationContainer>

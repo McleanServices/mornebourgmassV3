@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker';
 
 const ViewUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUserId, setSelectedUserId] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -32,17 +34,21 @@ const ViewUsers = () => {
     fetchUsers();
   }, []);
 
+  const filteredUsers = selectedUserId
+    ? users.filter(user => user.id_user.toString() === selectedUserId)
+    : users;
+
   const renderItem = ({ item }) => (
     <Card style={styles.card}>
       <Card.Title
         title={`${item.prenom} ${item.nom}`}
-        subtitle={item.email}
+        subtitle={`Numero Adherent: ${item.id_user}`}
         left={(props) => <Avatar.Icon {...props} icon="account" />}
         right={(props) => (
           <IconButton 
             {...props} 
             icon="eye" 
-            onPress={() => navigation.navigate('EditUser', { userId: item.id_user })} // Navigate to EditUser
+            onPress={() => navigation.navigate('EditUser', { userId: item.id_user })} 
           />
         )}
         titleStyle={styles.cardTitle}
@@ -51,28 +57,29 @@ const ViewUsers = () => {
     </Card>
   );
 
-  const renderSection = (title, data) => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id_user.toString()}
-      />
-    </View>
-  );
-
-  const admins = users.filter(user => user.role === 'admin');
-  const regularUsers = users.filter(user => user.role === 'user');
-
   return (
     <View style={styles.container}>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <>
-          {renderSection('Admins', admins)}
-          {renderSection('Users', regularUsers)}
+          <Text style={styles.heading}>Rechercher utilisateur par numéro adhérent</Text>
+          <View style={styles.listContainer}>
+            <Picker
+              selectedValue={selectedUserId}
+              style={styles.picker}
+              onValueChange={(itemValue) => setSelectedUserId(itemValue)}
+            >
+              {users.map(user => (
+                <Picker.Item key={user.id_user} label={user.id_user.toString()} value={user.id_user.toString()} />
+              ))}
+            </Picker>
+            <FlatList
+              data={filteredUsers}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.id_user.toString()}
+            />
+          </View>
         </>
       )}
     </View>
@@ -84,18 +91,23 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f4f4f4',
+    paddingVertical: 40, // Add more vertical padding
   },
-  section: {
-    marginBottom: 20,
+  picker: {
+    height: 50,
+    width: '100%',
+    marginBottom: 30, // Increase bottom margin
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-Bold' : 'Roboto-Bold',
+  pickerContainer: {
+    width: '100%',
+    marginBottom: 30, // Increase bottom margin
+  },
+  listContainer: {
+    flex: 1,
+    marginTop: 30, // Increase top margin
   },
   card: {
-    marginVertical: 10,
+    marginVertical: 15, // Increase vertical margin
     backgroundColor: '#fff',
     borderRadius: 10,
     elevation: 3,
@@ -105,6 +117,11 @@ const styles = StyleSheet.create({
   },
   cardSubtitle: {
     fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-Light' : 'Roboto-Light',
+  },
+  heading: {
+    fontSize: 16,
+    marginBottom: 30, // Increase bottom margin
+    textAlign: 'center',
   },
 });
 

@@ -164,10 +164,9 @@ const styles = StyleSheet.create({
   },
   explanation: {
     marginBottom: 10,
-    fontSize: 18,
+    fontSize: 16,
     color: '#333',
     textAlign: 'center',
-    fontWeight: 'bold',
   },
   card: {
     marginVertical: 10,

@@ -12,18 +12,21 @@ import {
 } from "react-native";
 import axios from "axios";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { useCookies } from 'react-cookie'; // Add this import
-import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
+import { useCookies } from 'react-cookie';
+import { Ionicons } from '@expo/vector-icons';
 
 const Palmares = () => {
-  // ...existing code...
-  const [palmares, setPalmares] = useState([]); // Add state for Palmares
-  // ...existing code...
+  const [palmares, setPalmares] = useState([]);
+  const [expanded, setExpanded] = useState({});
+
+  const toggleExpand = (index) => {
+    setExpanded((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
 
   useEffect(() => {
     const fetchPalmares = async () => {
       try {
-        const response = await axios.get("https://mornebourgmass.com/api/palmares"); // Replace with your server URL
+        const response = await axios.get("https://mornebourgmass.com/api/palmares");
         setPalmares(response.data);
       } catch (error) {
         console.error("Error fetching palmares:", error);
@@ -33,30 +36,41 @@ const Palmares = () => {
     fetchPalmares();
   }, []);
 
-  // ...existing code...
+  const renderDescription = (description, index) => {
+    const words = description.split(" ");
+    if (words.length <= 20 || expanded[index]) {
+      return description;
+    }
+    return words.slice(0, 20).join(" ") + "...";
+  };
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.container} pointerEvents="auto">
-          {/* Page Header */}
           <Text style={styles.header}>Palmarès</Text>
-
-          {/* Achievements Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Nos Réalisations</Text>
             <FlatList
               data={palmares}
-              numColumns={2}
-              renderItem={({ item }) => (
+              numColumns={1}
+              renderItem={({ item, index }) => (
                 <View style={styles.card}>
-                  <Ionicons name="trophy" size={40} color="#FFD700" style={styles.cardIcon} /> {/* Gold color */}
+                  <Ionicons name="trophy" size={40} color="#FFD700" style={styles.cardIcon} />
                   <Text style={styles.cardTitle}>{item.title}</Text>
-                  <Text style={styles.cardDescription}>{item.description}</Text>
+                  <Text style={styles.cardDescription}>
+                    {renderDescription(item.description, index)}
+                  </Text>
+                  {item.description.split(" ").length > 20 && (
+                    <TouchableOpacity onPress={() => toggleExpand(index)}>
+                      <Text style={styles.showMore}>
+                        {expanded[index] ? "Voir moins" : "Voir plus"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
               keyExtractor={(item, index) => index.toString()}
-              columnWrapperStyle={styles.grid}
             />
           </View>
         </ScrollView>
@@ -68,12 +82,12 @@ const Palmares = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF5EE", // Seashell color
+    backgroundColor: "#FFF5EE",
   },
   header: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#FF4500", // OrangeRed color
+    color: "#FF4500",
     textAlign: "center",
     marginVertical: 20,
   },
@@ -93,11 +107,11 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#FFFFFF",
-    width: "48%",
+    width: "100%",
     padding: 15,
     marginBottom: 15,
     borderRadius: 15,
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
+    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
     alignItems: "center",
   },
   cardIcon: {
@@ -115,7 +129,11 @@ const styles = StyleSheet.create({
     color: "#7F8C8D",
     textAlign: "center",
   },
-  // ...existing code...
+  showMore: {
+    color: "#FF4500",
+    marginTop: 5,
+    textAlign: "center",
+  },
 });
 
 export default Palmares;

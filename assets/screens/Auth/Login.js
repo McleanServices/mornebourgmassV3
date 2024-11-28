@@ -1,28 +1,24 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Platform } from "react-native";
 import { Text } from "react-native-paper";
-
 import Logo from "../components/Logo";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import axios from 'axios';
-import { useCookies } from 'react-cookie'; // Import useCookies from react-cookie
-
+import { useCookies } from 'react-cookie';
 import { theme } from "../core/Theme";
-
 import { usernameValidator } from "../helpers/UsernameValidator";
 import { passwordValidator } from "../helpers/PasswordValidator";
 import { TouchableOpacity } from "react-native";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [error, setError] = useState("");
-  const [cookies, setCookie] = useCookies(['token']); // Use react-cookie to get and set the token
+  const [cookies, setCookie] = useCookies(['token']);
 
   const onLoginPressed = async () => {
     const usernameError = usernameValidator(username.value);
@@ -50,23 +46,20 @@ const Login = ({ navigation }) => {
 
       if (response.ok) {
         const { token, userId, userRole } = data;
-        // Save token, userId, and userRole to AsyncStorage
         await AsyncStorage.setItem("token", token);
         await AsyncStorage.setItem("userId", userId.toString());
         if (userRole) {
           await AsyncStorage.setItem("userRole", userRole);
           console.log("Stored User Role:", userRole);
         }
-        setCookie('token', token, { path: '/', sameSite: 'None', secure: true }); // Set the token in cookies with sameSite and secure attributes
-        // Handle successful login
+        setCookie('token', token, { path: '/', sameSite: 'None', secure: true });
         console.log("Login successful", data);
         if (Platform.OS === 'web') {
-          navigation.navigate('Home'); // Navigate to the Accueil screen for web
+          navigation.navigate('Home');
         } else {
-          navigation.navigate('Home'); // Navigate to HomeAccueil in the nested navigator
+          navigation.navigate('Home');
         }
       } else {
-        // Handle login error
         setError(data.message || "Login failed");
       }
     } catch (err) {

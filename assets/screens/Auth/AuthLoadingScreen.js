@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useCookies } from 'react-cookie'; // Import useCookies from react-cookie
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 export default function AuthLoadingScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
@@ -10,8 +11,18 @@ export default function AuthLoadingScreen({ navigation }) {
     useEffect(() => {
         const checkAuth = async () => {
             console.log("Cookies:", cookies); // Log all cookies
-            const token = cookies.token;
+            let token = cookies.token;
             console.log("Token from cookies:", token); // Debugging information
+
+            if (!token && typeof window !== 'undefined') {
+                token = localStorage.getItem('token'); // Check localStorage for token
+                console.log("Token from localStorage:", token); // Debugging information
+            }
+
+            if (!token) {
+                token = await AsyncStorage.getItem('token'); // Check AsyncStorage for token
+                console.log("Token from AsyncStorage:", token); // Debugging information
+            }
 
             if (token) {
                 try {

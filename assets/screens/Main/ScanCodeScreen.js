@@ -23,7 +23,7 @@ const ScanCodeScreen = () => {
   const handleBarcodeScanned = async ({ data }) => {
     setScanned(true);
     try {
-      const response = await axios.get(`https://keigonwilson.com/api/user/${data}`);
+      const response = await axios.get(`https://mornebourgmass.com/api/user/${data}`);
       if (response.status === 200) {
         navigation.navigate('UserDetails', { userInfo: response.data.user });
       }
@@ -50,9 +50,19 @@ const ScanCodeScreen = () => {
           barcodeTypes: ['qr'], // You can add more types if needed
         }}
       />
+      
+      <View style={styles.overlay}>
+        <View style={styles.topOverlay} />
+        <View style={styles.middleOverlay}>
+          <View style={styles.sideOverlay} />
+          <View style={styles.frame} />
+          <View style={styles.sideOverlay} />
+        </View>
+        <View style={styles.bottomOverlay} />
+      </View>
 
       {scanned && (
-        <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
+        <Button title={'Scanner à nouveau'} onPress={() => setScanned(false)} />
       )}
     </View>
   );
@@ -71,6 +81,39 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  topOverlay: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  middleOverlay: {
+    flexDirection: 'row',
+  },
+  sideOverlay: {
+    flex: 1,
+    height: 200,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  frame: {
+    width: 200,
+    height: 200,
+    borderWidth: 2,
+    borderColor: '#00FF00',
+  },
+  bottomOverlay: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   errorText: {
     color: 'red',

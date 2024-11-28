@@ -4,8 +4,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { useRoute, useNavigation } from '@react-navigation/native';
 
-const AddActivityMobile = ({ navigation }) => {
+const EditActivityMobile = () => {
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { id } = route.params || {};
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
@@ -26,6 +30,29 @@ const AddActivityMobile = ({ navigation }) => {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (id) {
+      const fetchActivity = async () => {
+        try {
+          const response = await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch activity');
+          }
+          const data = await response.json();
+          setTitle(data.title);
+          setDescription(data.description);
+          setImageUrl(data.imageUrl);
+          setDate(new Date(data.date));
+          setTime(new Date(`1970-01-01T${data.time}Z`));
+        } catch (error) {
+          console.error('Error fetching activity:', error);
+        }
+      };
+
+      fetchActivity();
+    }
+  }, [id]);
 
   const pickImage = async () => {
     try {
@@ -72,7 +99,7 @@ const AddActivityMobile = ({ navigation }) => {
       let result = await response.json();
       if (response.ok) {
         Alert.alert('Upload successful', 'Image uploaded successfully');
-        setImageUrl(result.imageUrl); // Ensure this is the correct path to the image URL
+        setImageUrl(result.imageUrl);
         return result.imageUrl;
       } else {
         Alert.alert('Upload failed', result.message);
@@ -85,7 +112,7 @@ const AddActivityMobile = ({ navigation }) => {
     }
   };
 
-  const handleAddActivity = async () => {
+  const handleUpdateActivity = async () => {
     let newImageUrl = imageUrl;
 
     if (selectedImage) {
@@ -93,19 +120,19 @@ const AddActivityMobile = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('https://mornebourgmass.com/api/activity', {
+      const response = await axios.put(`https://mornebourgmass.com/api/activityscreen/${id}`, {
         title,
         description,
         date: date.toISOString().split('T')[0],
         time: time.toTimeString().split(' ')[0],
         imageUrl: newImageUrl,
       });
-      if (response.status === 201) {
+      if (response.status === 200) {
         setModalVisible(true);
       }
     } catch (error) {
-      console.error('Error adding activity:', error);
-      alert('Failed to add activity');
+      console.error('Error updating activity:', error);
+      alert('Failed to update activity');
     }
   };
 
@@ -133,7 +160,7 @@ const AddActivityMobile = ({ navigation }) => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Activity added successfully</Text>
+            <Text style={styles.modalText}>Activity updated successfully</Text>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => {
@@ -192,6 +219,8 @@ const AddActivityMobile = ({ navigation }) => {
           mode="time"
           display="default"
           onChange={handleTimeChange}
+          is24Hour={true} // Use 24-hour format
+          locale="fr-FR" // Set locale to French
         />
       )}
       <View style={styles.spacing} />
@@ -207,7 +236,7 @@ const AddActivityMobile = ({ navigation }) => {
         <Ionicons name="cloud-upload-outline" size={32} color="gray" />
         <Text>Pick an image from gallery</Text>
       </Pressable>
-      <Button title="Add Activity" onPress={handleAddActivity} />
+      <Button title="Update Activity" onPress={handleUpdateActivity} />
     </View>
   );
 };
@@ -277,4 +306,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddActivityMobile;
+export default EditActivityMobile;

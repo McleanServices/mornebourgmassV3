@@ -3,35 +3,30 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   ActivityIndicator,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import QRCode from "react-native-qrcode-svg";
 import { useNavigation } from "@react-navigation/native";
 import * as LocalAuthentication from 'expo-local-authentication';
+
 const Profile = () => {
   const [userId, setUserId] = useState(null);
-  const [userRole, setUserRole] = useState(null); // Add state for user role
+  const [userRole, setUserRole] = useState(null);
   const navigation = useNavigation();
 
   useEffect(() => {
     const loadUserData = async () => {
       try {
         const storedUserId = await AsyncStorage.getItem("userId");
-        const storedUserRole = await AsyncStorage.getItem("userRole"); // Load user role
-        // console.log("Stored User ID:", storedUserId); // Remove or comment out this line
-        // console.log("Stored User Role:", storedUserRole); // Remove or comment out this line
+        const storedUserRole = await AsyncStorage.getItem("userRole");
         if (storedUserId) {
           setUserId(storedUserId);
         }
         if (storedUserRole) {
           setUserRole(storedUserRole);
-          console.log("User Role:", storedUserRole); // Log the user role
-          if (storedUserRole === "admin") {
-            console.log("User is an admin"); // Log if the user is an admin
-          }
         }
       } catch (error) {
         console.error("Failed to load user data from AsyncStorage:", error);
@@ -41,26 +36,18 @@ const Profile = () => {
     loadUserData();
   }, []);
 
-  useEffect(() => {
-    // console.log("User ID:", userId); // Remove or comment out this line
-    // console.log("User Role:", userRole); // Remove or comment out this line
-  }, [userId, userRole]);
-
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       {userId ? (
         <>
           {userRole !== "admin" && (
             <>
               <Text style={styles.welcomeText}>
-                Bonjour, ID Utilisateur: {userId}
+                Numéro Adhérent: {userId}
               </Text>
               <Text style={styles.title}>Votre QR Code Personnel</Text>
-              <View style={styles.qrCodeContainer}>
-                <QRCode
-                  value={String(userId)} // Generate QR code with user ID
-                  size={150}
-                />
+              <View >
+                <QRCode value={String(userId)} size={200} />
               </View>
             </>
           )}
@@ -69,7 +56,7 @@ const Profile = () => {
             <>
               <TouchableOpacity
                 style={styles.button}
-                onPress={() => navigation.navigate("scancode")}
+                onPress={() => navigation.navigate("ScanCode")}
               >
                 <Text style={styles.buttonText}>Scanner un QR Code</Text>
               </TouchableOpacity>
@@ -85,32 +72,29 @@ const Profile = () => {
       ) : (
         <ActivityIndicator size="large" color="#0000ff" />
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#fff",
+    padding: 16,
   },
   welcomeText: {
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
+    color: "#2C3E50",
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
-  },
-  qrCodeContainer: {
-    backgroundColor: '#89CFF0',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
+    color: "#2C3E50",
   },
   button: {
     backgroundColor: "#007BFF",
@@ -118,6 +102,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginVertical: 10,
+    width: "80%",
   },
   buttonText: {
     color: "#fff",
