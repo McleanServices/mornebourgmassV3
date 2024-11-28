@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   ticketDate: {
     fontSize: 12,
     color: "#FFFFFF",
-    marginTop: 4,
+    marginTop: 5,
   },
 });
 
