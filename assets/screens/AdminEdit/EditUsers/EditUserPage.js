@@ -6,30 +6,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 
 const data = [
+    {
+        title: "Voir Utilisateur",
+        subtitle: "Voir les détails de l'utilisateur",
+        icon: "account",
+        navigateTo: "ViewUsers"
+      },
   {
-    title: "A Propos",
-    icon: "home",
-    navigateTo: "EditHome"
+    title: "Ajouter Utilisateur",
+    subtitle: "Ajouter un nouvel utilisateur",
+    icon: "account-plus",
+    navigateTo: "Register"
   },
-  {
-    title: "Utilisateur",
-    icon: "account",
-    navigateTo: "EditUserPage"
-  },
- 
-  {
-    title: "Activités",
-    icon: "calendar",
-    navigateTo: "EditActivtyPage"
-  },
-  {
-    title: "Palmarès",
-    icon: "trophy",
-    navigateTo: "EditPalmaresPage"
-  }
 ];
 
-const EditPage = () => {
+const EditUserPage = () => {
   const navigation = useNavigation();
   return (
     <LinearGradient
@@ -44,6 +35,7 @@ const EditPage = () => {
           <Card key={item.title} style={styles.card} onPress={() => navigation.navigate(item.navigateTo)}>
             <Card.Title
               title={item.title}
+              subtitle={item.subtitle}
               left={(props) => <Avatar.Icon {...props} icon={item.icon} />}
               right={(props) => (
                 <IconButton {...props} icon="chevron-right" />
@@ -106,4 +98,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditPage;
+export default EditUserPage;
+

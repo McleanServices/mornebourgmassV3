@@ -20,7 +20,7 @@ import ScanCodeScreen from './assets/screens/Main/ScanCodeScreen';
 import UserDetails from './assets/screens/AdminEdit/EditUsers/UserDetails';
 import EditPage from './assets/screens/AdminEdit/EditPage';
 import EditHome from './assets/screens/AdminEdit/EditHome/EditHome';
-import ViewUsers from './assets/screens/AdminEdit/EditHome/ViewUsers';
+import ViewUsers from './assets/screens/AdminEdit/EditUsers/ViewUsers';
 import EditActivityScreen from './assets/screens/AdminEdit/EditActivity/EditActivityScreen';
 import ViewActivities from './assets/screens/AdminEdit/EditActivity/ViewActivities';
 import AddPalmares from './assets/screens/AdminEdit/EditPalmares/AddPalmares';
@@ -37,12 +37,16 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import EditActivityMobile from './assets/screens/AdminEdit/EditActivity/EditActivityMobile';
 import BilletScreen from './assets/screens/Main/Billet'; 
 import Reglementation from './assets/screens/Main/Reglementation';
+import EditActivtyPage from './assets/screens/AdminEdit/EditActivity/EditActivtyPage';
+import EditUserPage from './assets/screens/AdminEdit/EditUsers/EditUserPage';
+import EditPalmaresPage from './assets/screens/AdminEdit/EditPalmares/EditPalmaresPage';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 const HomeStack = () => (
   <Stack.Navigator initialRouteName="Home" screenOptions={{ gestureEnabled: false }}>
     <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerTitle: 'Admin Utilisateur' }} />
     <Stack.Screen name="About" component={About} />
     <Stack.Screen name="Palmares" component={Palmares} options={{ headerTitle: '' }} />
     <Stack.Screen name="Shopping" component={ShoppingCart} options={{ headerTitle: '' }} />
@@ -62,16 +66,19 @@ const ActivityStack = ({ navigation }) => (
 
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
-    <Stack.Screen name="ProfileMain" component={Profile} options={{ headerShown: false }} />
+    <Stack.Screen name="ProfileMain" component={Profile} options={{ headerTitle: 'Profile' } }/>
     <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditPage" component={EditPage} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditHome" component={EditHome} options={{ headerTitle: '' }} />
+    <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerTitle: 'Admin Utilisateur' }} />
     <Stack.Screen name="ViewUsers" component={ViewUsers} options={{ headerTitle: '' }} />
     <Stack.Screen name="Register" component={RegisterScreen} options={{ headerTitle: '' }} />
     <Stack.Screen name="UserDetails" component={UserDetails} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditUser" component={EditUser} options={{ headerTitle: '' }} />
+    <Stack.Screen name="EditActivtyPage" component={EditActivtyPage} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditActivity" component={Platform.OS === 'web' ? EditActivityScreen : EditActivityMobile}  options={{ headerTitle: '' }} />
     <Stack.Screen name="ViewActivities" component={ViewActivities} options={{ headerTitle: '' }} />
+    <Stack.Screen name="EditPalmaresPage" component={EditPalmaresPage} options={{ headerTitle: '' }} />
     <Stack.Screen name="AddPalmares" component={AddPalmares} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditPalmares" component={EditPalmares} options={{ headerTitle: '' }} />
     <Stack.Screen name="ViewPalmares" component={ViewPalmares} options={{ headerTitle: '' }} />
@@ -85,34 +92,34 @@ const ProfileStack = () => (
 );
 
 const MoreTabs = ({ navigation }) => {
-  const [adminName, setAdminName] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null); 
 
   useEffect(() => {
-    const loadAdminName = async () => {
+    const loadUserRole = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
+        const storedUserRole = await AsyncStorage.getItem("userRole"); 
         if (token) {
-          const response = await axios.get('https://mornebourgmass.com/api/account', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setAdminName(response.data.identifiant);
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
         }
+        if (storedUserRole) {
+          setUserRole(storedUserRole);
+        }
       } catch (error) {
-        console.error("Failed to load admin name from server:", error);
+        console.error("Failed to load user role from server:", error);
         setIsAuthenticated(false);
       }
     };
 
     if (Platform.OS === 'web') {
       if (typeof document !== 'undefined') {
-        loadAdminName();
+        loadUserRole();
       }
     } else {
-      loadAdminName();
+      loadUserRole();
     }
   }, []);
 
@@ -127,6 +134,8 @@ const MoreTabs = ({ navigation }) => {
             iconName = 'musical-notes';
           } else if (route.name === 'Profil') {
             iconName = 'user';
+          } else if (route.name === 'QRCode') {
+            iconName = 'qrcode';
           }
           return <FontAwesome name={iconName} size={28} color={color} />;
         },
@@ -148,13 +157,15 @@ const MoreTabs = ({ navigation }) => {
                 style={styles.profileImage}
               />
               <View style={styles.greetingTextContainer}>
-                <Text style={styles.greetingText}>Bonjour, {adminName}!</Text>
+                <View>
+                  <Text style={styles.greetingText}>Bonjour !</Text>
+                </View>
               </View>
             </View>
           ),
           headerRight: () => (
             <Ionicons 
-              name="settings-outline" // Changed from "notifications-outline" to "settings-outline"
+              name="settings-outline"
               size={24}
               style={{ marginRight: 10 }}
               onPress={() => {
@@ -172,23 +183,23 @@ const MoreTabs = ({ navigation }) => {
           tabBarIcon: ({ color }) => <Ionicons name="musical-notes" size={28} color={color} />,
         }}
       />
+      {userRole === "admin" && (
+        <Tab.Screen
+          name="QRCode"
+          component={ScanCodeScreen}
+          options={{
+            title: 'QR Code',
+            tabBarIcon: ({ color }) => <FontAwesome size={28} name="qrcode" color={color} />,
+          }}
+        />
+      )}
       <Tab.Screen
         name="Profil"
         component={ProfileStack}
         options={{
+          headerShown: false ,
           title: 'Profile',
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
-        
-          headerRight: () => (
-            <Ionicons 
-              name="settings-outline" // Changed from "notifications-outline" to "settings-outline"
-              size={24}
-              style={{ marginRight: 10 }}
-              onPress={() => {
-                navigation.navigate('Settings');
-              }}
-            />
-          )
         }}
       />
     </Tab.Navigator>
@@ -208,6 +219,30 @@ export default function App() {
       }
     };
     checkAuth();
+
+    const handleInactivity = async () => {
+      await AsyncStorage.clear();
+      if (typeof localStorage !== 'undefined') {
+        localStorage.clear();
+      }
+      setIsAuthenticated(false);
+    };
+
+    let inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000); // 5 minutes
+
+    const resetInactivityTimeout = () => {
+      clearTimeout(inactivityTimeout);
+      inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000); // 5 minutes
+    };
+
+    window.addEventListener('mousemove', resetInactivityTimeout);
+    window.addEventListener('keydown', resetInactivityTimeout);
+
+    return () => {
+      clearTimeout(inactivityTimeout);
+      window.removeEventListener('mousemove', resetInactivityTimeout);
+      window.removeEventListener('keydown', resetInactivityTimeout);
+    };
   }, []);
 
   return (

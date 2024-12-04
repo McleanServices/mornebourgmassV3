@@ -7,29 +7,20 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const data = [
   {
-    title: "A Propos",
-    icon: "home",
-    navigateTo: "EditHome"
-  },
-  {
-    title: "Utilisateur",
-    icon: "account",
-    navigateTo: "EditUserPage"
-  },
- 
-  {
-    title: "Activités",
+    title: "Voir Activités",
+    subtitle: "Voir et modifier les activités",
     icon: "calendar",
-    navigateTo: "EditActivtyPage"
+    navigateTo: "ViewActivities"
   },
   {
-    title: "Palmarès",
-    icon: "trophy",
-    navigateTo: "EditPalmaresPage"
+    title: "Ajouter Activité",
+    subtitle: "Ajouter une nouvelle activité",
+    icon: "calendar-plus",
+    navigateTo: "AddActivity"
   }
 ];
 
-const EditPage = () => {
+const EditActivtyPage = () => {
   const navigation = useNavigation();
   return (
     <LinearGradient
@@ -44,6 +35,7 @@ const EditPage = () => {
           <Card key={item.title} style={styles.card} onPress={() => navigation.navigate(item.navigateTo)}>
             <Card.Title
               title={item.title}
+              subtitle={item.subtitle}
               left={(props) => <Avatar.Icon {...props} icon={item.icon} />}
               right={(props) => (
                 <IconButton {...props} icon="chevron-right" />
@@ -106,4 +98,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditPage;
+export default EditActivtyPage;

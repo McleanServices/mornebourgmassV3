@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Button, Linking, Animated } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Button, Linking, Animated, ActivityIndicator } from 'react-native'; // Import ActivityIndicator
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
-
+import axios from 'axios';
 const Activity = () => {
     const [activities, setActivities] = useState([]);
     const [username, setUsername] = useState('');
+    const [paymentStatus, setPaymentStatus] = useState(null); // Add state for payment status
+    const [loading, setLoading] = useState(false); // Add state for loading
     const slideAnim = useRef(new Animated.Value(-1000)).current; // Initial value for slide animation
     const navigation = useNavigation(); // Initialize navigation
 
@@ -45,8 +47,64 @@ const Activity = () => {
         }).start();
     }, []);
 
-    const handleInscrirePress = () => {
-        navigation.navigate('Shopping'); // Navigate to Shopping screen
+    const checkPaymentStatus = async (paymentLink, activityId) => {
+        setLoading(true); // Start loading
+        try {
+            const id_user = await AsyncStorage.getItem("userId"); // Get user ID from AsyncStorage
+
+            // Check if transaction link already exists
+            const checkResponse = await axios.get('http://localhost:8080/api/transactionLink', {
+                params: {
+                    id_user,
+                    id_activityscreen: activityId // Include activity ID
+                }
+            });
+
+            if (checkResponse.data.exists) {
+                // Transaction link exists, open it
+                const existingPaymentLink = checkResponse.data.paymentLink;
+                const response = await fetch(`http://localhost:8080/api/checkPaymentStatus?paymentLink=${encodeURIComponent(existingPaymentLink)}`);
+                const data = await response.json();
+                console.log('Payment Status:', data);
+                return data.status; // Return payment status
+            } else {
+                // Payment link does not exist
+                return null;
+            }
+        } catch (error) {
+            console.error('Error checking payment status:', error);
+            return null;
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+
+    useEffect(() => {
+        const fetchPaymentLinks = async () => {
+            try {
+                const response = await fetch('https://mornebourgmass.com/api/activityscreen');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch payment links');
+                }
+                const data = await response.json();
+                const updatedActivities = await Promise.all(data.map(async (activity) => {
+                    if (activity.payment_link) {
+                        const paymentStatus = await checkPaymentStatus(activity.payment_link, activity.id); // Pass activity ID
+                        return { ...activity, paymentStatus };
+                    }
+                    return activity;
+                }));
+                setActivities(updatedActivities);
+            } catch (error) {
+                console.error('Error fetching payment links:', error);
+            }
+        };
+
+        fetchPaymentLinks();
+    }, []);
+
+    const handleInscrirePress = (activityId) => {
+        navigation.navigate('Shopping', { activityId }); // Navigate to Shopping screen with activity ID
     };
 
     const formatDate = (dateString) => {
@@ -67,9 +125,19 @@ const Activity = () => {
                     <Text style={styles.title}>{item.title}</Text>
                     <Text style={styles.dateTime}>{formattedDate} à {item.time}</Text>
                     <Text style={styles.description}>{item.description}</Text>
-                    <TouchableOpacity style={styles.inscrireButton} onPress={handleInscrirePress}>
-                        <Text style={styles.inscrireButtonText}>Inscrire</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.tickets}>Nombre de tickets: {item.nombre_max_tickets}</Text> {/* Add number of tickets */}
+                    {loading ? (
+                        <>
+                            <ActivityIndicator size="small" color="#0000ff" /> {/* Show loader while checking payment status */}
+                            <Text style={styles.checkingText}>Vérification de l'inscription...</Text> {/* Add checking text */}
+                        </>
+                    ) : item.paymentStatus === 'PAID' ? (
+                        <Text style={styles.dejaInscritText}>Déjà inscrit</Text>
+                    ) : (
+                        <TouchableOpacity style={styles.inscrireButton} onPress={() => handleInscrirePress(item.id)}>
+                            <Text style={styles.inscrireButtonText}>Inscrire</Text>
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         );
@@ -81,7 +149,7 @@ const Activity = () => {
             <FlatList
                 data={activities}
                 renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
+                keyExtractor={(item) => item.id.toString()}
             />
         </Animated.View>
     );
@@ -146,6 +214,23 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    dejaInscritText: {
+        color: 'green',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 10,
+    },
+    checkingText: {
+        color: '#0000ff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 10,
+    },
+    tickets: {
+        fontSize: 16,
+        color: '#2C3E50',
+        marginTop: 5,
     },
 });
 

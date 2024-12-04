@@ -27,6 +27,26 @@ const SettingsScreen = ({ navigation }) => {
         };
 
         fetchUserDetails();
+
+        const handleInactivity = () => {
+            handleLogout();
+        };
+
+        let inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000); // 5 minutes
+
+        const resetInactivityTimeout = () => {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000); // 5 minutes
+        };
+
+        window.addEventListener('mousemove', resetInactivityTimeout);
+        window.addEventListener('keydown', resetInactivityTimeout);
+
+        return () => {
+            clearTimeout(inactivityTimeout);
+            window.removeEventListener('mousemove', resetInactivityTimeout);
+            window.removeEventListener('keydown', resetInactivityTimeout);
+        };
     }, []);
 
     const handleLogout = async () => {

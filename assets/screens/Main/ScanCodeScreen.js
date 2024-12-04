@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Button } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 
 const ScanCodeScreen = () => {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [error, setError] = useState(''); 
@@ -43,13 +44,15 @@ const ScanCodeScreen = () => {
     <View style={styles.container}>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <CameraView
-        style={StyleSheet.absoluteFillObject}
-        onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
-        barcodeScannerSettings={{
-          barcodeTypes: ['qr'], // You can add more types if needed
-        }}
-      />
+      {isFocused && (
+        <CameraView
+          style={StyleSheet.absoluteFillObject}
+          onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+          barcodeScannerSettings={{
+            barcodeTypes: ['qr'], 
+          }}
+        />
+      )}
       
       <View style={styles.overlay}>
         <View style={styles.topOverlay} />

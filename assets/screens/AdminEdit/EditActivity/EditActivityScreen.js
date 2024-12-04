@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, Modal, Pressable } from 'react-native';
 import DatePicker, { registerLocale } from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import TimePicker from 'react-time-picker';
@@ -21,6 +21,9 @@ const EditActivityScreen = () => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('00:00'); // Initialize with a valid time string
   const [selectedImage, setSelectedImage] = useState(null);
+  const [paymentLink, setPaymentLink] = useState(''); // Add state for payment link
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -37,6 +40,7 @@ const EditActivityScreen = () => {
           setImageUrl(data.imageUrl);
           setDate(data.date.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, '')); // Remove trailing time and milliseconds
           setTime(data.time || '00:00'); // Ensure time is set to a valid string
+          setPaymentLink(data.payment_link); // Set payment link
           console.log('Fetched activity data:', data); // Log fetched data
         } catch (error) {
           console.error('Error fetching activity:', error);
@@ -116,7 +120,7 @@ const EditActivityScreen = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ title, description, imageUrl: newImageUrl, date, time }),
+          body: JSON.stringify({ title, description, imageUrl: newImageUrl, date, time, payment_link: paymentLink }), // Include payment link
         });
 
         console.log('Update request sent to server'); // Log after sending request
@@ -139,66 +143,137 @@ const EditActivityScreen = () => {
     }
   };
 
+  const handleDelete = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDeleteActivity = async () => {
+    if (deleteConfirmation === 'SUPPRIMER') {
+      try {
+        await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`, { method: 'DELETE' });
+        setDeleteModalVisible(false);
+        setDeleteConfirmation('');
+        navigation.goBack();
+      } catch (error) {
+        console.error("Erreur lors de la suppression de l'activité:", error);
+      }
+    } else {
+      alert('Veuillez taper SUPPRIMER pour confirmer.');
+    }
+  };
+
+  const cancelDeleteActivity = () => {
+    setDeleteModalVisible(false);
+    setDeleteConfirmation('');
+  };
+
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        value={title || ''} 
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={description || ''}
-        onChangeText={setDescription}
-      />
-      <Text style={styles.label}>Date</Text>
-      <DatePicker
-        selected={date ? new Date(date) : null}
-        onChange={(selectedDate) => setDate(selectedDate.toISOString().split('T')[0])}
-        minDate={new Date()}
-        dateFormat="yyyy-MM-dd"
-        locale="fr"
-        customInput={
-          <TextInput
-            style={styles.input}
-            value={date}
-            placeholder="Select Date"
-            editable={false}
-          />
-        }
-      />
-      <Text style={styles.label}>Time</Text>
-      <TimePicker
-        onChange={(newTime) => {
-          console.log('TimePicker onChange:', newTime); // Log new time value
-          setTime(newTime || '00:00');
-        }}
-        value={time}
-        disableClock={true}
-        format="HH:mm"
-        clearIcon={null}
-        clockIcon={null}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Image URL"
-        value={imageUrl || ''} 
-        onChangeText={setImageUrl}
-        editable={false} 
-      />
-      <View {...getRootProps()} style={styles.dropzone}>
-        <input {...getInputProps()} />
-        <Ionicons name="cloud-upload-outline" size={32} color="gray" />
-        <Text>Drag 'n' drop an image here, or click to select one</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          placeholder="Title"
+          value={title || ''} 
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Description"
+          value={description || ''}
+          onChangeText={setDescription}
+        />
+        <Text style={styles.label}>Date</Text>
+        <DatePicker
+          selected={date ? new Date(date) : null}
+          onChange={(selectedDate) => setDate(selectedDate.toISOString().split('T')[0])}
+          minDate={new Date()}
+          dateFormat="yyyy-MM-dd"
+          locale="fr"
+          customInput={
+            <TextInput
+              style={styles.input}
+              value={date}
+              placeholder="Select Date"
+              editable={false}
+            />
+          }
+        />
+        <Text style={styles.label}>Time</Text>
+        <TimePicker
+          onChange={(newTime) => {
+            console.log('TimePicker onChange:', newTime); // Log new time value
+            setTime(newTime || '00:00');
+          }}
+          value={time}
+          disableClock={true}
+          format="HH:mm"
+          clearIcon={null}
+          clockIcon={null}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Image URL"
+          value={imageUrl || ''} 
+          onChangeText={setImageUrl}
+          editable={false} 
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Payment Link"
+          value={paymentLink || ''} // Add input for payment link
+          onChangeText={setPaymentLink}
+        />
+        <View {...getRootProps()} style={styles.dropzone}>
+          <input {...getInputProps()} />
+          <Ionicons name="cloud-upload-outline" size={32} color="gray" />
+          <Text>Drag 'n' drop an image here, or click to select one</Text>
+        </View>
+        <Button title="Update Activity" onPress={updateActivity} />
+        <Button title="Delete Activity" onPress={handleDelete} />
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={deleteModalVisible}
+          onRequestClose={() => {
+            setDeleteModalVisible(!deleteModalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Êtes-vous sûr de vouloir supprimer l'activité "{title}" ? Tapez SUPPRIMER pour confirmer.</Text>
+              <TextInput
+                style={styles.input}
+                onChangeText={setDeleteConfirmation}
+                value={deleteConfirmation}
+              />
+              <View style={styles.modalButtonContainer}>
+                <Pressable
+                  style={[styles.button, deleteConfirmation === 'SUPPRIMER' ? styles.buttonConfirmActive : styles.buttonConfirmInactive]}
+                  onPress={confirmDeleteActivity}
+                  disabled={deleteConfirmation !== 'SUPPRIMER'}
+                >
+                  <Text style={styles.textStyle}>Confirmer</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, styles.buttonCancel]}
+                  onPress={cancelDeleteActivity}
+                >
+                  <Text style={styles.textStyle}>Annuler</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </View>
-      <Button title="Update Activity" onPress={updateActivity} />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     padding: 20,
@@ -218,6 +293,55 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonConfirmActive: {
+    backgroundColor: '#2196F3',
+  },
+  buttonConfirmInactive: {
+    backgroundColor: '#B0C4DE',
+  },
+  buttonCancel: {
+    backgroundColor: '#f44336',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 

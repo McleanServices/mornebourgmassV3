@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform, TextInput } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ViewUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedUserId, setSelectedUserId] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch('https://mornebourgmass.com/api/users');
+        const token = await AsyncStorage.getItem("token");
+        const response = await fetch('https://mornebourgmass.com/api/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.status === 403) {
+          throw new Error('Access denied');
+        }
         if (!response.ok) {
           throw new Error('Failed to fetch users');
         }
@@ -21,10 +29,18 @@ const ViewUsers = () => {
         setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
-        if (Platform.OS === 'web') {
-          alert('Erreur: Une erreur s\'est produite lors de la récupération des utilisateurs');
+        if (error.message === 'Access denied') {
+          if (Platform.OS === 'web') {
+            alert('Accès refusé: Vous n\'êtes pas autorisé à accéder à cette ressource');
+          } else {
+            Alert.alert('Accès refusé', 'Vous n\'êtes pas autorisé à accéder à cette ressource');
+          }
         } else {
-          Alert.alert('Erreur', 'Une erreur s\'est produite lors de la récupération des utilisateurs');
+          if (Platform.OS === 'web') {
+            alert('Erreur: Une erreur s\'est produite lors de la récupération des utilisateurs');
+          } else {
+            Alert.alert('Erreur', 'Une erreur s\'est produite lors de la récupération des utilisateurs');
+          }
         }
       } finally {
         setLoading(false);
@@ -34,8 +50,8 @@ const ViewUsers = () => {
     fetchUsers();
   }, []);
 
-  const filteredUsers = selectedUserId
-    ? users.filter(user => user.id_user.toString() === selectedUserId)
+  const filteredUsers = searchQuery
+    ? users.filter(user => user.id_user.toString().includes(searchQuery))
     : users;
 
   const renderItem = ({ item }) => (
@@ -63,17 +79,17 @@ const ViewUsers = () => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <>
-          <Text style={styles.heading}>Rechercher utilisateur par numéro adhérent</Text>
+          <View style={styles.searchContainer}>
+            <Text style={styles.label}>Numéro Adhérent:</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Entrez le numéro adhérent"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              keyboardType="numeric" // Ensure the keyboard shows up
+            />
+          </View>
           <View style={styles.listContainer}>
-            <Picker
-              selectedValue={selectedUserId}
-              style={styles.picker}
-              onValueChange={(itemValue) => setSelectedUserId(itemValue)}
-            >
-              {users.map(user => (
-                <Picker.Item key={user.id_user} label={user.id_user.toString()} value={user.id_user.toString()} />
-              ))}
-            </Picker>
             <FlatList
               data={filteredUsers}
               renderItem={renderItem}
@@ -93,35 +109,48 @@ const styles = StyleSheet.create({
     backgroundColor: '#f4f4f4',
     paddingVertical: 40, // Add more vertical padding
   },
-  picker: {
+  searchContainer: {
+    width: '100%',
+    marginBottom: 20,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+  searchInput: {
     height: 50,
     width: '100%',
-    marginBottom: 30, // Increase bottom margin
-  },
-  pickerContainer: {
-    width: '100%',
-    marginBottom: 30, // Increase bottom margin
+    paddingHorizontal: 10,
+    fontSize: 16, // Ensure the font size is not too small
   },
   listContainer: {
     flex: 1,
-    marginTop: 30, // Increase top margin
+    marginTop: 20, // Increase top margin
   },
   card: {
-    marginVertical: 15, // Increase vertical margin
+    marginVertical: 10, // Increase vertical margin
     backgroundColor: '#fff',
     borderRadius: 10,
     elevation: 3,
+    padding: 10,
   },
   cardTitle: {
     fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-Medium' : 'Roboto-Medium',
+    fontSize: 14, // Smaller font size
   },
   cardSubtitle: {
     fontFamily: Platform.OS === 'ios' ? 'HelveticaNeue-Light' : 'Roboto-Light',
+    fontSize: 12, // Smaller font size
   },
   heading: {
-    fontSize: 16,
-    marginBottom: 30, // Increase bottom margin
+    fontSize: 18,
+    marginBottom: 20, // Increase bottom margin
     textAlign: 'center',
+    fontWeight: 'bold',
   },
 });
 

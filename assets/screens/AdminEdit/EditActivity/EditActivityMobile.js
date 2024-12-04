@@ -19,6 +19,7 @@ const EditActivityMobile = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
+  const [paymentLink, setPaymentLink] = useState(''); // Add state for payment link
 
   useEffect(() => {
     (async () => {
@@ -45,6 +46,7 @@ const EditActivityMobile = () => {
           setImageUrl(data.imageUrl);
           setDate(new Date(data.date));
           setTime(new Date(`1970-01-01T${data.time}Z`));
+          setPaymentLink(data.payment_link); // Set payment link
         } catch (error) {
           console.error('Error fetching activity:', error);
         }
@@ -126,6 +128,7 @@ const EditActivityMobile = () => {
         date: date.toISOString().split('T')[0],
         time: time.toTimeString().split(' ')[0],
         imageUrl: newImageUrl,
+        payment_link: paymentLink, // Include payment link
       });
       if (response.status === 200) {
         setModalVisible(true);
@@ -231,6 +234,13 @@ const EditActivityMobile = () => {
         value={imageUrl || ''}
         onChangeText={setImageUrl}
         editable={false}
+      />
+      <Text style={styles.label}>Payment Link</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Payment Link"
+        value={paymentLink || ''} // Add input for payment link
+        onChangeText={setPaymentLink}
       />
       <Pressable style={styles.imagePicker} onPress={pickImage}>
         <Ionicons name="cloud-upload-outline" size={32} color="gray" />

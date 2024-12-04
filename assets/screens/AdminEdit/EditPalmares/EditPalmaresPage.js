@@ -3,33 +3,25 @@ import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import { StyleSheet, View, ScrollView } from 'react-native'; // Import ScrollView
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
+import EditPalmares from './EditPalmares';
 
 
 const data = [
   {
-    title: "A Propos",
-    icon: "home",
-    navigateTo: "EditHome"
-  },
-  {
-    title: "Utilisateur",
-    icon: "account",
-    navigateTo: "EditUserPage"
-  },
- 
-  {
-    title: "Activités",
-    icon: "calendar",
-    navigateTo: "EditActivtyPage"
-  },
-  {
-    title: "Palmarès",
+    title: "Ajouter Palmarès",
+    subtitle: "Ajouter un nouveau palmarès",
     icon: "trophy",
-    navigateTo: "EditPalmaresPage"
+    navigateTo: "AddPalmares"
+  },
+  {
+    title: "Modifier Palmarès",
+    subtitle: "Modifier un palmarès existant",
+    icon: "trophy",
+    navigateTo: "ViewPalmares"
   }
 ];
 
-const EditPage = () => {
+const EditPalmaresPage = () => {
   const navigation = useNavigation();
   return (
     <LinearGradient
@@ -106,4 +98,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditPage;
+export default EditPalmaresPage;
