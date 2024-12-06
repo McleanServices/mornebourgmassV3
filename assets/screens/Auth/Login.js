@@ -6,12 +6,10 @@ import Header from "../components/Header";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
-import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { theme } from "../core/Theme";
 import { usernameValidator } from "../helpers/UsernameValidator";
 import { passwordValidator } from "../helpers/PasswordValidator";
-import { TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = ({ navigation }) => {

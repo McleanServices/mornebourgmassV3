@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Button, Linking, Animated, ActivityIndicator } from 'react-native'; // Import ActivityIndicator
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useNavigation, useFocusEffect } from '@react-navigation/native'; // Import useNavigation and useFocusEffect
 import axios from 'axios';
+import debounce from 'lodash.debounce'; // Import debounce from lodash
+
 const Activity = () => {
     const [activities, setActivities] = useState([]);
     const [username, setUsername] = useState('');
@@ -11,41 +13,29 @@ const Activity = () => {
     const slideAnim = useRef(new Animated.Value(-1000)).current; // Initial value for slide animation
     const navigation = useNavigation(); // Initialize navigation
 
-    useEffect(() => {
-        const fetchActivities = async () => {
-            try {
-                const response = await fetch('https://mornebourgmass.com/api/activityscreen');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch activities');
-                }
-                const data = await response.json();
-                setActivities(data);
-            } catch (error) {
-                console.error('Error fetching activities:', error);
+    const fetchActivities = async () => {
+        try {
+            const response = await fetch('https://mornebourgmass.com/api/activityscreen');
+            if (!response.ok) {
+                throw new Error('Failed to fetch activities');
             }
-        };
+            const data = await response.json();
+            setActivities(data);
+        } catch (error) {
+            console.error('Error fetching activities:', error);
+        }
+    };
 
-        const fetchUsername = async () => {
-            try {
-                const fetchedUsername = await AsyncStorage.getItem('username');
-                if (fetchedUsername) {
-                    setUsername(fetchedUsername);
-                }
-            } catch (error) {
-                console.error('Error fetching username:', error);
+    const fetchUsername = async () => {
+        try {
+            const fetchedUsername = await AsyncStorage.getItem('username');
+            if (fetchedUsername) {
+                setUsername(fetchedUsername);
             }
-        };
-
-        fetchActivities();
-        fetchUsername();
-
-        // Start slide animation
-        Animated.timing(slideAnim, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true, // Add this line
-        }).start();
-    }, []);
+        } catch (error) {
+            console.error('Error fetching username:', error);
+        }
+    };
 
     const checkPaymentStatus = async (paymentLink, activityId) => {
         setLoading(true); // Start loading
@@ -53,7 +43,7 @@ const Activity = () => {
             const id_user = await AsyncStorage.getItem("userId"); // Get user ID from AsyncStorage
 
             // Check if transaction link already exists
-            const checkResponse = await axios.get('http://localhost:8080/api/transactionLink', {
+            const checkResponse = await axios.get('https://mornebourgmass.com/api/transactionLink', {
                 params: {
                     id_user,
                     id_activityscreen: activityId // Include activity ID
@@ -63,7 +53,7 @@ const Activity = () => {
             if (checkResponse.data.exists) {
                 // Transaction link exists, open it
                 const existingPaymentLink = checkResponse.data.paymentLink;
-                const response = await fetch(`http://localhost:8080/api/checkPaymentStatus?paymentLink=${encodeURIComponent(existingPaymentLink)}`);
+                const response = await fetch(`https://mornebourgmass.com/api/checkPaymentStatus?paymentLink=${encodeURIComponent(existingPaymentLink)}`);
                 const data = await response.json();
                 console.log('Payment Status:', data);
                 return data.status; // Return payment status
@@ -79,29 +69,47 @@ const Activity = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchPaymentLinks = async () => {
-            try {
-                const response = await fetch('https://mornebourgmass.com/api/activityscreen');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch payment links');
-                }
-                const data = await response.json();
-                const updatedActivities = await Promise.all(data.map(async (activity) => {
-                    if (activity.payment_link) {
-                        const paymentStatus = await checkPaymentStatus(activity.payment_link, activity.id); // Pass activity ID
-                        return { ...activity, paymentStatus };
-                    }
-                    return activity;
-                }));
-                setActivities(updatedActivities);
-            } catch (error) {
-                console.error('Error fetching payment links:', error);
+    const fetchPaymentLinks = async () => {
+        try {
+            const response = await fetch('https://mornebourgmass.com/api/activityscreen');
+            if (!response.ok) {
+                throw new Error('Failed to fetch payment links');
             }
-        };
+            const data = await response.json();
+            const updatedActivities = await Promise.all(data.map(async (activity) => {
+                if (activity.payment_link) {
+                    const paymentStatus = await checkPaymentStatus(activity.payment_link, activity.id); // Pass activity ID
+                    return { ...activity, paymentStatus };
+                }
+                return activity;
+            }));
+            setActivities(updatedActivities);
+        } catch (error) {
+            console.error('Error fetching payment links:', error);
+        }
+    };
 
-        fetchPaymentLinks();
+    useEffect(() => {
+        fetchActivities();
+        fetchUsername();
+
+        // Start slide animation
+        Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true, // Add this line
+        }).start();
     }, []);
+
+    const debouncedFetchActivities = useCallback(debounce(fetchActivities, 300), []);
+    const debouncedFetchPaymentLinks = useCallback(debounce(fetchPaymentLinks, 300), []);
+
+    useFocusEffect(
+        useCallback(() => {
+            debouncedFetchActivities();
+            debouncedFetchPaymentLinks();
+        }, [debouncedFetchActivities, debouncedFetchPaymentLinks])
+    );
 
     const handleInscrirePress = (activityId) => {
         navigation.navigate('Shopping', { activityId }); // Navigate to Shopping screen with activity ID
@@ -125,18 +133,24 @@ const Activity = () => {
                     <Text style={styles.title}>{item.title}</Text>
                     <Text style={styles.dateTime}>{formattedDate} à {item.time}</Text>
                     <Text style={styles.description}>{item.description}</Text>
-                    <Text style={styles.tickets}>Nombre de tickets: {item.nombre_max_tickets}</Text> {/* Add number of tickets */}
-                    {loading ? (
-                        <>
-                            <ActivityIndicator size="small" color="#0000ff" /> {/* Show loader while checking payment status */}
-                            <Text style={styles.checkingText}>Vérification de l'inscription...</Text> {/* Add checking text */}
-                        </>
-                    ) : item.paymentStatus === 'PAID' ? (
-                        <Text style={styles.dejaInscritText}>Déjà inscrit</Text>
+                    {item.nombre_ticket === 0 ? (
+                        <Text style={styles.noTicketsText}>Ticket non disponible</Text>
                     ) : (
-                        <TouchableOpacity style={styles.inscrireButton} onPress={() => handleInscrirePress(item.id)}>
-                            <Text style={styles.inscrireButtonText}>Inscrire</Text>
-                        </TouchableOpacity>
+                        <>
+                            <Text style={styles.tickets}>Nombre de tickets: {item.nombre_ticket}</Text>
+                            {loading ? (
+                                <>
+                                    <ActivityIndicator size="small" color="#0000ff" /> 
+                                    <Text style={styles.checkingText}>Vérification de l'inscription...</Text>
+                                </>
+                            ) : item.paymentStatus === 'PAID' ? (
+                                <Text style={styles.dejaInscritText}>Déjà inscrit</Text>
+                            ) : (
+                                <TouchableOpacity style={styles.inscrireButton} onPress={() => handleInscrirePress(item.id)}>
+                                    <Text style={styles.inscrireButtonText}>Inscrire</Text>
+                                </TouchableOpacity>
+                            )}
+                        </>
                     )}
                 </View>
             </View>
@@ -228,9 +242,21 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     tickets: {
-        fontSize: 16,
+        fontSize: 18, // Increase font size
         color: '#2C3E50',
         marginTop: 5,
+        fontWeight: 'bold', // Make text bold
+        backgroundColor: '#E0E0E0', // Add background color
+        padding: 5, // Add padding
+        borderRadius: 5, // Add border radius
+        textAlign: 'center', // Center align text
+    },
+    noTicketsText: {
+        fontSize: 18,
+        color: 'red',
+        marginTop: 5,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
 });
 

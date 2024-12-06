@@ -69,7 +69,7 @@ const ShoppingCart = () => {
                 updateLoadingPercentage(50); // Update loading percentage
 
                 // Check if transaction link already exists
-                const checkResponse = await axios.get('http://localhost:8080/api/transactionLink', {
+                const checkResponse = await axios.get('https://mornebourgmass.com/api/transactionLink', {
                     params: {
                         id_user,
                         id_activityscreen: activityId // Include activity ID
@@ -82,7 +82,7 @@ const ShoppingCart = () => {
                     Linking.openURL(checkResponse.data.paymentLink);
                 } else {
                     // Payment link does not exist, create a new one
-                    await axios.put('http://localhost:8080/api/paiement', {
+                    await axios.put('https://mornebourgmass.com/api/paiement', {
                         id_user,
                         id_activityscreen: activityId // Include activity ID
                     }, {
@@ -92,7 +92,7 @@ const ShoppingCart = () => {
                     });
 
                     // Recheck if transaction link exists
-                    const recheckResponse = await axios.get('http://localhost:8080/api/transactionLink', {
+                    const recheckResponse = await axios.get('https://mornebourgmass.com/api/transactionLink', {
                         params: {
                             id_user,
                             id_activityscreen: activityId // Include activity ID

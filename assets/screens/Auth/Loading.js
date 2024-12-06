@@ -4,34 +4,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ProgressBar } from 'react-native-paper';
 
 export default function Loading({ navigation }) {
-  const [progress, setProgress] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prevProgress) => {
-        if (prevProgress >= 1) {
-          clearInterval(interval);
-          setIsFinished(true);
-          return 1;
-        }
-        return prevProgress + 0.01;
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (isFinished) {
-      const timeout = setTimeout(() => {
-        window.location.reload(); // Navigate to the Login screen after 3 seconds
-      }, 1000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [isFinished, navigation]);
-
   return (
     <LinearGradient
       colors={['#89CFF0', '#89CFF0', '#FFA500']}

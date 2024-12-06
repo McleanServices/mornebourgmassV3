@@ -5,41 +5,18 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Welcome from './assets/screens/Auth/Welcome';
-import Loading from './assets/screens/Auth/Loading';
-import HomeScreen from './assets/screens/Main/Home';
-import Profile from './assets/screens/Main/Profile';
-import SettingsScreen from './assets/screens/Main/Settings';
-import RegisterScreen from './assets/screens/AdminEdit/EditUsers/Register';
-import ActivityScreen from './assets/screens/Main/Activity';
-import AuthLoadingScreen from './assets/screens/Auth/AuthLoadingScreen';
-import ShoppingCart from './assets/screens/Main/Shopping';
-import ScanCodeScreen from './assets/screens/Main/ScanCodeScreen';
-import UserDetails from './assets/screens/AdminEdit/EditUsers/UserDetails';
-import EditPage from './assets/screens/AdminEdit/EditPage';
-import EditHome from './assets/screens/AdminEdit/EditHome/EditHome';
-import ViewUsers from './assets/screens/AdminEdit/EditUsers/ViewUsers';
-import EditActivityScreen from './assets/screens/AdminEdit/EditActivity/EditActivityScreen';
-import ViewActivities from './assets/screens/AdminEdit/EditActivity/ViewActivities';
-import AddPalmares from './assets/screens/AdminEdit/EditPalmares/AddPalmares';
-import EditPalmares from './assets/screens/AdminEdit/EditPalmares/EditPalmares';
-import ViewPalmares from './assets/screens/AdminEdit/EditPalmares/ViewPalmares';
-import Login from './assets/screens/Auth/Login';
-import AddActivity from './assets/screens/AdminEdit/EditActivity/Addactivity';
-import AddActivityMobile from './assets/screens/AdminEdit/EditActivity/AddactivityMobile';
+import { 
+  Welcome, Loading, HomeScreen, Profile, SettingsScreen, RegisterScreen, 
+  ActivityScreen, ShoppingCart, ScanCodeScreen, UserDetails, EditPage, EditHome, 
+  ViewUsers, EditActivityScreen, ViewActivities, AddPalmares, EditPalmares, 
+  ViewPalmares, Login, AddActivity, AddActivityMobile, EditUser, Palmares, About, 
+  EditActivityMobile, BilletScreen, Reglementation, EditActivtyPage, EditUserPage, 
+  EditPalmaresPage 
+} from './assets/screens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import EditUser from './assets/screens/AdminEdit/EditUsers/EditUser';
-import Palmares from './assets/screens/Main/Palmares';
-import About from './assets/screens/Main/About';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import EditActivityMobile from './assets/screens/AdminEdit/EditActivity/EditActivityMobile';
-import BilletScreen from './assets/screens/Main/Billet'; 
-import Reglementation from './assets/screens/Main/Reglementation';
-import EditActivtyPage from './assets/screens/AdminEdit/EditActivity/EditActivtyPage';
-import EditUserPage from './assets/screens/AdminEdit/EditUsers/EditUserPage';
-import EditPalmaresPage from './assets/screens/AdminEdit/EditPalmares/EditPalmaresPage';
+
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
@@ -60,13 +37,15 @@ const HomeStack = () => (
 const ActivityStack = ({ navigation }) => (
   <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
     <Stack.Screen name="ActivityMain" component={ActivityScreen} options={{ headerShown: false }} />
-    <Stack.Screen name="Shopping" component={ShoppingCart} options={{ headerTitle: '' }} />
+    <Stack.Screen name="Shopping">
+      {props => <ShoppingCart {...props} navigation={navigation} />}
+    </Stack.Screen>
   </Stack.Navigator>
 );
 
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
-    <Stack.Screen name="ProfileMain" component={Profile} options={{ headerTitle: 'Profile' } }/>
+    <Stack.Screen name="ProfileMain" component={Profile} options={{ headerShown: false }}/>
     <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditPage" component={EditPage} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditHome" component={EditHome} options={{ headerTitle: '' }} />
@@ -208,6 +187,7 @@ const MoreTabs = ({ navigation }) => {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // New state for loading
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -216,6 +196,8 @@ export default function App() {
         setIsAuthenticated(!!token);
       } catch (error) {
         console.error("Error checking authentication:", error);
+      } finally {
+        setIsLoading(false); // Set loading to false after checking auth
       }
     };
     checkAuth();
@@ -244,6 +226,14 @@ export default function App() {
       window.removeEventListener('keydown', resetInactivityTimeout);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#8A2BE2" />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

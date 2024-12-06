@@ -20,6 +20,9 @@ const AddActivity = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
+  const [nombreMaxTickets, setNombreMaxTickets] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [inputErrors, setInputErrors] = useState({});
 
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
@@ -70,7 +73,24 @@ const AddActivity = ({ navigation }) => {
     }
   };
 
+  const validateInputs = () => {
+    const errors = {};
+    if (!title) errors.title = 'Please input the title';
+    if (!description) errors.description = 'Please input the description';
+    if (!date) errors.date = 'Please input the date';
+    if (!time) errors.time = 'Please input the time';
+    if (!imageUrl) errors.imageUrl = 'Please input the image URL';
+    if (!nombreMaxTickets) errors.nombreMaxTickets = 'Please input the number of max tickets';
+
+    setInputErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleAddActivity = async () => {
+    if (!validateInputs()) {
+      return;
+    }
+
     let newImageUrl = imageUrl;
 
     if (selectedImage) {
@@ -87,6 +107,7 @@ const AddActivity = ({ navigation }) => {
         date,
         time,
         imageUrl: newImageUrl,
+        nombre_max_tickets: nombreMaxTickets,
       });
       if (response.status === 201) {
         setModalVisible(true);
@@ -100,6 +121,12 @@ const AddActivity = ({ navigation }) => {
   const handleDateChange = (selectedDate) => {
     setDate(selectedDate.toISOString().split('T')[0]);
   };
+
+  const inputStyle = (value, error) => [
+    styles.input,
+    value ? styles.inputFilled : null,
+    error ? styles.inputError : null,
+  ];
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -129,16 +156,18 @@ const AddActivity = ({ navigation }) => {
         </Modal>
         <Text style={styles.label}>Title</Text>
         <TextInput
-          style={styles.input}
+          style={inputStyle(title, inputErrors.title)}
           value={title}
           onChangeText={setTitle}
         />
+        {inputErrors.title && <Text style={styles.errorText}>{inputErrors.title}</Text>}
         <Text style={styles.label}>Description</Text>
         <TextInput
-          style={styles.input}
+          style={inputStyle(description, inputErrors.description)}
           value={description}
           onChangeText={setDescription}
         />
+        {inputErrors.description && <Text style={styles.errorText}>{inputErrors.description}</Text>}
         <Text style={styles.label}>Date</Text>
         <View>
           <DatePicker
@@ -149,7 +178,7 @@ const AddActivity = ({ navigation }) => {
             locale="fr"
             customInput={
               <TextInput
-                style={styles.input}
+                style={inputStyle(date, inputErrors.date)}
                 value={date}
                 placeholder="Select Date"
                 editable={false}
@@ -157,6 +186,7 @@ const AddActivity = ({ navigation }) => {
             }
           />
         </View>
+        {inputErrors.date && <Text style={styles.errorText}>{inputErrors.date}</Text>}
         <Text style={styles.label}>Time (HH:mm)</Text>
         <View>
           <TimePicker
@@ -169,20 +199,33 @@ const AddActivity = ({ navigation }) => {
             className="time-picker-input"
           />
         </View>
+        {inputErrors.time && <Text style={styles.errorText}>{inputErrors.time}</Text>}
         <View style={styles.spacing} />
         <Text style={styles.label}>Image URL</Text>
         <TextInput
-          style={styles.input}
+          style={inputStyle(imageUrl, inputErrors.imageUrl)}
           placeholder="Image URL"
           value={imageUrl || ''}
           onChangeText={setImageUrl}
           editable={false}
         />
+        {inputErrors.imageUrl && <Text style={styles.errorText}>{inputErrors.imageUrl}</Text>}
         <View {...getRootProps()} style={styles.dropzone}>
           <input {...getInputProps()} />
           <Ionicons name="cloud-upload-outline" size={32} color="gray" />
           <Text>Drag 'n' drop an image here, or click to select one</Text>
         </View>
+        <Text style={styles.label}>Nombre Max Tickets</Text>
+        <TextInput
+          style={inputStyle(nombreMaxTickets, inputErrors.nombreMaxTickets)}
+          value={nombreMaxTickets}
+          onChangeText={setNombreMaxTickets}
+          keyboardType="numeric"
+        />
+        {inputErrors.nombreMaxTickets && <Text style={styles.errorText}>{inputErrors.nombreMaxTickets}</Text>}
+        {errorMessage ? (
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+        ) : null}
         <Button title="Add Activity" onPress={handleAddActivity} />
       </View>
     </ScrollView>
@@ -214,6 +257,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    marginBottom: 15,
+  },
+  inputFilled: {
+    borderColor: 'green',
+  },
+  inputError: {
+    borderColor: 'red',
+  },
+  errorText: {
+    color: 'red',
     marginBottom: 15,
   },
   centeredView: {
@@ -257,6 +310,11 @@ const styles = StyleSheet.create({
   },
   spacing: {
     height: 20,
+  },
+  errorMessage: {
+    color: 'red',
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 

@@ -24,6 +24,7 @@ const EditActivityScreen = () => {
   const [paymentLink, setPaymentLink] = useState(''); // Add state for payment link
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [nombreMaxTickets, setNombreMaxTickets] = useState(''); // Add state for nombre_max_tickets
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const EditActivityScreen = () => {
           setDate(data.date.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, '')); // Remove trailing time and milliseconds
           setTime(data.time || '00:00'); // Ensure time is set to a valid string
           setPaymentLink(data.payment_link); // Set payment link
+          setNombreMaxTickets(data.nombre_max_tickets || ''); // Set nombre_max_tickets
           console.log('Fetched activity data:', data); // Log fetched data
         } catch (error) {
           console.error('Error fetching activity:', error);
@@ -120,7 +122,7 @@ const EditActivityScreen = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ title, description, imageUrl: newImageUrl, date, time, payment_link: paymentLink }), // Include payment link
+          body: JSON.stringify({ title, description, imageUrl: newImageUrl, date, time, payment_link: paymentLink, nombre_max_tickets: nombreMaxTickets }), // Include nombre_max_tickets
         });
 
         console.log('Update request sent to server'); // Log after sending request
@@ -222,6 +224,12 @@ const EditActivityScreen = () => {
           placeholder="Payment Link"
           value={paymentLink || ''} // Add input for payment link
           onChangeText={setPaymentLink}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Nombre Max Tickets"
+          value={nombreMaxTickets || ''} // Add input for nombre_max_tickets
+          onChangeText={setNombreMaxTickets}
         />
         <View {...getRootProps()} style={styles.dropzone}>
           <input {...getInputProps()} />

@@ -5,6 +5,8 @@ import { Text, View, Button } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 
+
+
 export default function Welcome() {
     const navigation = useNavigation();
 
