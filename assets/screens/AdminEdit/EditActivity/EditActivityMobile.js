@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { API_URL } from "@env";
 
 const EditActivityMobile = () => {
-  const route = useRoute();
-  const navigation = useNavigation();
-  const { id } = route.params || {};
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
@@ -20,28 +20,21 @@ const EditActivityMobile = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
   const [paymentLink, setPaymentLink] = useState(''); // Add state for payment link
+  const [showPaymentLink, setShowPaymentLink] = useState(false);
+  const [activityTitle, setActivityTitle] = useState('');
 
   useEffect(() => {
-    (async () => {
-      if (Platform.OS !== 'web') {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          alert('Sorry, we need camera roll permissions to make this work!');
-        }
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
+    // Get activity data
     if (id) {
       const fetchActivity = async () => {
         try {
-          const response = await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`);
+          const response = await fetch(`${API_URL}/api/activityscreen/${id}`);
           if (!response.ok) {
             throw new Error('Failed to fetch activity');
           }
           const data = await response.json();
           setTitle(data.title);
+          setActivityTitle(data.title); // Store activity title
           setDescription(data.description);
           setImageUrl(data.imageUrl);
           setDate(new Date(data.date));
@@ -55,6 +48,17 @@ const EditActivityMobile = () => {
       fetchActivity();
     }
   }, [id]);
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Sorry, we need camera roll permissions to make this work!');
+        }
+      }
+    })();
+  }, []);
 
   const pickImage = async () => {
     try {
@@ -89,7 +93,7 @@ const EditActivityMobile = () => {
     });
 
     try {
-      let response = await fetch('https://mornebourgmass.com/api/upload', {
+      let response = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -122,7 +126,7 @@ const EditActivityMobile = () => {
     }
 
     try {
-      const response = await axios.put(`https://mornebourgmass.com/api/activityscreen/${id}`, {
+      const response = await axios.put(`${API_URL}/api/activityscreen/${id}`, {
         title,
         description,
         date: date.toISOString().split('T')[0],
@@ -151,110 +155,130 @@ const EditActivityMobile = () => {
     setTime(currentTime);
   };
 
+  const togglePaymentLink = () => {
+    setShowPaymentLink(!showPaymentLink);
+  };
+
   return (
-    <View style={styles.container}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Activity updated successfully</Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => {
-                setModalVisible(false);
-                navigation.goBack();
-              }}
-            >
-              <Text style={styles.textStyle}>OK</Text>
-            </Pressable>
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Activity updated successfully</Text>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => {
+                  setModalVisible(false);
+                  router.back();
+                }}
+              >
+                <Text style={styles.textStyle}>OK</Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </Modal>
-      <Text style={styles.label}>Title</Text>
-      <TextInput
-        style={styles.input}
-        value={title}
-        onChangeText={setTitle}
-      />
-      <Text style={styles.label}>Description</Text>
-      <TextInput
-        style={styles.input}
-        value={description}
-        onChangeText={setDescription}
-      />
-      <Text style={styles.label}>Date</Text>
-      <Pressable onPress={() => setShowDatePicker(true)}>
+        </Modal>
+        <Text style={styles.label}>Title</Text>
         <TextInput
           style={styles.input}
-          value={date.toISOString().split('T')[0]}
-          placeholder="Select Date"
-          editable={false}
+          value={title}
+          onChangeText={setTitle}
         />
-      </Pressable>
-      <Text style={styles.tapMeText}>Tap me</Text>
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-        />
-      )}
-      <Text style={styles.label}>Time</Text>
-      <Pressable onPress={() => setShowTimePicker(true)}>
+        <Text style={styles.label}>Description</Text>
         <TextInput
           style={styles.input}
-          value={time.toTimeString().split(' ')[0]}
-          placeholder="Select Time"
+          value={description}
+          onChangeText={setDescription}
+        />
+        <Text style={styles.label}>Date</Text>
+        <Pressable onPress={() => setShowDatePicker(true)} style={styles.input}>
+          <Text style={{ fontSize: 16, color: '#000' }}>
+            {date.toISOString().split('T')[0] || "Selectionner la date"}
+          </Text>
+        </Pressable>
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        )}
+        <Text style={styles.label}>Time</Text>
+        <Pressable onPress={() => setShowTimePicker(true)}>
+          <TextInput
+            style={styles.input}
+            value={time.toTimeString().split(' ')[0]}
+            placeholder="Select Time"
+            editable={false}
+          />
+        </Pressable>
+        
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+            is24Hour={true} // Use 24-hour format
+            locale="fr-FR" // Set locale to French
+          />
+        )}
+        <View style={styles.spacing} />
+        <Text style={styles.label}>Image URL</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Image URL"
+          value={imageUrl || ''}
+          onChangeText={setImageUrl}
           editable={false}
         />
-      </Pressable>
-      <Text style={styles.tapMeText}>Tap me</Text>
-      {showTimePicker && (
-        <DateTimePicker
-          value={time}
-          mode="time"
-          display="default"
-          onChange={handleTimeChange}
-          is24Hour={true} // Use 24-hour format
-          locale="fr-FR" // Set locale to French
-        />
-      )}
-      <View style={styles.spacing} />
-      <Text style={styles.label}>Image URL</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Image URL"
-        value={imageUrl || ''}
-        onChangeText={setImageUrl}
-        editable={false}
-      />
-      <Text style={styles.label}>Payment Link</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Payment Link"
-        value={paymentLink || ''} // Add input for payment link
-        onChangeText={setPaymentLink}
-      />
-      <Pressable style={styles.imagePicker} onPress={pickImage}>
-        <Ionicons name="cloud-upload-outline" size={32} color="gray" />
-        <Text>Pick an image from gallery</Text>
-      </Pressable>
-      <Button title="Update Activity" onPress={handleUpdateActivity} />
-    </View>
+        <Pressable 
+          style={styles.toggleButton}
+          onPress={togglePaymentLink}
+        >
+          <Text style={styles.toggleButtonText}>
+            {showPaymentLink ? 'Masquer le lien de paiement' : 'Afficher le lien de paiement'}
+          </Text>
+        </Pressable>
+
+        {showPaymentLink && (
+          <View>
+            <Text style={styles.warningText}>
+              Attention: Cela modifiera le lien de paiement pour l'activité "{activityTitle}"
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Lien de paiement"
+              value={paymentLink || ''}
+              onChangeText={setPaymentLink}
+            />
+          </View>
+        )}
+        <Pressable style={styles.imagePicker} onPress={pickImage}>
+          <Ionicons name="cloud-upload-outline" size={32} color="gray" />
+          <Text>Pick an image from gallery</Text>
+        </Pressable>
+        <Button title="Update Activity" onPress={handleUpdateActivity} />
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flex: 1,
+  },
+  container: {
     padding: 20,
+    paddingBottom: 40,
   },
   label: {
     fontSize: 16,
@@ -313,6 +337,25 @@ const styles = StyleSheet.create({
   },
   spacing: {
     height: 20,
+  },
+  toggleButton: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  toggleButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  warningText: {
+    color: '#FF6B6B',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
 

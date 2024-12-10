@@ -1,16 +1,40 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from "@env";
 
-const UserDetails = ({ route }) => {
-  const { userInfo } = route.params;
-  const navigation = useNavigation();
+const UserDetailsScreen = () => {
+  const router = useRouter();
+  const [userInfo, setUserInfo] = useState(null);
+  const [error, setError] = useState('');
   const busRegler = true; // Simulate the bus_regler property
+
+  const fetchUserInfo = useCallback(async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('userData');
+      if (storedData) {
+        const response = await axios.get(`${API_URL}/api/user/${storedData}`);
+        if (response.status === 200) {
+          setUserInfo(response.data.user);
+        }
+      }
+    } catch (err) {
+      setError('Failed to fetch user info.');
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, [fetchUserInfo]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Informations de l'utilisateur :</Text>
-      {userInfo ? (
+      {error ? (
+        <Text style={styles.errorMessage}>{error}</Text>
+      ) : userInfo ? (
         <View style={styles.card}>
           <Text style={styles.infoText}>Nom: <Text style={styles.infoValue}>{userInfo.nom}</Text></Text>
           <Text style={styles.infoText}>Prénom: <Text style={styles.infoValue}>{userInfo.prenom}</Text></Text>
@@ -101,4 +125,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UserDetails;
+export default UserDetailsScreen;

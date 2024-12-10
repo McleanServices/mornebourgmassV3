@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform, Modal, Pressable } from 'react-native';
+import { API_URL } from "@env";
 
-const EditHome = () => {
+const EditHomeScreen = () => {
+    const [id, setId] = useState(null);  // Add new state for ID
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [notreMission, setNotreMission] = useState(''); // Add state for NotreMission
@@ -11,7 +13,7 @@ const EditHome = () => {
     useEffect(() => {
         const fetchActivity = async () => {
             try {
-                const response = await fetch('https://mornebourgmass.com/api/homescreen');
+                const response = await fetch(`${API_URL}/api/homescreen`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch activity data');
                 }
@@ -19,6 +21,7 @@ const EditHome = () => {
                 console.log('Fetched data:', data); // Log the fetched data
                 // Access the first item in the array
                 if (data.length > 0) {
+                    setId(data[0]._id);  // Store the ID
                     setTitle(data[0].title);
                     setDescription(data[0].description);
                     setNotreMission(data[0].NotreMission); // Ensure NotreMission is set from response
@@ -182,4 +185,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default EditHome;
+export default EditHomeScreen;

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, Modal, Pressable } from 'react-native';
 import axios from 'axios';
-import { theme } from '../../core/Theme'; // Import theme
+import { theme } from '../../core/Theme';
+import { API_URL } from "@env";
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
-const EditUser = ({ route }) => {
-  const { userId } = route.params;
+const EditUser = () => {
+  const { id } = useLocalSearchParams();
+  const userId = id;
   const [userInfo, setUserInfo] = useState(null);
   const [identifiant, setIdentifiant] = useState('');
   const [email, setEmail] = useState('');
@@ -16,32 +19,35 @@ const EditUser = ({ route }) => {
   const [grade, setGrade] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get(`https://mornebourgmass.com/api/user/${userId}`);
+        const response = await axios.get(`${API_URL}/api/user/${userId}`);
         const user = response.data.user;
         setUserInfo(user);
-        setIdentifiant(user.identifiant);
-        setEmail(user.email);
-        setNom(user.nom);
-        setPrenom(user.prenom);
-        setNumeroTelephone(user.numero_telephone);
-        setDateNaissance(user.date_naissance.split('T')[0]); // Format date_naissance to exclude time part
-        setRole(user.role);
-        setGrade(user.grade);
+        setIdentifiant(user.identifiant || '');
+        setEmail(user.email || '');
+        setNom(user.nom || '');
+        setPrenom(user.prenom || '');
+        setNumeroTelephone(user.numero_telephone || '');
+        setDateNaissance(user.date_naissance ? user.date_naissance.split('T')[0] : ''); 
+        setRole(user.role || '');
+        setGrade(user.grade || '');
       } catch (error) {
-        console.error('Error fetching user info:', error);
+        setError(<Text>Error fetching user info: {error.message}</Text>);
       }
     };
 
-    fetchUserInfo();
+    if (userId) {
+      fetchUserInfo();
+    }
   }, [userId]);
 
   const handleSave = async () => {
     try {
-      const formattedDateNaissance = date_naissance.split('T')[0]; // Format date_naissance to YYYY-MM-DD
+      const formattedDateNaissance = date_naissance.split('T')[0]; 
       const updatedUser = {
         identifiant,
         email,
@@ -52,22 +58,25 @@ const EditUser = ({ route }) => {
         role,
         grade,
       };
-      const response = await axios.put(`https://mornebourgmass.com/api/user/${userId}`, updatedUser);
-      if (response.status === 200) {
-        console.log('User information saved:', updatedUser);
+      const response = await axios.put(`${API_URL}/api/user/${userId}`, updatedUser);
+      if (!!response && response.status === 200) {
         setSuccessMessage('Utilisateur enregistré avec succès.');
         setModalVisible(true);
       } else {
-        console.error('Error saving user info:', response.data.message);
+        setSuccessMessage('Error saving user info: ' + (response?.data?.message || 'Unknown error'));
+        setModalVisible(true);
       }
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.error('Error saving user info: User not found');
-      } else if (error.response && error.response.status === 500) {
-        console.error('Error saving user info: Internal server error', error.response.data);
+      let errorMessage = 'Error saving user info: ';
+      if (error.response?.status === 404) {
+        errorMessage += 'User not found';
+      } else if (error.response?.status === 500) {
+        errorMessage += 'Internal server error';
       } else {
-        console.error('Error saving user info:', error);
+        errorMessage += error.message || 'Unknown error';
       }
+      setError(<Text>{errorMessage}</Text>);
+      setModalVisible(true);
     }
   };
 
@@ -79,19 +88,27 @@ const EditUser = ({ route }) => {
     );
   }
 
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <>
       <Modal
         animationType="slide"
-        transparent={true}
-        visible={modalVisible}
+        transparent={!!true}
+        visible={!!modalVisible}
         onRequestClose={() => {
-          setModalVisible(!modalVisible);
+          setModalVisible(false);
         }}
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>{successMessage}</Text>
+            <Text style={styles.modalText}>{successMessage || ''}</Text>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(false)}
@@ -104,7 +121,7 @@ const EditUser = ({ route }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>Modifier l'utilisateur</Text>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Numéro Adhérent</Text>
+          <Text style={styles.label}>Numéro Adhérent</Text>
           <TextInput
             style={styles.input}
             value={userInfo.id_user.toString()}
@@ -112,7 +129,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Identifiant</Text>
+          <Text style={styles.label}>Identifiant</Text>
           <TextInput
             style={styles.input}
             value={identifiant}
@@ -121,7 +138,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Email</Text>
+          <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
             value={email}
@@ -131,7 +148,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Nom</Text>
+          <Text style={styles.label}>Nom</Text>
           <TextInput
             style={styles.input}
             value={nom}
@@ -140,7 +157,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Prénom</Text>
+          <Text style={styles.label}>Prénom</Text>
           <TextInput
             style={styles.input}
             value={prenom}
@@ -149,7 +166,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Numéro Téléphone</Text>
+          <Text style={styles.label}>Numéro Téléphone</Text>
           <TextInput
             style={styles.input}
             value={numero_telephone}
@@ -159,7 +176,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Date Naissance</Text>
+          <Text style={styles.label}>Date Naissance</Text>
           <TextInput
             style={styles.input}
             value={date_naissance}
@@ -168,7 +185,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Rôle</Text>
+          <Text style={styles.label}>Rôle</Text>
           <TextInput
             style={styles.input}
             value={role}
@@ -177,7 +194,7 @@ const EditUser = ({ route }) => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Grade</Text>
+          <Text style={styles.label}>Grade</Text>
           <TextInput
             style={styles.input}
             value={grade}
@@ -185,7 +202,9 @@ const EditUser = ({ route }) => {
             placeholder="Grade"
           />
         </View>
-        <Button title="Enregistrer" onPress={handleSave} />
+        <Pressable style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Enregistrer</Text>
+        </Pressable>
       </ScrollView>
     </>
   );
@@ -207,19 +226,16 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 20,
   },
-  inputLabel: {
-    position: 'absolute',
-    left: 10,
-    top: -10,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: 5,
-    zIndex: 1,
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
     paddingHorizontal: 10,
+    borderRadius: 5,
   },
   centeredView: {
     flex: 1,
@@ -251,6 +267,21 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+  },
+  saveButton: {
+    backgroundColor: theme.colors.primary,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
 

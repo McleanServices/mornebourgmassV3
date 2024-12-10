@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { API_URL } from "@env";
 
 const AddActivityMobile = ({ navigation }) => {
   const [title, setTitle] = useState('');
@@ -60,7 +61,7 @@ const AddActivityMobile = ({ navigation }) => {
     });
 
     try {
-      let response = await fetch('https://mornebourgmass.com/api/upload', {
+      let response = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -93,7 +94,7 @@ const AddActivityMobile = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('https://mornebourgmass.com/api/activity', {
+      const response = await axios.post(`${API_URL}/api/activity`, {
         title,
         description,
         date: date.toISOString().split('T')[0],

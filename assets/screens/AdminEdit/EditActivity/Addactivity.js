@@ -8,7 +8,7 @@ import { fr } from 'date-fns/locale';
 import axios from 'axios';
 import { useDropzone } from 'react-dropzone';
 import { Ionicons } from '@expo/vector-icons';
-
+import { API_URL } from "@env";
 registerLocale('fr', fr);
 
 const AddActivity = ({ navigation }) => {
@@ -50,7 +50,7 @@ const AddActivity = ({ navigation }) => {
 
     try {
       console.log('Uploading image...');
-      let response = await fetch('https://mornebourgmass.com/api/upload', {
+      let response = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -101,7 +101,7 @@ const AddActivity = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post('https://mornebourgmass.com/api/activity', {
+      const response = await axios.post(`${API_URL}/api/activity`, {
         title,
         description,
         date,

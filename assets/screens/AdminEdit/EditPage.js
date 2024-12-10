@@ -1,36 +1,34 @@
 import * as React from 'react';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
-import { StyleSheet, View, ScrollView } from 'react-native'; // Import ScrollView
-import { useNavigation } from "@react-navigation/native";
+import { StyleSheet, View, ScrollView } from 'react-native';
+import { useRouter } from "expo-router"; // Replace useNavigation with useRouter
 import { LinearGradient } from 'expo-linear-gradient';
-
 
 const data = [
   {
     title: "A Propos",
     icon: "home",
-    navigateTo: "EditHome"
+    navigateTo: "/pages/edithome"  // Update path format
   },
   {
     title: "Utilisateur",
     icon: "account",
-    navigateTo: "EditUserPage"
+    navigateTo: "/pages/userpage"
   },
- 
   {
     title: "Activités",
     icon: "calendar",
-    navigateTo: "EditActivtyPage"
+    navigateTo: "/pages/viewactivty"
   },
   {
     title: "Palmarès",
     icon: "trophy",
-    navigateTo: "EditPalmaresPage"
+    navigateTo: "/editPalmaresPage"
   }
 ];
 
-const EditPage = () => {
-  const navigation = useNavigation();
+const EditPageScreen = () => {
+  const router = useRouter(); // Use router instead of navigation
   return (
     <LinearGradient
       colors={['#FFFFFF', '#FFFFFF', '#FFFFFF']} // Change gradient colors to white
@@ -41,7 +39,7 @@ const EditPage = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
         {data.map((item) => (
-          <Card key={item.title} style={styles.card} onPress={() => navigation.navigate(item.navigateTo)}>
+          <Card key={item.title} style={styles.card} onPress={() => router.push(item.navigateTo)}>
             <Card.Title
               title={item.title}
               left={(props) => <Avatar.Icon {...props} icon={item.icon} />}
@@ -106,4 +104,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditPage;
+export default EditPageScreen;

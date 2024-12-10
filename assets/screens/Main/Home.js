@@ -12,20 +12,17 @@ import {
 } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { IconButton } from 'react-native-paper'; // Add this import
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
+  const router = useRouter();
   const screenWidth = Dimensions.get("window").width;
   const slideAnim1 = useRef(new Animated.Value(-1000)).current; // Initial value for first view slide animation
   const slideAnim2 = useRef(new Animated.Value(-1000)).current; // Initial value for second view slide animation
   const slideAnim3 = useRef(new Animated.Value(-1000)).current; // Initial value for third view slide animation
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-      e.preventDefault();
-    });
-
     // Start slide animations one after the other
     Animated.sequence([
       Animated.timing(slideAnim1, {
@@ -44,16 +41,14 @@ const HomeScreen = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start();
-
-    return unsubscribe;
-  }, [navigation]);
+  }, []);
 
   const categories = [
-    { id: "1", name: "Billet", icon: "ticket", onPress: () => navigation.navigate('Billet')  },
-    { id: "2", name: "Événement", icon: "calendar", onPress: () => navigation.navigate('ActivityMain') },
-    { id: "3", name: "Actualités", icon: "newspaper",  onPress: () => navigation.navigate('Reglementation')},
-    { id: "4", name: "Palmarès", icon: "trophy", onPress: () => navigation.navigate('Palmares') },
-    { id: "5", name: "À propos", icon: "information-circle", onPress: () => navigation.navigate('About') },
+    { id: "1", name: "Billets", icon: "ticket", onPress: () => router.push('/(tabs)/billet') },
+    { id: "2", name: "Événement", icon: "calendar", onPress: () => router.push('/activity-main') },
+    { id: "3", name: "Actualités", icon: "newspaper", onPress: () => router.push('/reglementation') },
+    { id: "4", name: "Palmarès", icon: "trophy", onPress: () => router.push('/palmares') },
+    { id: "5", name: "À propos", icon: "information-circle", onPress: () => router.push('/about') },
   ];
 
   const iconColor = "#B19CD9"; // Even lighter shade of #8A2BE2
@@ -122,7 +117,7 @@ const HomeScreen = ({ navigation }) => {
                 
                 <TouchableOpacity
                   style={styles.joinButton}
-                  onPress={() => navigation.navigate('Activite')}
+                  onPress={() => router.push('/activite')}
                 >
                   <Text style={styles.joinButtonText}>Inscrire</Text>
                 </TouchableOpacity>
@@ -134,7 +129,7 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="document-text" size={50} color="#89CFF0" />
                 <Text style={styles.customRecommendationText}>Lisez la réglementation de MorneBourgMass</Text>
-                <IconButton icon="chevron-right" onPress={() => navigation.navigate('Reglementation')} />
+                <IconButton icon="chevron-right" onPress={() => router.push('/reglementation')} />
               </View>
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="book" size={50} color="#89CFF0" />

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Linking, ActivityIn
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
+import { API_URL } from "@env";
 
 const ShoppingCart = () => {
     const route = useRoute(); 
@@ -30,7 +31,7 @@ const ShoppingCart = () => {
 
         const fetchPaymentLink = async () => {
             try {
-                const response = await axios.get(`https://mornebourgmass.com/api/activityscreen/${activityId}`);
+                const response = await axios.get(`${API_URL}/api/activityscreen/${activityId}`);
                 if (response.data) {
                     setPaymentLink(response.data.payment_link);
                     setManualLink(response.data.payment_link);
@@ -59,7 +60,7 @@ const ShoppingCart = () => {
                 setLoadingPercentage(percentage);
             };
 
-            const response = await axios.get(`https://mornebourgmass.com/api/activityscreen/${activityId}`);
+            const response = await axios.get(`${API_URL}/api/activityscreen/${activityId}`);
             updateLoadingPercentage(25); // Update loading percentage
 
             if (response.data) {
@@ -69,7 +70,7 @@ const ShoppingCart = () => {
                 updateLoadingPercentage(50); // Update loading percentage
 
                 // Check if transaction link already exists
-                const checkResponse = await axios.get('https://mornebourgmass.com/api/transactionLink', {
+                const checkResponse = await axios.get(`${API_URL}/api/transactionLink`, {
                     params: {
                         id_user,
                         id_activityscreen: activityId // Include activity ID
@@ -82,7 +83,7 @@ const ShoppingCart = () => {
                     Linking.openURL(checkResponse.data.paymentLink);
                 } else {
                     // Payment link does not exist, create a new one
-                    await axios.put('https://mornebourgmass.com/api/paiement', {
+                    await axios.put(`${API_URL}/api/paiement`, {
                         id_user,
                         id_activityscreen: activityId // Include activity ID
                     }, {
@@ -92,7 +93,7 @@ const ShoppingCart = () => {
                     });
 
                     // Recheck if transaction link exists
-                    const recheckResponse = await axios.get('https://mornebourgmass.com/api/transactionLink', {
+                    const recheckResponse = await axios.get(`${API_URL}/api/transactionLink`, {
                         params: {
                             id_user,
                             id_activityscreen: activityId // Include activity ID

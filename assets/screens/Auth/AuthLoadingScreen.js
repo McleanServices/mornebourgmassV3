@@ -3,6 +3,7 @@ import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import { useCookies } from 'react-cookie'; // Import useCookies from react-cookie
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { API_URL } from "@env";
 
 export default function AuthLoadingScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
@@ -27,7 +28,7 @@ export default function AuthLoadingScreen({ navigation }) {
             if (token) {
                 try {
                     console.log("Attempting to authenticate with token"); // Debugging information
-                    const response = await axios.get('https://mornebourgmass.com/api/account', {
+                    const response = await axios.get('${API_URL}/api/account', {
                         headers: {
                             Authorization: `Bearer ${token}`
                         },
@@ -47,7 +48,7 @@ export default function AuthLoadingScreen({ navigation }) {
                         // Retry the request once more after a timeout
                         try {
                             console.log("Retrying authentication with token"); // Debugging information
-                            const retryResponse = await axios.get('https://mornebourgmass.com/api/account', {
+                            const retryResponse = await axios.get('${API_URL}/api/account', {
                                 headers: {
                                     Authorization: `Bearer ${token}`
                                 },

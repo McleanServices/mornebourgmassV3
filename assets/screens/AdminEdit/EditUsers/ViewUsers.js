@@ -1,20 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform, TextInput } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from "@env";
+import { useAuth } from '../../../../context/auth';
 
 const ViewUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const navigation = useNavigation();
+  const router = useRouter();
+  const { session } = useAuth();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const response = await fetch('https://mornebourgmass.com/api/users', {
+        const token = session?.token;
+        if (!token) {
+          throw new Error('No token found');
+        }
+        const response = await fetch(`${API_URL}/api/users`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -48,7 +54,7 @@ const ViewUsers = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [session]);
 
   const filteredUsers = searchQuery
     ? users.filter(user => user.id_user.toString().includes(searchQuery))
@@ -64,7 +70,7 @@ const ViewUsers = () => {
           <IconButton 
             {...props} 
             icon="eye" 
-            onPress={() => navigation.navigate('EditUser', { userId: item.id_user })} 
+            onPress={() => router.replace(`/pages/edituser/${item.id_user}/edituser`)} 
           />
         )}
         titleStyle={styles.cardTitle}

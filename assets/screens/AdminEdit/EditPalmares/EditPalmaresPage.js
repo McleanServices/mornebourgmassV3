@@ -4,7 +4,7 @@ import { StyleSheet, View, ScrollView } from 'react-native'; // Import ScrollVie
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
 import EditPalmares from './EditPalmares';
-
+import { API_URL } from "@env";
 
 const data = [
   {

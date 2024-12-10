@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { API_URL } from "@env";
 
 const ViewActivities = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await fetch('https://mornebourgmass.com/api/activityscreen');
+        const response = await fetch(`${API_URL}/api/activityscreen`);
         if (!response.ok) {
           throw new Error('Failed to fetch activities');
         }
@@ -48,7 +49,7 @@ const ViewActivities = () => {
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           activities.map((item) => (
-            <Card key={item.id} style={styles.card} onPress={() => navigation.navigate("EditActivity", { id: item.id })}>
+            <Card key={item.id} style={styles.card} onPress={() => router.push(`/pages/editactivity/${item.id}/editactivity`)}>
               <Card.Title
                 title={item.title}
                 subtitle={item.description}

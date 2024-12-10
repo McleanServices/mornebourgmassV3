@@ -14,7 +14,8 @@
     "ios": {
       "supportsTablet": true,
       "jsEngine": "jsc",
-      "bundleIdentifier": "debuggingMorneBourgApp"
+      "bundleIdentifier": "debuggingMorneBourgApp",
+      "newArchEnabled": true
     },
     "android": {
       "adaptiveIcon": {
@@ -22,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.tyreceexpo.mynewproject2",
-      "jsEngine": "hermes"
+      "jsEngine": "hermes",
+      "newArchEnabled": true
     },
     "web": {
       "favicon": "./assets/logo1.png",
@@ -42,21 +44,25 @@
     "plugins": [
       "expo-asset",
       "expo-build-properties",
-      ["expo-camera",
-      {
-        "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-        "recordAudioAndroid": true
-      }],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "recordAudioAndroid": true
+        }
+      ],
       [
         "expo-local-authentication",
         {
           "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
         }
-      ]
+      ],
+      "expo-router"
     ],
     "experiments": {
       "baseUrl": "/mobile"
-    }
+    },
+    "scheme": "mornebourgmass"
   }
 }

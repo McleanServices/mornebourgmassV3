@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
 import { useRoute } from '@react-navigation/native';
+import { API_URL } from "@env";
 
 const EditPalmares = () => {
   const route = useRoute();
@@ -13,7 +14,7 @@ const EditPalmares = () => {
   useEffect(() => {
     const fetchPalmares = async () => {
       try {
-        const response = await fetch(`https://mornebourgmass.com/api/palmares/${id}`);
+        const response = await fetch(`${API_URL}/api/palmares/${id}`);
         const data = await response.json();
         console.log('Fetched data:', data); // Log the fetched data for testing
         if (data) {
@@ -35,7 +36,7 @@ const EditPalmares = () => {
   const handleUpdatePalmares = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`https://mornebourgmass.com/api/palmares/${id}`, {
+      const response = await fetch(`${API_URL}/api/palmares/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

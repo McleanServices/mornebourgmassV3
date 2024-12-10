@@ -8,7 +8,7 @@ import { fr } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons'; // Add this import statement
-
+import { API_URL } from "@env";
 // Register French locale
 registerLocale('fr', fr);
 
@@ -31,7 +31,7 @@ const EditActivityScreen = () => {
     if (id) {
       const fetchActivity = async () => {
         try {
-          const response = await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`);
+          const response = await fetch(`${API_URL}/api/activityscreen/${id}`);
           if (!response.ok) {
             throw new Error('Failed to fetch activity');
           }
@@ -79,7 +79,7 @@ const EditActivityScreen = () => {
 
     try {
       console.log('Uploading image...'); // Log before uploading
-      let response = await fetch('https://mornebourgmass.com/api/upload', {
+      let response = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
         body: formData,
         // Remove the Content-Type header to let fetch set it automatically
@@ -117,7 +117,7 @@ const EditActivityScreen = () => {
     if (newImageUrl) {
       try {
         console.log('Sending update request to server...'); // Log before sending request
-        const response = await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`, {
+        const response = await fetch(`${API_URL}/api/activityscreen/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ const EditActivityScreen = () => {
   const confirmDeleteActivity = async () => {
     if (deleteConfirmation === 'SUPPRIMER') {
       try {
-        await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`, { method: 'DELETE' });
+        await fetch(`${API_URL}/api/activityscreen/${id}`, { method: 'DELETE' });
         setDeleteModalVisible(false);
         setDeleteConfirmation('');
         navigation.goBack();

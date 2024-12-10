@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Image, Text, ActivityIndicator, Platform } from 'react-native';
+import { StyleSheet, View, Image, Text, ActivityIndicator, Platform, AppState } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from "@env";
+import axios from 'axios'; // Add this import at the top
 import { 
   Welcome, Loading, HomeScreen, Profile, SettingsScreen, RegisterScreen, 
   ActivityScreen, ShoppingCart, ScanCodeScreen, UserDetails, EditPage, EditHome, 
@@ -16,6 +18,11 @@ import {
 } from './assets/screens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+
+// Add this at the top of your App.js file
+if (typeof window !== 'undefined' && !window.addEventListener) {
+  window.addEventListener = () => {};
+}
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -46,7 +53,6 @@ const ActivityStack = ({ navigation }) => (
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
     <Stack.Screen name="ProfileMain" component={Profile} options={{ headerShown: false }}/>
-    <Stack.Screen name="Settings" component={SettingsScreen} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditPage" component={EditPage} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditHome" component={EditHome} options={{ headerTitle: '' }} />
     <Stack.Screen name="EditUserPage" component={EditUserPage} options={{ headerTitle: 'Admin Utilisateur' }} />
@@ -70,37 +76,58 @@ const ProfileStack = () => (
   </Stack.Navigator>
 );
 
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Welcome" component={Welcome} />
+    <Stack.Screen name="Loading" component={Loading} />
+    <Stack.Screen name="Login" component={Login} />
+  </Stack.Navigator>
+);
+
 const MoreTabs = ({ navigation }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null); 
+  const [initialCheck, setInitialCheck] = useState(true);
 
   useEffect(() => {
     const loadUserRole = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        const storedUserRole = await AsyncStorage.getItem("userRole"); 
-        if (token) {
+        const storedUserId = await AsyncStorage.getItem("userId");
+        
+        if (token && storedUserId) {
           setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-        if (storedUserRole) {
-          setUserRole(storedUserRole);
+          
+          // Fetch fresh user details including role
+          const response = await axios.get(`${API_URL}/api/user/${storedUserId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          const userRole = response.data.user.role;
+          setUserRole(userRole.toLowerCase());
+          await AsyncStorage.setItem("userRole", userRole);
+        } else if (initialCheck) {
+          navigation.navigate('Auth');
         }
       } catch (error) {
-        console.error("Failed to load user role from server:", error);
-        setIsAuthenticated(false);
+        console.error("Failed to load user role from API:", error);
+        if (initialCheck) {
+          navigation.navigate('Auth');
+        }
+      } finally {
+        setInitialCheck(false);
       }
     };
 
-    if (Platform.OS === 'web') {
-      if (typeof document !== 'undefined') {
-        loadUserRole();
-      }
-    } else {
-      loadUserRole();
-    }
-  }, []);
+    loadUserRole();
+    
+    // Set up periodic role refresh
+    const roleRefreshInterval = setInterval(loadUserRole, 60000); // Refresh every minute
+
+    return () => {
+      clearInterval(roleRefreshInterval);
+    };
+  }, [navigation, initialCheck]);
 
   return (
     <Tab.Navigator
@@ -120,6 +147,7 @@ const MoreTabs = ({ navigation }) => {
         },
         tabBarActiveTintColor: '#8A2BE2',
         tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { display: route.name === 'Auth' ? 'none' : 'flex' }
       })}
     >
       <Tab.Screen
@@ -162,7 +190,7 @@ const MoreTabs = ({ navigation }) => {
           tabBarIcon: ({ color }) => <Ionicons name="musical-notes" size={28} color={color} />,
         }}
       />
-      {userRole === "admin" && (
+      {userRole && userRole.toLowerCase() === "admin" && (
         <Tab.Screen
           name="QRCode"
           component={ScanCodeScreen}
@@ -181,13 +209,20 @@ const MoreTabs = ({ navigation }) => {
           tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
         }}
       />
+      {!isAuthenticated && (
+        <Tab.Screen 
+          name="Auth" 
+          component={AuthStack} 
+          options={{ headerShown: false, tabBarButton: () => null }} 
+        />
+      )}
     </Tab.Navigator>
   );
 };
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // New state for loading
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -196,13 +231,15 @@ export default function App() {
         setIsAuthenticated(!!token);
       } catch (error) {
         console.error("Error checking authentication:", error);
+        setIsAuthenticated(false);
       } finally {
-        setIsLoading(false); // Set loading to false after checking auth
+        setIsLoading(false);
       }
     };
     checkAuth();
 
     const handleInactivity = async () => {
+      await AsyncStorage.removeItem('userRole'); // Add this line
       await AsyncStorage.clear();
       if (typeof localStorage !== 'undefined') {
         localStorage.clear();
@@ -210,21 +247,35 @@ export default function App() {
       setIsAuthenticated(false);
     };
 
-    let inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000); // 5 minutes
+    // Platform specific inactivity handling
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      let inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000);
 
-    const resetInactivityTimeout = () => {
-      clearTimeout(inactivityTimeout);
-      inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000); // 5 minutes
-    };
+      const resetInactivityTimeout = () => {
+        clearTimeout(inactivityTimeout);
+        inactivityTimeout = setTimeout(handleInactivity, 5 * 60 * 1000);
+      };
 
-    window.addEventListener('mousemove', resetInactivityTimeout);
-    window.addEventListener('keydown', resetInactivityTimeout);
+      window.addEventListener('mousemove', resetInactivityTimeout);
+      window.addEventListener('keydown', resetInactivityTimeout);
 
-    return () => {
-      clearTimeout(inactivityTimeout);
-      window.removeEventListener('mousemove', resetInactivityTimeout);
-      window.removeEventListener('keydown', resetInactivityTimeout);
-    };
+      return () => {
+        clearTimeout(inactivityTimeout);
+        window.removeEventListener('mousemove', resetInactivityTimeout);
+        window.removeEventListener('keydown', resetInactivityTimeout);
+      };
+    } else {
+      // For mobile platforms, use AppState
+      const subscription = AppState.addEventListener('change', (nextAppState) => {
+        if (nextAppState === 'background') {
+          handleInactivity();
+        }
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }
   }, []);
 
   if (isLoading) {
@@ -239,16 +290,11 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ gestureEnabled: false }}>
-          {!isAuthenticated ? (
-            <>
-              <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-              <Stack.Screen name="Loading" component={Loading} options={{ headerShown: false }} />
-              <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-              <Stack.Screen name="Home" component={MoreTabs} options={{ headerShown: false }} />
-            </>
-          ) : (
-            <Stack.Screen name="Home" component={MoreTabs} options={{ headerShown: false }} />
-          )}
+          <Stack.Screen 
+            name="Home" 
+            component={MoreTabs} 
+            options={{ headerShown: false }} 
+          />
         </Stack.Navigator>
         <StatusBar />
       </NavigationContainer>

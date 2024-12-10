@@ -1,22 +1,24 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Platform } from "react-native";
+import { StyleSheet, View, Platform, ActivityIndicator } from "react-native";
 import { Text } from "react-native-paper";
 import Logo from "../components/Logo";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import TextInput from "../components/TextInput";
-import BackButton from "../components/BackButton";
 import { useCookies } from 'react-cookie';
 import { theme } from "../core/Theme";
 import { usernameValidator } from "../helpers/UsernameValidator";
 import { passwordValidator } from "../helpers/PasswordValidator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_URL } from "@env";
+import axios from 'axios'; // Add axios import
 
-const Login = ({ navigation }) => {
+const Login = ({ navigation, signIn }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
   const [error, setError] = useState("");
   const [cookies, setCookie] = useCookies(['token']);
+  const [isLoading, setIsLoading] = useState(false);
 
   const onLoginPressed = async () => {
     const usernameError = usernameValidator(username.value);
@@ -28,8 +30,9 @@ const Login = ({ navigation }) => {
       return;
     }
 
+    setIsLoading(true); // Start loading
     try {
-      const response = await fetch("https://mornebourgmass.com/api/user/login", {
+      const response = await fetch(`${API_URL}/api/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -44,19 +47,33 @@ const Login = ({ navigation }) => {
       const data = await response.json();
 
       if (response.ok) {
-        const { token, userId, userRole } = data;
-        await AsyncStorage.setItem("token", token);
-        await AsyncStorage.setItem("userId", userId.toString());
-        if (userRole) {
-          await AsyncStorage.setItem("userRole", userRole);
-          console.log("Stored User Role:", userRole);
-        }
-        setCookie('token', token, { path: '/', sameSite: 'None', secure: true });
-        console.log("Login successful", data);
+        const { token, userId } = data;
+        
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userDetailsResponse = await axios.get(`${API_URL}/api/user/${decodedToken.id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const userRole = userDetailsResponse.data.user.role;
+        const user = { id: decodedToken.id, role: userRole };
+
+        // Store in secure storage
+        await Promise.all([
+          AsyncStorage.setItem("token", token),
+          AsyncStorage.setItem("userData", JSON.stringify(user)),
+          new Promise(resolve => {
+            setCookie('token', token, { path: '/', sameSite: 'None', secure: true });
+            resolve();
+          })
+        ]);
+
+        // Use signIn function from context with proper parameters
+        signIn(token, user);
+
         if (Platform.OS === 'web') {
-          navigation.navigate('Home');
-        } else {
-          navigation.navigate('Home');
+          window.location.href = '/(tabs)';
+        } else if (navigation) {
+          navigation.replace('(tabs)');
         }
       } else {
         setError(data.message || "Login failed");
@@ -64,12 +81,13 @@ const Login = ({ navigation }) => {
     } catch (err) {
       console.error("Network error:", err);
       setError("An error occurred. Please try again.");
+    } finally {
+      setIsLoading(false); // End loading regardless of outcome
     }
   };
 
   return (
     <View style={styles.container}>
-      <BackButton goBack={navigation.goBack} />
       <Logo />
       <Header>Login</Header>
       <TextInput
@@ -91,9 +109,23 @@ const Login = ({ navigation }) => {
         secureTextEntry
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Button mode="contained" onPress={onLoginPressed}>
-        Login
+      <Button 
+        mode="contained" 
+        onPress={onLoginPressed}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator color="#ffffff" />
+        ) : (
+          "Login"
+        )}
       </Button>
+      {isLoading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#8A2BE2" />
+          <Text style={styles.loadingText}>Connexion en cours...</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -109,6 +141,21 @@ const styles = StyleSheet.create({
     color: theme.colors.error,
     paddingHorizontal: 4,
     paddingTop: 4,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#8A2BE2',
+    fontSize: 16,
   },
 });
 

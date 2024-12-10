@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform } from 'react-native';
+import { API_URL } from "@env";
 
 const AddPalmares = () => {
   const [title, setTitle] = useState('');
@@ -10,7 +11,7 @@ const AddPalmares = () => {
   const handleAddPalmares = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://mornebourgmass.com/api/palmares', {
+      const response = await fetch(`${API_URL}/api/palmares`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

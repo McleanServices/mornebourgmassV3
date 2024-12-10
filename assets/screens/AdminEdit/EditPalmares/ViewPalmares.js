@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { API_URL } from "@env";
 
 const ViewPalmares = () => {
   const [palmares, setPalmares] = useState([]);
@@ -12,7 +13,7 @@ const ViewPalmares = () => {
   useEffect(() => {
     const fetchPalmares = async () => {
       try {
-        const response = await fetch('https://mornebourgmass.com/api/palmares');
+        const response = await fetch(`${API_URL}/api/palmares`);
         if (!response.ok) {
           throw new Error('Failed to fetch palmares');
         }

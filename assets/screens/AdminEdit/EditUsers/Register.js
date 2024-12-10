@@ -1,222 +1,194 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, FlatList, Alert, ActivityIndicator, TextInput, Platform, Modal, Pressable } from "react-native";
-import { Text } from "react-native-paper";
-import Header from "../../components/Header";
-import Button from "../../components/Button";
-import BackButton from "../../components/BackButton";
-import validator from "validator";
+import React, { useState, useEffect } from 'react';
+import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, ScrollView, Alert, Platform } from 'react-native';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
+import { API_URL } from "@env";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import validator from 'validator';
+import PhoneInput from 'react-native-phone-input';
 
-import { theme } from "../../core/Theme";
-
-export default function RegisterScreen({ navigation }) {
-  const [username, setUsername] = useState({ value: "", error: "" });
-  const [email, setEmail] = useState({ value: "", error: "" });
-  const [password, setPassword] = useState({ value: "", error: "" });
-  const [firstName, setFirstName] = useState({ value: "", error: "" });
-  const [lastName, setLastName] = useState({ value: "", error: "" });
-  const [dateOfBirth, setDateOfBirth] = useState({ value: "", error: "" });
-  const [phoneNumber, setPhoneNumber] = useState({ value: "", error: "" });
-  const [role, setRole] = useState("user"); // Default role
-  const [loading, setLoading] = useState(false); // State for loading indicator
-  const [successMessage, setSuccessMessage] = useState(""); // State for success message
-  const [userId, setUserId] = useState({ value: "", error: "" }); // New state for user ID
+const RegisterScreen = () => {
+  const router = useRouter();
+  const [nextUserId, setNextUserId] = useState('');
+  const [identifiant, setIdentifiant] = useState('');
+  const [nom, setNom] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [dateNaissance, setDateNaissance] = useState(new Date());
   const [modalVisible, setModalVisible] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   useEffect(() => {
     const fetchNextUserId = async () => {
       try {
-        const response = await fetch("https://mornebourgmass.com/api/nextUserId");
-        const data = await response.json();
-        setUserId({ value: data.nextUserId.toString(), error: "" });
+        const response = await axios.get(`${API_URL}/api/nextUserId`);
+        setNextUserId(response.data.nextUserId);
       } catch (error) {
-        console.error("Error fetching next user ID:", error);
+        console.error('Erreur lors de la récupération du prochain ID utilisateur:', error);
       }
     };
 
     fetchNextUserId();
   }, []);
 
-  const onSignUpPressed = async () => {
-    if (!validator.isEmail(email.value)) {
-      setEmail({ ...email, color: "red", error: "Veuillez entrer une adresse email valide." });
-      return;
-    }
-    if (!validator.isAlpha(firstName.value)) {
-      setFirstName({ ...firstName, color: "red", error: "Veuillez entrer un prénom valide." });
-      return;
-    }
-    if (!validator.isDate(dateOfBirth.value)) {
-      setDateOfBirth({ ...dateOfBirth, color: "red", error: "Veuillez entrer une date de naissance valide." });
-      return;
-    }
-    if (!validator.isMobilePhone(phoneNumber.value)) {
-      setPhoneNumber({ ...phoneNumber, color: "red", error: "Veuillez entrer un numéro de téléphone valide." });
-      return;
+  const handleRegister = async () => {
+    let valid = true;
+
+    if (!validator.isEmail(email)) {
+      setEmailError('Veuillez entrer une adresse email valide');
+      valid = false;
+    } else {
+      setEmailError('');
     }
 
-    setLoading(true); // Show loading indicator
+    if (!phone.isValidNumber()) {
+      setPhoneError('Veuillez entrer un numéro de téléphone valide');
+      valid = false;
+    } else {
+      setPhoneError('');
+    }
+
+    if (!valid) return;
 
     try {
-      console.log("Sending registration request with data:", {
-        identifiant: email.value,
-        nom: lastName.value,
-        prenom: firstName.value,
-        role: role,
+      const response = await axios.post(`${API_URL}/api/register`, {
+        identifiant,
+        nom,
+        prenom,
+        email,
+        password,
+        numero_telephone: phoneNumber,
+        date_naissance: dateNaissance.toISOString().split('T')[0],
       });
 
-      const response = await fetch("https://mornebourgmass.com/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          identifiant: email.value, // Use email as the identifiant
-          nom: lastName.value,
-          prenom: firstName.value,
-          email: email.value,
-          password: password.value,
-          numero_telephone: phoneNumber.value, // Updated field name
-          date_naissance: dateOfBirth.value,
-          role: role,
-        }),
-      });
-
-      const responseData = await response.json();
-      console.log("Registration response:", responseData);
-
-      setLoading(false); // Hide loading indicator
-
-      if (response.ok) {
-        setSuccessMessage("Utilisateur enregistré avec succès."); // Set success message
-        setModalVisible(true); // Show success modal
-      } else {
-        setSuccessMessage(""); // Clear success message
-        Alert.alert("Erreur", `Une erreur s'est produite lors de l'enregistrement: ${responseData.message}`);
+      if (response.status === 201) {
+        setModalVisible(true);
       }
     } catch (error) {
-      setLoading(false); // Hide loading indicator
-      console.error("Error during registration:", error);
-      Alert.alert("Erreur", `Une erreur s'est produite lors de l'enregistrement: ${error.message}`);
+      console.error('Erreur lors de l\'inscription de l\'utilisateur:', error);
+      Alert.alert('Échec de l\'inscription', 'Une erreur s\'est produite lors de l\'inscription de l\'utilisateur');
     }
   };
 
-  const formFields = [
-    { placeholder: "Numéro d'adhérent", value: userId, setValue: setUserId, editable: false }, // New input field
-    { placeholder: "Nom d'utilisateur", value: username, setValue: setUsername },
-    { placeholder: "Prénom", value: firstName, setValue: setFirstName },
-    { placeholder: "Nom", value: lastName, setValue: setLastName },
-    { placeholder: "Email", value: email, setValue: setEmail, autoCapitalize: "none", autoCompleteType: "email", textContentType: "emailAddress", keyboardType: "email-address" },
-    { placeholder: "Mot de passe", value: password, setValue: setPassword, secureTextEntry: true },
-    { placeholder: "Date de naissance (YYYY-MM-DD)", value: dateOfBirth, setValue: setDateOfBirth },
-    { placeholder: "Numéro de téléphone", value: phoneNumber, setValue: setPhoneNumber },
-  ];
-
-  const renderItem = ({ item }) => (
-    <View style={styles.inputContainer}>
-      <Text style={styles.inputLabel}>{item.placeholder}</Text>
-      <TextInput
-        returnKeyType="next"
-        value={item.value.value}
-        onChangeText={(text) => item.setValue({ value: text, error: "" })}
-        style={styles.input}
-        autoCapitalize={item.autoCapitalize}
-        autoCompleteType={item.autoCompleteType}
-        textContentType={item.textContentType}
-        keyboardType={item.keyboardType}
-        secureTextEntry={item.secureTextEntry}
-        editable={item.editable !== false} // Set editable property
-      />
-    </View>
-  );
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || dateNaissance;
+    setShowDatePicker(Platform.OS === 'ios');
+    setDateNaissance(currentDate);
+  };
 
   return (
-    <>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Utilisateur enregistré avec succès</Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.textStyle}>OK</Text>
-            </Pressable>
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>Utilisateur enregistré avec succès</Text>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => {
+                  setModalVisible(false);
+                  router.back();
+                }}
+              >
+                <Text style={styles.textStyle}>OK</Text>
+              </Pressable>
+            </View>
           </View>
-        </View>
-      </Modal>
-      <FlatList
-        data={formFields}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.placeholder}
-        ListHeaderComponent={<BackButton goBack={navigation.goBack} />}
-        ListFooterComponent={
-          <>
-            {loading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-              <>
-                <Button mode="contained" onPress={onSignUpPressed} style={{ marginTop: 24 }}>
-                  Ajouter
-                </Button>
-                {successMessage ? (
-                  <Text style={styles.successMessage}>{successMessage}</Text>
-                ) : null}
-                {/* Temporary button to trigger the modal */}
-                {/* <Button mode="contained" onPress={() => setModalVisible(true)} style={{ marginTop: 24 }}>
-                  Show Modal
-                </Button> */}
-              </>
-            )}
-          </>
-        }
-        contentContainerStyle={styles.scrollContainer}
-      />
-    </>
+        </Modal>
+        <Text style={styles.label}>Numéro adhérent</Text>
+        <TextInput
+          style={styles.input}
+          value={nextUserId.toString()}
+          editable={false}
+        />
+        <Text style={styles.label}>Identifiant</Text>
+        <TextInput
+          style={styles.input}
+          value={identifiant}
+          onChangeText={setIdentifiant}
+        />
+        <Text style={styles.label}>Nom</Text>
+        <TextInput
+          style={styles.input}
+          value={nom}
+          onChangeText={setNom}
+        />
+        <Text style={styles.label}>Prénom</Text>
+        <TextInput
+          style={styles.input}
+          value={prenom}
+          onChangeText={setPrenom}
+        />
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={[styles.input, emailError ? styles.errorInput : null]}
+          value={email}
+          onChangeText={setEmail}
+        />
+        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+        <Text style={styles.label}>Mot de passe</Text>
+        <TextInput
+          style={styles.input}
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <Text style={styles.label}>Numéro de Téléphone</Text>
+        <PhoneInput
+          style={[styles.input, phoneError ? styles.errorInput : null]}
+          value={phoneNumber}
+          onChangePhoneNumber={setPhoneNumber}
+        />
+        {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+        <Text style={styles.label}>Date de Naissance</Text>
+        <Pressable onPress={() => setShowDatePicker(true)} style={styles.input}>
+          <Text style={{ fontSize: 16, color: '#000' }}>
+            {dateNaissance.toISOString().split('T')[0] || "Sélectionner la date"}
+          </Text>
+        </Pressable>
+        {showDatePicker && (
+          <DateTimePicker
+            value={dateNaissance}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        )}
+        <Button title="S'inscrire" onPress={handleRegister} />
+      </View>
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   scrollContainer: {
-    flexGrow: 1,
-    backgroundColor: theme.colors.background,
+    flex: 1,
+  },
+  container: {
     padding: 20,
+    paddingBottom: 40,
   },
-  inputContainer: {
-    marginBottom: 20, // Increased spacing between inputs
-  },
-  inputLabel: {
-    position: "absolute",
-    left: 10,
-    top: -10,
-    backgroundColor: theme.colors.background,
-    paddingHorizontal: 5,
-    zIndex: 1,
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
     borderWidth: 1,
-    paddingHorizontal: 10,
-  },
-  row: {
-    flexDirection: "row",
-    marginTop: 4,
-  },
-  link: {
-    fontWeight: "bold",
-    color: theme.colors.primary,
-  },
-  successMessage: {
-    color: "green",
-    marginTop: 10,
-    textAlign: "center",
+    borderColor: '#ccc',
+    padding: 10,
+    marginBottom: 15,
+    borderRadius: 5,
   },
   centeredView: {
     flex: 1,
@@ -229,7 +201,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 35,
     alignItems: 'center',
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)", // Replace shadow properties with boxShadow
+    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
     elevation: 5,
   },
   button: {
@@ -249,4 +221,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: 'center',
   },
+  errorInput: {
+    borderColor: 'red',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 15,
+  },
 });
+
+export default RegisterScreen;

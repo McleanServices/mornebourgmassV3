@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, Button } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import axios from 'axios';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useRouter, useFocusEffect, Link } from 'expo-router';
+import { API_URL } from "@env";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ScanCodeScreen = () => {
-  const navigation = useNavigation();
-  const isFocused = useIsFocused();
+  const router = useRouter();
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [error, setError] = useState(''); 
+  const [navigated, setNavigated] = useState(false);
   
-
   // Request camera permission on mount
   useEffect(() => {
     (async () => {
@@ -23,15 +24,30 @@ const ScanCodeScreen = () => {
   // Handle scanning the QR code
   const handleBarcodeScanned = async ({ data }) => {
     setScanned(true);
-    try {
-      const response = await axios.get(`https://mornebourgmass.com/api/user/${data}`);
-      if (response.status === 200) {
-        navigation.navigate('UserDetails', { userInfo: response.data.user });
+    if (!navigated) {
+      try {
+        setNavigated(true);
+        await AsyncStorage.setItem('userData', data);
+        router.replace({
+          pathname: '/pages/userdetails/[id]/userdetails',
+          params: { id: data }
+        });
+      } catch (err) {
+        setError('Failed to save user data.');
+        setNavigated(false);
       }
-    } catch (err) {
-      setError('Failed to fetch user info.');
     }
   };
+
+  useFocusEffect(() => {
+    if (hasPermission === null || hasPermission === false) {
+      return;
+    }
+    return () => {
+      setScanned(false);
+      setNavigated(false);
+    };
+  });
 
   if (hasPermission === null) {
     return <Text style={styles.permissionText}>Requesting camera permission...</Text>;
@@ -44,15 +60,13 @@ const ScanCodeScreen = () => {
     <View style={styles.container}>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      {isFocused && (
-        <CameraView
-          style={StyleSheet.absoluteFillObject}
-          onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'], 
-          }}
-        />
-      )}
+      <CameraView
+        style={StyleSheet.absoluteFillObject}
+        onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'], 
+        }}
+      />
       
       <View style={styles.overlay}>
         <View style={styles.topOverlay} />
