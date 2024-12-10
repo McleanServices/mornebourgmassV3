@@ -6,26 +6,23 @@ import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import { fr } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons'; // Add this import statement
+import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from "@env";
-// Register French locale
+import { useRouter, useLocalSearchParams } from 'expo-router';
 registerLocale('fr', fr);
 
 const EditActivityScreen = () => {
-  const route = useRoute();
-  const { id } = route.params || {}; // Add default value to handle undefined params
+  const { id } = useLocalSearchParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('00:00'); // Initialize with a valid time string
+  const [time, setTime] = useState('00:00');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [paymentLink, setPaymentLink] = useState(''); // Add state for payment link
+  const [paymentLink, setPaymentLink] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const [nombreMaxTickets, setNombreMaxTickets] = useState(''); // Add state for nombre_max_tickets
-  const navigation = useNavigation();
+  const [nombreMaxTickets, setNombreMaxTickets] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -39,11 +36,11 @@ const EditActivityScreen = () => {
           setTitle(data.title);
           setDescription(data.description);
           setImageUrl(data.imageUrl);
-          setDate(data.date.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, '')); // Remove trailing time and milliseconds
-          setTime(data.time || '00:00'); // Ensure time is set to a valid string
-          setPaymentLink(data.payment_link); // Set payment link
-          setNombreMaxTickets(data.nombre_max_tickets || ''); // Set nombre_max_tickets
-          console.log('Fetched activity data:', data); // Log fetched data
+          setDate(data.date.replace(/T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, ''));
+          setTime(data.time || '00:00');
+          setPaymentLink(data.payment_link);
+          setNombreMaxTickets(data.nombre_max_tickets || '');
+          console.log('Fetched activity data:', data);
         } catch (error) {
           console.error('Error fetching activity:', error);
         }
@@ -56,7 +53,7 @@ const EditActivityScreen = () => {
   const onDrop = useCallback((acceptedFiles) => {
     const file = acceptedFiles[0];
     setSelectedImage(file);
-    setImageUrl(URL.createObjectURL(file)); // Update the image URL input box
+    setImageUrl(URL.createObjectURL(file));
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -67,33 +64,32 @@ const EditActivityScreen = () => {
   const uploadImage = async () => {
     if (!selectedImage) {
       Alert.alert('No image selected', 'Please select an image first');
-      console.log('No image selected'); // Log if no image is selected
+      console.log('No image selected');
       return null;
     }
 
-    const fileName = selectedImage.name; // Use the file name from the selected file
-    const fileType = selectedImage.type; // Use the MIME type from the selected file
+    const fileName = selectedImage.name;
+    const fileType = selectedImage.type;
 
     let formData = new FormData();
     formData.append('image', selectedImage, fileName);
 
     try {
-      console.log('Uploading image...'); // Log before uploading
-      let response = await fetch(`${API_URL}/api/upload`, {
+      console.log('Uploading image...');
+      let response = await fetch(`https://2446-104-250-11-62.ngrok-free.app/api/upload`, {
         method: 'POST',
         body: formData,
-        // Remove the Content-Type header to let fetch set it automatically
       });
 
       let result = await response.json();
       if (response.ok) {
         Alert.alert('Upload successful', 'Image uploaded successfully');
-        console.log('Uploaded image URL:', result.imageUrl); // Log the uploaded image URL
-        setImageUrl(result.imageUrl); // Update the image URL input box
+        console.log('Uploaded image URL:', result.imageUrl);
+        setImageUrl(result.imageUrl);
         return result.imageUrl;
       } else {
         Alert.alert('Upload failed', result.message);
-        console.log('Upload failed:', result.message); // Log the failure message
+        console.log('Upload failed:', result.message);
         return null;
       }
     } catch (error) {
@@ -104,44 +100,43 @@ const EditActivityScreen = () => {
   };
 
   const updateActivity = async () => {
-    console.log('Update Activity button clicked'); // Log button click
-    let newImageUrl = imageUrl; // Use existing imageUrl by default
+    console.log('Update Activity button clicked');
+    let newImageUrl = imageUrl;
 
     if (selectedImage) {
       newImageUrl = await uploadImage();
-      console.log('New Image URL:', newImageUrl); // Log the new image URL
+      console.log('New Image URL:', newImageUrl);
     } else {
-      console.log('No new image selected, using existing image URL'); // Log if no new image is selected
+      console.log('No new image selected, using existing image URL');
     }
 
     if (newImageUrl) {
       try {
-        console.log('Sending update request to server...'); // Log before sending request
+        console.log('Sending update request to server...');
         const response = await fetch(`${API_URL}/api/activityscreen/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ title, description, imageUrl: newImageUrl, date, time, payment_link: paymentLink, nombre_max_tickets: nombreMaxTickets }), // Include nombre_max_tickets
+          body: JSON.stringify({ title, description, imageUrl: newImageUrl, date, time, payment_link: paymentLink, nombre_max_tickets: nombreMaxTickets }),
         });
 
-        console.log('Update request sent to server'); // Log after sending request
+        console.log('Update request sent to server');
 
         if (response.ok) {
           Alert.alert('Update successful', 'Activity updated successfully');
-          console.log('Activity updated successfully'); // Log successful update
-          navigation.goBack();
+          console.log('Activity updated successfully');
         } else {
           const result = await response.json();
           Alert.alert('Update failed', result.message);
-          console.log('Update failed:', result.message); // Log the failure message
+          console.log('Update failed:', result.message);
         }
       } catch (error) {
         console.error('Update error:', error);
         Alert.alert('Update error', 'An error occurred while updating the activity');
       }
     } else {
-      console.log('New image URL is null, update aborted'); // Log if newImageUrl is null
+      console.log('New image URL is null, update aborted');
     }
   };
 
@@ -155,7 +150,6 @@ const EditActivityScreen = () => {
         await fetch(`${API_URL}/api/activityscreen/${id}`, { method: 'DELETE' });
         setDeleteModalVisible(false);
         setDeleteConfirmation('');
-        navigation.goBack();
       } catch (error) {
         console.error("Erreur lors de la suppression de l'activité:", error);
       }
@@ -175,7 +169,7 @@ const EditActivityScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Title"
-          value={title || ''} 
+          value={title || ''}
           onChangeText={setTitle}
         />
         <TextInput
@@ -203,7 +197,7 @@ const EditActivityScreen = () => {
         <Text style={styles.label}>Time</Text>
         <TimePicker
           onChange={(newTime) => {
-            console.log('TimePicker onChange:', newTime); // Log new time value
+            console.log('TimePicker onChange:', newTime);
             setTime(newTime || '00:00');
           }}
           value={time}
@@ -215,20 +209,20 @@ const EditActivityScreen = () => {
         <TextInput
           style={styles.input}
           placeholder="Image URL"
-          value={imageUrl || ''} 
+          value={imageUrl || ''}
           onChangeText={setImageUrl}
-          editable={false} 
+          editable={false}
         />
         <TextInput
           style={styles.input}
           placeholder="Payment Link"
-          value={paymentLink || ''} // Add input for payment link
+          value={paymentLink || ''}
           onChangeText={setPaymentLink}
         />
         <TextInput
           style={styles.input}
           placeholder="Nombre Max Tickets"
-          value={nombreMaxTickets || ''} // Add input for nombre_max_tickets
+          value={nombreMaxTickets || ''}
           onChangeText={setNombreMaxTickets}
         />
         <View {...getRootProps()} style={styles.dropzone}>

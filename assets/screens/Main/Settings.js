@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL } from "@env";
@@ -40,31 +40,36 @@ const SettingsScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.header}>Paramètres</Text>
-            {userDetails ? (
-                <View style={styles.profileContainer}>
-                    <Text style={styles.profileText}>Nom: {userDetails.nom}</Text>
-                    <Text style={styles.profileText}>Prénom: {userDetails.prenom}</Text>
-                    <Text style={styles.profileText}>Numéro Adhérent: {userDetails.id_user}</Text>
-                    <Text style={styles.profileText}>Email: {userDetails.email}</Text>
-                    <Text style={styles.profileText}>Role: {userDetails.role}</Text>
-                    <Text style={styles.profileText}>Token: {session?.token}</Text>
-                    <TouchableOpacity 
-                        style={styles.signOutButton} 
-                        onPress={handleSignOut}
-                    >
-                        <Text style={styles.signOutButtonText}>Se déconnecter</Text>
-                    </TouchableOpacity>
-                </View>
-            ) : (
-                <Text>Chargement des détails de l'utilisateur...</Text>
-            )}
-        </View>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <View style={styles.container}>
+                <Text style={styles.header}>Paramètres</Text>
+                {userDetails ? (
+                    <View style={styles.profileContainer}>
+                        <Text style={styles.profileText}>Nom: {userDetails.nom}</Text>
+                        <Text style={styles.profileText}>Prénom: {userDetails.prenom}</Text>
+                        <Text style={styles.profileText}>Numéro Adhérent: {userDetails.id_user}</Text>
+                        <Text style={styles.profileText}>Email: {userDetails.email}</Text>
+                        <Text style={styles.profileText}>Role: {userDetails.role}</Text>
+                        <Text style={styles.profileText}>Token: {session?.token}</Text>
+                        <TouchableOpacity 
+                            style={styles.signOutButton} 
+                            onPress={handleSignOut}
+                        >
+                            <Text style={styles.signOutButtonText}>Se déconnecter</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <Text>Chargement des détails de l'utilisateur...</Text>
+                )}
+            </View>
+        </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
+    scrollContainer: {
+        flexGrow: 1,
+    },
     container: {
         flex: 1,
         padding: 20,

@@ -44,11 +44,11 @@ const HomeScreen = () => {
   }, []);
 
   const categories = [
-    { id: "1", name: "Billets", icon: "ticket", onPress: () => router.push('/(tabs)/billet') },
-    { id: "2", name: "Événement", icon: "calendar", onPress: () => router.push('/activity-main') },
-    { id: "3", name: "Actualités", icon: "newspaper", onPress: () => router.push('/reglementation') },
-    { id: "4", name: "Palmarès", icon: "trophy", onPress: () => router.push('/palmares') },
-    { id: "5", name: "À propos", icon: "information-circle", onPress: () => router.push('/about') },
+    { id: "1", name: "Billets", icon: "ticket", onPress: () => router.push('/pages/billet') },
+    { id: "2", name: "Événement", icon: "calendar", onPress: () => router.push('/pages/reglementation') },
+    { id: "3", name: "Actualités", icon: "newspaper", onPress: () => router.push('/pages/reglementation') },
+    { id: "4", name: "Palmarès", icon: "trophy", onPress: () => router.push('/pages/reglementation') },
+    { id: "5", name: "À propos", icon: "information-circle", onPress: () => router.push('/pages/reglementation') },
   ];
 
   const iconColor = "#B19CD9"; // Even lighter shade of #8A2BE2
@@ -117,7 +117,7 @@ const HomeScreen = () => {
                 
                 <TouchableOpacity
                   style={styles.joinButton}
-                  onPress={() => router.push('/activite')}
+                  onPress={() => router.push('/activity')}
                 >
                   <Text style={styles.joinButtonText}>Inscrire</Text>
                 </TouchableOpacity>
@@ -129,7 +129,7 @@ const HomeScreen = () => {
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="document-text" size={50} color="#89CFF0" />
                 <Text style={styles.customRecommendationText}>Lisez la réglementation de MorneBourgMass</Text>
-                <IconButton icon="chevron-right" onPress={() => router.push('/reglementation')} />
+                <IconButton icon="chevron-right" onPress={() => router.push('/pages/reglementation')} />
               </View>
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="book" size={50} color="#89CFF0" />

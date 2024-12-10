@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform, TextInput } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform, TextInput, Modal, Pressable } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,6 +10,7 @@ const ViewUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { session } = useAuth();
 
@@ -34,13 +35,8 @@ const ViewUsers = () => {
         const data = await response.json();
         setUsers(data);
       } catch (error) {
-        console.error('Error fetching users:', error);
         if (error.message === 'Access denied') {
-          if (Platform.OS === 'web') {
-            alert('Accès refusé: Vous n\'êtes pas autorisé à accéder à cette ressource');
-          } else {
-            Alert.alert('Accès refusé', 'Vous n\'êtes pas autorisé à accéder à cette ressource');
-          }
+          setModalVisible(true);
         } else {
           if (Platform.OS === 'web') {
             alert('Erreur: Une erreur s\'est produite lors de la récupération des utilisateurs');
@@ -81,6 +77,26 @@ const ViewUsers = () => {
 
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Accès refusé: Vous n'êtes pas autorisé à accéder à cette ressource. Veuillez vous reconnecter.</Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.textStyle}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
@@ -157,6 +173,37 @@ const styles = StyleSheet.create({
     marginBottom: 20, // Increase bottom margin
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonClose: {
+    backgroundColor: '#2196F3',
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 

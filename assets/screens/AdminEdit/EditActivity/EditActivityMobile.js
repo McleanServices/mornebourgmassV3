@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform, ScrollView } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform, ScrollView, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,12 +19,12 @@ const EditActivityMobile = () => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
-  const [paymentLink, setPaymentLink] = useState(''); // Add state for payment link
+  const [paymentLink, setPaymentLink] = useState('');
   const [showPaymentLink, setShowPaymentLink] = useState(false);
   const [activityTitle, setActivityTitle] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    // Get activity data
     if (id) {
       const fetchActivity = async () => {
         try {
@@ -34,12 +34,12 @@ const EditActivityMobile = () => {
           }
           const data = await response.json();
           setTitle(data.title);
-          setActivityTitle(data.title); // Store activity title
+          setActivityTitle(data.title);
           setDescription(data.description);
           setImageUrl(data.imageUrl);
           setDate(new Date(data.date));
           setTime(new Date(`1970-01-01T${data.time}Z`));
-          setPaymentLink(data.payment_link); // Set payment link
+          setPaymentLink(data.payment_link);
         } catch (error) {
           console.error('Error fetching activity:', error);
         }
@@ -92,8 +92,10 @@ const EditActivityMobile = () => {
       type: 'image/jpeg',
     });
 
+    setUploading(true);
+
     try {
-      let response = await fetch(`${API_URL}/api/upload`, {
+      let response = await fetch(`https://2446-104-250-11-62.ngrok-free.app/api/upload`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -102,7 +104,17 @@ const EditActivityMobile = () => {
         },
       });
 
-      let result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+        const text = await response.text();
+        console.error('Response text:', text);
+        Alert.alert('Upload error', 'An error occurred while uploading the image');
+        return null;
+      }
+
       if (response.ok) {
         Alert.alert('Upload successful', 'Image uploaded successfully');
         setImageUrl(result.imageUrl);
@@ -115,6 +127,8 @@ const EditActivityMobile = () => {
       console.error('Upload error:', error);
       Alert.alert('Upload error', 'An error occurred while uploading the image');
       return null;
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -132,7 +146,7 @@ const EditActivityMobile = () => {
         date: date.toISOString().split('T')[0],
         time: time.toTimeString().split(' ')[0],
         imageUrl: newImageUrl,
-        payment_link: paymentLink, // Include payment link
+        payment_link: paymentLink,
       });
       if (response.status === 200) {
         setModalVisible(true);
@@ -177,7 +191,6 @@ const EditActivityMobile = () => {
                 style={[styles.button, styles.buttonClose]}
                 onPress={() => {
                   setModalVisible(false);
-                  router.back();
                 }}
               >
                 <Text style={styles.textStyle}>OK</Text>
@@ -227,8 +240,8 @@ const EditActivityMobile = () => {
             mode="time"
             display="default"
             onChange={handleTimeChange}
-            is24Hour={true} // Use 24-hour format
-            locale="fr-FR" // Set locale to French
+            is24Hour={true}
+            locale="fr-FR"
           />
         )}
         <View style={styles.spacing} />
@@ -240,6 +253,7 @@ const EditActivityMobile = () => {
           onChangeText={setImageUrl}
           editable={false}
         />
+        {uploading && <ActivityIndicator size="large" color="#0000ff" />}
         <Pressable 
           style={styles.toggleButton}
           onPress={togglePaymentLink}
@@ -302,12 +316,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
     elevation: 5,
   },
   button: {

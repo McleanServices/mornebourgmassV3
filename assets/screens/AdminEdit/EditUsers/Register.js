@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, ScrollView, Alert, Platform } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, ScrollView, Alert, Platform, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { API_URL } from "@env";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import validator from 'validator';
-import PhoneInput from 'react-native-phone-input';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
+import { Appbar } from 'react-native-paper'; // Import Appbar
 
 const RegisterScreen = () => {
   const router = useRouter();
@@ -21,6 +22,7 @@ const RegisterScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [phoneError, setPhoneError] = useState('');
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false); // State for confirmation modal
 
   useEffect(() => {
     const fetchNextUserId = async () => {
@@ -32,10 +34,31 @@ const RegisterScreen = () => {
       }
     };
 
+    const loadSavedData = async () => {
+      try {
+        const savedData = await AsyncStorage.getItem('registerData');
+        if (savedData) {
+          const { identifiant, nom, prenom, email, password, phoneNumber, dateNaissance } = JSON.parse(savedData);
+          setIdentifiant(identifiant);
+          setNom(nom);
+          setPrenom(prenom);
+          setEmail(email);
+          setPassword(password);
+          setPhoneNumber(phoneNumber);
+          setDateNaissance(new Date(dateNaissance));
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des données sauvegardées:', error);
+      }
+    };
+
     fetchNextUserId();
+    loadSavedData();
   }, []);
 
   const handleRegister = async () => {
+    console.log('Register button clicked'); // Log when the register button is clicked
+
     let valid = true;
 
     if (!validator.isEmail(email)) {
@@ -45,12 +68,13 @@ const RegisterScreen = () => {
       setEmailError('');
     }
 
-    if (!phone.isValidNumber()) {
-      setPhoneError('Veuillez entrer un numéro de téléphone valide');
-      valid = false;
-    } else {
-      setPhoneError('');
-    }
+    // Remove phone number validation using PhoneInput
+    // if (!phone.isValidNumber()) {
+    //   setPhoneError('Veuillez entrer un numéro de téléphone valide');
+    //   valid = false;
+    // } else {
+    //   setPhoneError('');
+    // }
 
     if (!valid) return;
 
@@ -61,16 +85,38 @@ const RegisterScreen = () => {
         prenom,
         email,
         password,
-        numero_telephone: phoneNumber,
+        numero_telephone: phoneNumber.toString(), // Ensure phone number is varchar
         date_naissance: dateNaissance.toISOString().split('T')[0],
       });
 
       if (response.status === 201) {
+        await AsyncStorage.removeItem('registerData'); // Clear saved data upon successful registration
         setModalVisible(true);
+      } else {
+        Alert.alert('Échec de l\'inscription', 'Une erreur s\'est produite lors de l\'inscription de l\'utilisateur');
       }
     } catch (error) {
       console.error('Erreur lors de l\'inscription de l\'utilisateur:', error);
       Alert.alert('Échec de l\'inscription', 'Une erreur s\'est produite lors de l\'inscription de l\'utilisateur');
+    }
+  };
+
+  const handleSaveProgress = async () => {
+    try {
+      const data = {
+        identifiant,
+        nom,
+        prenom,
+        email,
+        password,
+        phoneNumber,
+        dateNaissance: dateNaissance.toISOString(),
+      };
+      await AsyncStorage.setItem('registerData', JSON.stringify(data));
+      Alert.alert('Progression sauvegardée', 'Vos données ont été sauvegardées avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde des données:', error);
+      Alert.alert('Erreur', 'Une erreur s\'est produite lors de la sauvegarde des données');
     }
   };
 
@@ -80,94 +126,153 @@ const RegisterScreen = () => {
     setDateNaissance(currentDate);
   };
 
+  const handleBackAction = () => {
+    if (identifiant || nom || prenom || email || password || phoneNumber) {
+      setConfirmModalVisible(true);
+    } else {
+      router.back();
+    }
+  };
+
+  const handleConfirmLeave = () => {
+    setConfirmModalVisible(false);
+    router.back();
+  };
+
   return (
-    <ScrollView style={styles.scrollContainer}>
-      <View style={styles.container}>
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <Text style={styles.modalText}>Utilisateur enregistré avec succès</Text>
-              <Pressable
-                style={[styles.button, styles.buttonClose]}
-                onPress={() => {
-                  setModalVisible(false);
-                  router.back();
-                }}
-              >
-                <Text style={styles.textStyle}>OK</Text>
-              </Pressable>
+    <>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={handleBackAction} />
+        <Appbar.Content title="Register" />
+      </Appbar.Header>
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(!modalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>Utilisateur enregistré avec succès</Text>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => {
+                    setModalVisible(false);
+                    router.back();
+                  }}
+                >
+                  <Text style={styles.textStyle}>OK</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        </Modal>
-        <Text style={styles.label}>Numéro adhérent</Text>
-        <TextInput
-          style={styles.input}
-          value={nextUserId.toString()}
-          editable={false}
-        />
-        <Text style={styles.label}>Identifiant</Text>
-        <TextInput
-          style={styles.input}
-          value={identifiant}
-          onChangeText={setIdentifiant}
-        />
-        <Text style={styles.label}>Nom</Text>
-        <TextInput
-          style={styles.input}
-          value={nom}
-          onChangeText={setNom}
-        />
-        <Text style={styles.label}>Prénom</Text>
-        <TextInput
-          style={styles.input}
-          value={prenom}
-          onChangeText={setPrenom}
-        />
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={[styles.input, emailError ? styles.errorInput : null]}
-          value={email}
-          onChangeText={setEmail}
-        />
-        {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
-        <Text style={styles.label}>Mot de passe</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <Text style={styles.label}>Numéro de Téléphone</Text>
-        <PhoneInput
-          style={[styles.input, phoneError ? styles.errorInput : null]}
-          value={phoneNumber}
-          onChangePhoneNumber={setPhoneNumber}
-        />
-        {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
-        <Text style={styles.label}>Date de Naissance</Text>
-        <Pressable onPress={() => setShowDatePicker(true)} style={styles.input}>
-          <Text style={{ fontSize: 16, color: '#000' }}>
-            {dateNaissance.toISOString().split('T')[0] || "Sélectionner la date"}
-          </Text>
-        </Pressable>
-        {showDatePicker && (
-          <DateTimePicker
-            value={dateNaissance}
-            mode="date"
-            display="default"
-            onChange={handleDateChange}
+          </Modal>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={confirmModalVisible}
+            onRequestClose={() => {
+              setConfirmModalVisible(!confirmModalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                <Text style={styles.modalText}>Êtes-vous sûr de vouloir quitter ?</Text>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={handleSaveProgress}
+                >
+                  <Text style={styles.textStyle}>Sauvegarder la progression</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={handleConfirmLeave}
+                >
+                  <Text style={styles.textStyle}>Oui</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.button, styles.buttonClose]}
+                  onPress={() => setConfirmModalVisible(false)}
+                >
+                  <Text style={styles.textStyle}>Non</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+          <Text style={styles.label}>Numéro adhérent</Text>
+          <TextInput
+            style={styles.input}
+            value={nextUserId.toString()}
+            editable={false}
           />
-        )}
-        <Button title="S'inscrire" onPress={handleRegister} />
-      </View>
-    </ScrollView>
+          <Text style={styles.label}>Identifiant</Text>
+          <TextInput
+            style={styles.input}
+            value={identifiant}
+            onChangeText={setIdentifiant}
+          />
+          <Text style={styles.label}>Nom</Text>
+          <TextInput
+            style={styles.input}
+            value={nom}
+            onChangeText={setNom}
+          />
+          <Text style={styles.label}>Prénom</Text>
+          <TextInput
+            style={styles.input}
+            value={prenom}
+            onChangeText={setPrenom}
+          />
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={[styles.input, emailError ? styles.errorInput : null]}
+            value={email}
+            onChangeText={setEmail}
+          />
+          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+          <Text style={styles.label}>Mot de passe</Text>
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+          <Text style={styles.label}>Numéro de Téléphone</Text>
+          <TextInput
+            style={[styles.input, phoneError ? styles.errorInput : null]}
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+          />
+          {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+          <Text style={styles.label}>Date de Naissance</Text>
+          <Pressable onPress={() => setShowDatePicker(true)} style={styles.input}>
+            <Text style={{ fontSize: 16, color: '#000' }}>
+              {dateNaissance.toISOString().split('T')[0] || "Sélectionner la date"}
+            </Text>
+          </Pressable>
+          {showDatePicker && (
+            <DateTimePicker
+              value={dateNaissance}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleSaveProgress}>
+              <Text style={styles.buttonText}>Sauvegarder la progression</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleRegister}>
+              <Text style={styles.buttonText}>S'inscrire</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
@@ -205,9 +310,22 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
+    backgroundColor: "#007BFF",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+    width: "80%",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
   },
   buttonClose: {
     backgroundColor: '#2196F3',

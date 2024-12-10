@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from "@env";
 
-const AddActivityMobile = ({ navigation }) => {
+const AddActivityMobileScreen = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
@@ -16,6 +16,9 @@ const AddActivityMobile = ({ navigation }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageUrl, setImageUrl] = useState('');
+  const [nombreMaxTickets, setNombreMaxTickets] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [inputErrors, setInputErrors] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -86,7 +89,24 @@ const AddActivityMobile = ({ navigation }) => {
     }
   };
 
+  const validateInputs = () => {
+    const errors = {};
+    if (!title) errors.title = 'Please input the title';
+    if (!description) errors.description = 'Please input the description';
+    if (!date) errors.date = 'Please input the date';
+    if (!time) errors.time = 'Please input the time';
+    if (!imageUrl) errors.imageUrl = 'Please input the image URL';
+    if (!nombreMaxTickets) errors.nombreMaxTickets = 'Please input the number of max tickets';
+
+    setInputErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleAddActivity = async () => {
+    if (!validateInputs()) {
+      return;
+    }
+
     let newImageUrl = imageUrl;
 
     if (selectedImage) {
@@ -100,6 +120,7 @@ const AddActivityMobile = ({ navigation }) => {
         date: date.toISOString().split('T')[0],
         time: time.toTimeString().split(' ')[0],
         imageUrl: newImageUrl,
+        nombre_max_tickets: nombreMaxTickets,
       });
       if (response.status === 201) {
         setModalVisible(true);
@@ -139,7 +160,6 @@ const AddActivityMobile = ({ navigation }) => {
               style={[styles.button, styles.buttonClose]}
               onPress={() => {
                 setModalVisible(false);
-                navigation.goBack();
               }}
             >
               <Text style={styles.textStyle}>OK</Text>
@@ -153,12 +173,14 @@ const AddActivityMobile = ({ navigation }) => {
         value={title}
         onChangeText={setTitle}
       />
+      {inputErrors.title && <Text style={styles.errorText}>{inputErrors.title}</Text>}
       <Text style={styles.label}>Description</Text>
       <TextInput
         style={styles.input}
         value={description}
         onChangeText={setDescription}
       />
+      {inputErrors.description && <Text style={styles.errorText}>{inputErrors.description}</Text>}
       <Text style={styles.label}>Date</Text>
       <Pressable onPress={() => setShowDatePicker(true)}>
         <TextInput
@@ -177,6 +199,7 @@ const AddActivityMobile = ({ navigation }) => {
           onChange={handleDateChange}
         />
       )}
+      {inputErrors.date && <Text style={styles.errorText}>{inputErrors.date}</Text>}
       <Text style={styles.label}>Time</Text>
       <Pressable onPress={() => setShowTimePicker(true)}>
         <TextInput
@@ -195,6 +218,7 @@ const AddActivityMobile = ({ navigation }) => {
           onChange={handleTimeChange}
         />
       )}
+      {inputErrors.time && <Text style={styles.errorText}>{inputErrors.time}</Text>}
       <View style={styles.spacing} />
       <Text style={styles.label}>Image URL</Text>
       <TextInput
@@ -204,10 +228,22 @@ const AddActivityMobile = ({ navigation }) => {
         onChangeText={setImageUrl}
         editable={false}
       />
+      {inputErrors.imageUrl && <Text style={styles.errorText}>{inputErrors.imageUrl}</Text>}
       <Pressable style={styles.imagePicker} onPress={pickImage}>
         <Ionicons name="cloud-upload-outline" size={32} color="gray" />
         <Text>Pick an image from gallery</Text>
       </Pressable>
+      <Text style={styles.label}>Nombre Max Tickets</Text>
+      <TextInput
+        style={styles.input}
+        value={nombreMaxTickets}
+        onChangeText={setNombreMaxTickets}
+        keyboardType="numeric"
+      />
+      {inputErrors.nombreMaxTickets && <Text style={styles.errorText}>{inputErrors.nombreMaxTickets}</Text>}
+      {errorMessage ? (
+        <Text style={styles.errorMessage}>{errorMessage}</Text>
+      ) : null}
       <Button title="Add Activity" onPress={handleAddActivity} />
     </View>
   );
@@ -276,6 +312,16 @@ const styles = StyleSheet.create({
   spacing: {
     height: 20,
   },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginBottom: 10,
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: 14,
+    marginBottom: 10,
+  },
 });
 
-export default AddActivityMobile;
+export default AddActivityMobileScreen;

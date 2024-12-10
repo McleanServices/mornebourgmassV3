@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Button, Linking, Animated, ActivityIndicator } from 'react-native'; // Import ActivityIndicator
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
@@ -6,6 +6,7 @@ import axios from 'axios';
 import debounce from 'lodash.debounce'; // Import debounce from lodash
 import { API_URL } from "@env";
 import { useAuth } from '../../../context/auth';
+
 
 const ActivityScreen = () => {
     const router = useRouter();
@@ -29,16 +30,7 @@ const ActivityScreen = () => {
         }
     };
 
-    const fetchUsername = async () => {
-        try {
-            const fetchedUsername = await AsyncStorage.getItem('username');
-            if (fetchedUsername) {
-                setUsername(fetchedUsername);
-            }
-        } catch (error) {
-            console.error('Error fetching username:', error);
-        }
-    };
+
 
     const checkPaymentStatus = async (paymentLink, activityId) => {
         setLoading(true); // Start loading
@@ -94,7 +86,7 @@ const ActivityScreen = () => {
 
     useEffect(() => {
         fetchActivities();
-        fetchUsername();
+       
 
         // Start slide animation
         Animated.timing(slideAnim, {
@@ -108,16 +100,17 @@ const ActivityScreen = () => {
     const debouncedFetchPaymentLinks = useCallback(debounce(fetchPaymentLinks, 300), []);
 
     useEffect(() => {
-        // Replace useFocusEffect with useEffect
         debouncedFetchActivities();
         debouncedFetchPaymentLinks();
     }, [debouncedFetchActivities, debouncedFetchPaymentLinks]);
 
-    const handleInscrirePress = (activityId) => {
-        router.push({
-            pathname: '/shopping',
-            params: { activityId }
-        });
+    const handleInscrirePress = async (activityId) => {
+        try {
+            await AsyncStorage.setItem('selectedActivityId', activityId.toString());
+            router.push(`/pages/shopping/${activityId}/shopping`);
+        } catch (error) {
+            console.error('Error saving activity ID to AsyncStorage:', error);
+        }
     };
 
     const formatDate = (dateString) => {

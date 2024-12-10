@@ -9,7 +9,7 @@ export default function AppLayout() {
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
+        <Text>Chargement...</Text>
       </View>
     );
   }
@@ -32,13 +32,11 @@ export default function AppLayout() {
               </Pressable>
             </Link>
           ),
-/*************  ✨ Codeium Command ⭐  *************/
         /**
          * Function to render the icon for the home tab in the bottom tab bar
          * @param {{color: string}} props The props object with the color for the icon
          * @returns {React.ReactElement} A React element representing the icon
          */
-/******  636e6112-26f0-4cc4-9d49-1e3d5c739aa6  *******/
           tabBarIcon: ({ color }) => (
             <Text style={{ color }}>🏠</Text>
           ),

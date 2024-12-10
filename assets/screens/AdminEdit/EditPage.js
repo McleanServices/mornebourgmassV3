@@ -23,7 +23,7 @@ const data = [
   {
     title: "Palmarès",
     icon: "trophy",
-    navigateTo: "/editPalmaresPage"
+    navigateTo: "/pages/palmares"
   }
 ];
 

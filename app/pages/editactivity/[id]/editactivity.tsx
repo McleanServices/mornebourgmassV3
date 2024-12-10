@@ -1,6 +1,8 @@
 import EditActivityMobile from '../../../../assets/screens/AdminEdit/EditActivity/EditActivityMobile';
-
+import EditActivityScreen from '../../../../assets/screens/AdminEdit/EditActivity/EditActivityScreen';
+import { Platform } from 'react-native';
 import { Stack } from 'expo-router';
+
 export default function EditActivity() {
   return (
     <>
@@ -10,7 +12,7 @@ export default function EditActivity() {
           headerShown: true,
         }} 
       />
-      <EditActivityMobile />
+      {Platform.OS === 'web' ? <EditActivityScreen /> : <EditActivityMobile />}
     </>
   );
 }

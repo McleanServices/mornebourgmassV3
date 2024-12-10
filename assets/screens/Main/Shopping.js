@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Linking, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { useRoute } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { API_URL } from "@env";
+import { useAuth } from '../../../context/auth';
 
-const ShoppingCart = () => {
-    const route = useRoute(); 
-    const { activityId } = route.params; 
-    const [username, setUsername] = useState('');
+const ShoppingScreen = () => {
+    const router = useRouter(); 
+    const { session } = useAuth();
+    const [activityId, setActivityId] = useState(null); // Add state for activityId
     const [paymentLink, setPaymentLink] = useState('');
     const slideAnim = useRef(new Animated.Value(-1000)).current;
     const [showPayment, setShowPayment] = useState(false);
@@ -18,16 +19,18 @@ const ShoppingCart = () => {
     const [loadingPercentage, setLoadingPercentage] = useState(0);
 
     useEffect(() => {
-        const fetchUsername = async () => {
+        const getActivityIdFromStorage = async () => {
             try {
-                const fetchedUsername = await AsyncStorage.getItem('username');
-                if (fetchedUsername) {
-                    setUsername(fetchedUsername);
+                const storedActivityId = await AsyncStorage.getItem('selectedActivityId');
+                if (storedActivityId) {
+                    setActivityId(storedActivityId);
                 }
             } catch (error) {
-                console.error('Error fetching username:', error);
+                console.error('Error getting activity ID from AsyncStorage:', error);
             }
         };
+
+        getActivityIdFromStorage();
 
         const fetchPaymentLink = async () => {
             try {
@@ -41,8 +44,9 @@ const ShoppingCart = () => {
             }
         };
 
-        fetchUsername();
-        fetchPaymentLink();
+        if (activityId) {
+            fetchPaymentLink();
+        }
 
         Animated.timing(slideAnim, {
             toValue: 0,
@@ -53,56 +57,50 @@ const ShoppingCart = () => {
 
     const handlePaymentLinkClick = async () => {
         try {
-            setLoading(true); // Show loader
-            setLoadingPercentage(0); // Reset loading percentage
+            setLoading(true);
+            setLoadingPercentage(0); 
 
             const updateLoadingPercentage = (percentage) => {
                 setLoadingPercentage(percentage);
             };
 
             const response = await axios.get(`${API_URL}/api/activityscreen/${activityId}`);
-            updateLoadingPercentage(25); // Update loading percentage
+            updateLoadingPercentage(25); 
 
             if (response.data) {
                 const paymentLink = response.data.payment_link;
-                // Get id_user from AsyncStorage
-                const id_user = await AsyncStorage.getItem("userId");
-                updateLoadingPercentage(50); // Update loading percentage
+                const id_user = session?.user?.id;
+                updateLoadingPercentage(50);
 
-                // Check if transaction link already exists
                 const checkResponse = await axios.get(`${API_URL}/api/transactionLink`, {
                     params: {
                         id_user,
-                        id_activityscreen: activityId // Include activity ID
+                        id_activityscreen: activityId 
                     }
                 });
-                updateLoadingPercentage(75); // Update loading percentage
+                updateLoadingPercentage(75); 
 
                 if (checkResponse.data.exists) {
-                    // Transaction link exists, open it
                     Linking.openURL(checkResponse.data.paymentLink);
                 } else {
-                    // Payment link does not exist, create a new one
                     await axios.put(`${API_URL}/api/paiement`, {
                         id_user,
-                        id_activityscreen: activityId // Include activity ID
+                        id_activityscreen: activityId 
                     }, {
                         params: {
-                            paymentLink // Use paymentLink from query parameters
+                            paymentLink 
                         }
                     });
 
-                    // Recheck if transaction link exists
                     const recheckResponse = await axios.get(`${API_URL}/api/transactionLink`, {
                         params: {
                             id_user,
-                            id_activityscreen: activityId // Include activity ID
+                            id_activityscreen: activityId 
                         }
                     });
-                    updateLoadingPercentage(100); // Update loading percentage
+                    updateLoadingPercentage(100); 
 
                     if (recheckResponse.data.exists) {
-                        // Transaction link exists, open it
                         Linking.openURL(recheckResponse.data.paymentLink);
                     } else {
                         Linking.openURL(paymentLink);
@@ -112,7 +110,7 @@ const ShoppingCart = () => {
         } catch (error) {
             console.error('Error fetching payment link:', error);
         } finally {
-            setLoading(false); // Hide loader
+            setLoading(false); 
         }
     };
 
@@ -195,4 +193,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ShoppingCart;
+export default ShoppingScreen;

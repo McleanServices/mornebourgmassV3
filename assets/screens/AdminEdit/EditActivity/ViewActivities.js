@@ -48,18 +48,29 @@ const ViewActivities = () => {
         {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
-          activities.map((item) => (
-            <Card key={item.id} style={styles.card} onPress={() => router.push(`/pages/editactivity/${item.id}/editactivity`)}>
+          <>
+            <Card style={styles.card} onPress={() => router.push('/pages/addactivity')}>
               <Card.Title
-                title={item.title}
-                subtitle={item.description}
-                left={(props) => <Avatar.Icon {...props} icon="calendar" />}
+                title="Ajouter une nouvelle activité"
+                left={(props) => <Avatar.Icon {...props} icon="plus" />}
                 right={(props) => (
                   <IconButton {...props} icon="chevron-right" />
                 )}
               />
             </Card>
-          ))
+            {activities.map((item) => (
+              <Card key={item.id} style={styles.card} onPress={() => router.push(`/pages/editactivity/${item.id}/editactivity`)}>
+                <Card.Title
+                  title={item.title}
+                  subtitle={item.description}
+                  left={(props) => <Avatar.Icon {...props} icon="calendar" />}
+                  right={(props) => (
+                    <IconButton {...props} icon="chevron-right" />
+                  )}
+                />
+              </Card>
+            ))}
+          </>
         )}
       </ScrollView>
     </LinearGradient>
