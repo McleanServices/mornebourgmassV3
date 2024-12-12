@@ -1,26 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  Dimensions,
   TouchableOpacity,
   FlatList,
-  Image,
   Animated, // Import Animated
 } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { IconButton } from 'react-native-paper'; // Add this import
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { IconButton } from "react-native-paper"; // Add this import
 
 const HomeScreen = () => {
   const router = useRouter();
-  const screenWidth = Dimensions.get("window").width;
   const slideAnim1 = useRef(new Animated.Value(-1000)).current; // Initial value for first view slide animation
   const slideAnim2 = useRef(new Animated.Value(-1000)).current; // Initial value for second view slide animation
   const slideAnim3 = useRef(new Animated.Value(-1000)).current; // Initial value for third view slide animation
+  const scaleAnim = useRef(new Animated.Value(1)).current; // Initial value for scale animation
 
   useEffect(() => {
     // Start slide animations one after the other
@@ -41,14 +39,67 @@ const HomeScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Repeat scale animation every 5 seconds
+    const loopAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.spring(scaleAnim, {
+          toValue: 0.95,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+        }),
+      ]),
+      {
+        iterations: -1, // Infinite loop
+      }
+    );
+    loopAnimation.start();
+
+    return () => loopAnimation.stop(); // Cleanup on unmount
   }, []);
 
+  const handlePressIn = () => {
+    scaleAnim.setValue(0.95); // Manually set value on press in
+  };
+
+  const handlePressOut = () => {
+    scaleAnim.setValue(1); // Manually set value on press out
+  };
+
   const categories = [
-    { id: "1", name: "Billets", icon: "ticket", onPress: () => router.push('/pages/billet') },
-    { id: "2", name: "Événement", icon: "calendar", onPress: () => router.push('/pages/reglementation') },
-    { id: "3", name: "Actualités", icon: "newspaper", onPress: () => router.push('/pages/reglementation') },
-    { id: "4", name: "Palmarès", icon: "trophy", onPress: () => router.push('/pages/reglementation') },
-    { id: "5", name: "À propos", icon: "information-circle", onPress: () => router.push('/pages/reglementation') },
+    {
+      id: "1",
+      name: "Billets",
+      icon: "ticket",
+      onPress: () => router.push("/pages/billet"),
+    },
+    {
+      id: "2",
+      name: "Événement",
+      icon: "calendar",
+      onPress: () => router.push("/pages/reglementation"),
+    },
+    {
+      id: "3",
+      name: "Actualités",
+      icon: "newspaper",
+      onPress: () => router.push("/pages/reglementation"),
+    },
+    {
+      id: "4",
+      name: "Palmarès",
+      icon: "trophy",
+      onPress: () => router.push("/pages/reglementation"),
+    },
+    {
+      id: "5",
+      name: "À propos",
+      icon: "information-circle",
+      onPress: () => router.push("/pages/reglementation"),
+    },
   ];
 
   const iconColor = "#B19CD9"; // Even lighter shade of #8A2BE2
@@ -65,7 +116,7 @@ const HomeScreen = () => {
       title: "Musique de MorneBourgMass",
       description: "Écoutez les meilleurs morceaux pour MorneBourgMass.",
       color: "#FFA500",
-    }
+    },
   ];
 
   return (
@@ -80,8 +131,17 @@ const HomeScreen = () => {
               contentContainerStyle={styles.categoriesContainer}
             >
               {categories.map((category) => (
-                <TouchableOpacity key={category.id} style={styles.categoryCard} onPress={category.onPress}>
-                  <Ionicons name={category.icon} size={30} color={iconColor} style={styles.categoryIcon} />
+                <TouchableOpacity
+                  key={category.id}
+                  style={styles.categoryCard}
+                  onPress={category.onPress}
+                >
+                  <Ionicons
+                    name={category.icon}
+                    size={30}
+                    color={iconColor}
+                    style={styles.categoryIcon}
+                  />
                   <Text style={styles.categoryText}>{category.name}</Text>
                 </TouchableOpacity>
               ))}
@@ -100,10 +160,15 @@ const HomeScreen = () => {
                 renderItem={({ item }) => (
                   <View
                     key={item.id}
-                    style={[styles.recommendationCard, { backgroundColor: item.color }]}
+                    style={[
+                      styles.recommendationCard,
+                      { backgroundColor: item.color },
+                    ]}
                   >
                     <Text style={styles.recommendationTitle}>{item.title}</Text>
-                    <Text style={styles.recommendationDescription}>{item.description}</Text>
+                    <Text style={styles.recommendationDescription}>
+                      {item.description}
+                    </Text>
                   </View>
                 )}
                 keyExtractor={(item) => item.id}
@@ -113,13 +178,19 @@ const HomeScreen = () => {
             <Animated.View style={{ transform: [{ translateX: slideAnim2 }] }}>
               <View style={styles.sectionSeparator} />
               <View style={styles.eventCard}>
-                <Text style={styles.eventTitle}>Prêt pour le prochain événement de MorneBourgMass?</Text>
-                
+                <Text style={styles.eventTitle}>
+                  Prêt pour le prochain événement de MorneBourgMass&#39;?
+                </Text>
+
                 <TouchableOpacity
                   style={styles.joinButton}
-                  onPress={() => router.push('/activity')}
+                  onPress={() => router.push("/activity")}
+                  onPressIn={handlePressIn}
+                  onPressOut={handlePressOut}
                 >
-                  <Text style={styles.joinButtonText}>Inscrire</Text>
+                  <Animated.Text style={[styles.joinButtonText, { transform: [{ scale: scaleAnim }] }]}>
+                    Inscrire
+                  </Animated.Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>
@@ -128,16 +199,25 @@ const HomeScreen = () => {
               <Text style={styles.sectionTitle}>Nos Suggestions</Text>
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="document-text" size={50} color="#89CFF0" />
-                <Text style={styles.customRecommendationText}>Lisez la réglementation de MorneBourgMass</Text>
-                <IconButton icon="chevron-right" onPress={() => router.push('/pages/reglementation')} />
+                <Text style={styles.customRecommendationText}>
+                  Lisez la réglementation de MorneBourgMass
+                </Text>
+                <IconButton
+                  icon="chevron-right"
+                  onPress={() => router.push("/pages/reglementation")}
+                />
               </View>
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="book" size={50} color="#89CFF0" />
-                <Text style={styles.customRecommendationText}>Lisez l'histoire de MorneBourgMass</Text>
+                <Text style={styles.customRecommendationText}>
+                  Lisez l&#39;histoire de MorneBourgMass
+                </Text>
               </View>
               <View style={styles.customRecommendationCard}>
                 <Ionicons name="walk" size={50} color="#FFA500" />
-                <Text style={styles.customRecommendationText}>Participez à une marche de MorneBourgMass</Text>
+                <Text style={styles.customRecommendationText}>
+                  Participez à une marche de MorneBourgMass
+                </Text>
               </View>
             </View>
           </Animated.View>
@@ -275,7 +355,7 @@ const styles = StyleSheet.create({
     height: 40, // Adjust the height as needed for spacing
   },
   arrowIcon: {
-    marginLeft: 'auto', // Align the arrow icon to the right
+    marginLeft: "auto", // Align the arrow icon to the right
   },
 });
 

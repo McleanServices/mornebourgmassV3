@@ -14,7 +14,7 @@ import axios from "axios";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { useCookies } from 'react-cookie';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from "@env";
+//test
 
 const Palmares = () => {
   const [palmares, setPalmares] = useState([]);
@@ -27,7 +27,7 @@ const Palmares = () => {
   useEffect(() => {
     const fetchPalmares = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/palmares`);
+        const response = await axios.get(`https://mornebourgmass.com/api/palmares`);
         setPalmares(response.data);
       } catch (error) {
         console.error("Error fetching palmares:", error);

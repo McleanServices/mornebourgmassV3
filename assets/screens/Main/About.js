@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { API_URL } from "@env";
+//test
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ const About = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/homescreen`);
+        const response = await axios.get(`https://mornebourgmass.com/api/homescreen`);
         setActivities(response.data);
         if (response.data.length > 0) {
           setNotreMission(response.data[0].NotreMission);

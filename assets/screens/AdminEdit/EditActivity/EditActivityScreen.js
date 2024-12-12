@@ -7,7 +7,7 @@ import 'react-time-picker/dist/TimePicker.css';
 import { fr } from 'date-fns/locale';
 import { useDropzone } from 'react-dropzone';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from "@env";
+//test
 import { useRouter, useLocalSearchParams } from 'expo-router';
 registerLocale('fr', fr);
 
@@ -28,7 +28,7 @@ const EditActivityScreen = () => {
     if (id) {
       const fetchActivity = async () => {
         try {
-          const response = await fetch(`${API_URL}/api/activityscreen/${id}`);
+          const response = await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`);
           if (!response.ok) {
             throw new Error('Failed to fetch activity');
           }
@@ -113,7 +113,7 @@ const EditActivityScreen = () => {
     if (newImageUrl) {
       try {
         console.log('Sending update request to server...');
-        const response = await fetch(`${API_URL}/api/activityscreen/${id}`, {
+        const response = await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ const EditActivityScreen = () => {
   const confirmDeleteActivity = async () => {
     if (deleteConfirmation === 'SUPPRIMER') {
       try {
-        await fetch(`${API_URL}/api/activityscreen/${id}`, { method: 'DELETE' });
+        await fetch(`https://mornebourgmass.com/api/activityscreen/${id}`, { method: 'DELETE' });
         setDeleteModalVisible(false);
         setDeleteConfirmation('');
       } catch (error) {

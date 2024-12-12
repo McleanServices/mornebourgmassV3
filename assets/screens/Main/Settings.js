@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL } from "@env";
+//test
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../../context/auth';
 
@@ -21,7 +21,7 @@ const SettingsScreen = () => {
                 if (storedDetails) {
                     setUserDetails(JSON.parse(storedDetails));
                 } else if (session?.user?.id) {
-                    const response = await axios.get(`${API_URL}/api/user/${session.user.id}`);
+                    const response = await axios.get(`https://mornebourgmass.com/api/user/${session.user.id}`);
                     const userData = response.data.user;
                     await AsyncStorage.setItem('userDetails', JSON.stringify(userData));
                     setUserDetails(userData);
@@ -50,7 +50,6 @@ const SettingsScreen = () => {
                         <Text style={styles.profileText}>Numéro Adhérent: {userDetails.id_user}</Text>
                         <Text style={styles.profileText}>Email: {userDetails.email}</Text>
                         <Text style={styles.profileText}>Role: {userDetails.role}</Text>
-                        <Text style={styles.profileText}>Token: {session?.token}</Text>
                         <TouchableOpacity 
                             style={styles.signOutButton} 
                             onPress={handleSignOut}

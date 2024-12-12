@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from "@env";
+//test
 
 const UserDetailsScreen = () => {
   const router = useRouter();
@@ -15,7 +15,7 @@ const UserDetailsScreen = () => {
     try {
       const storedData = await AsyncStorage.getItem('userData');
       if (storedData) {
-        const response = await axios.get(`${API_URL}/api/user/${storedData}`);
+        const response = await axios.get(`https://mornebourgmass.com/api/user/${storedData}`);
         if (response.status === 200) {
           setUserInfo(response.data.user);
         }

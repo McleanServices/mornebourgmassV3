@@ -10,8 +10,10 @@ import { theme } from "../core/Theme";
 import { usernameValidator } from "../helpers/UsernameValidator";
 import { passwordValidator } from "../helpers/PasswordValidator";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_URL } from "@env";
 import axios from 'axios'; // Add axios import
+import { decode as atob } from "base-64"; // Import atob polyfill
+
+//test
 
 const Login = ({ navigation, signIn }) => {
   const [username, setUsername] = useState({ value: "", error: "" });
@@ -32,7 +34,7 @@ const Login = ({ navigation, signIn }) => {
 
     setIsLoading(true); // Start loading
     try {
-      const response = await fetch(`${API_URL}/api/user/login`, {
+      const response = await fetch(`https://mornebourgmass.com/api/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,7 +52,7 @@ const Login = ({ navigation, signIn }) => {
         const { token, userId } = data;
         
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const userDetailsResponse = await axios.get(`${API_URL}/api/user/${decodedToken.id}`, {
+        const userDetailsResponse = await axios.get(`https://mornebourgmass.com/api/user/${decodedToken.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -97,6 +99,7 @@ const Login = ({ navigation, signIn }) => {
         onChangeText={(text) => setUsername({ value: text, error: "" })}
         error={!!username.error}
         errorText={username.error}
+        description={!username.error ? "Enter your username" : ""}
         autoCapitalize="none"
       />
       <TextInput
@@ -106,6 +109,7 @@ const Login = ({ navigation, signIn }) => {
         onChangeText={(text) => setPassword({ value: text, error: "" })}
         error={!!password.error}
         errorText={password.error}
+        description={!password.error ? "Enter your password" : ""}
         secureTextEntry
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}

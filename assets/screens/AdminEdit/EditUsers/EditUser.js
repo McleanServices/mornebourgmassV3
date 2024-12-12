@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Modal, Pressable } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Modal, Pressable, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import axios from 'axios';
 import { theme } from '../../core/Theme';
-import { API_URL } from "@env";
+//test
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const EditUser = () => {
   const { id } = useLocalSearchParams();
@@ -20,11 +21,12 @@ const EditUser = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState(null);
+  const [confirmUserId, setConfirmUserId] = useState(''); // Add state for confirm userId
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/user/${userId}`);
+        const response = await axios.get(`https://mornebourgmass.com/api/user/${userId}`);
         const user = response.data.user;
         setUserInfo(user);
         setIdentifiant(user.identifiant || '');
@@ -35,6 +37,7 @@ const EditUser = () => {
         setDateNaissance(user.date_naissance ? user.date_naissance.split('T')[0] : ''); 
         setRole(user.role || '');
         setGrade(user.grade || '');
+        await AsyncStorage.setItem('userId', userId); // Save userId in AsyncStorage
       } catch (error) {
         setError(<Text>Error fetching user info: {error.message}</Text>);
       }
@@ -46,6 +49,50 @@ const EditUser = () => {
   }, [userId]);
 
   const handleSave = async () => {
+    if (Platform.OS === 'ios') {
+      Alert.alert(
+        "Confirmation",
+        "Êtes-vous sûr de vouloir mettre à jour les informations de l'utilisateur? Veuillez entrer l'ID utilisateur pour confirmer.",
+        [
+          {
+            text: "Annuler",
+            style: "cancel"
+          },
+          {
+            text: "Confirmer",
+            onPress: () => {
+              Alert.prompt(
+                "Confirmer l'ID utilisateur",
+                "Veuillez entrer l'ID utilisateur pour confirmer.",
+                [
+                  {
+                    text: "Annuler",
+                    style: "cancel"
+                  },
+                  {
+                    text: "Confirmer",
+                    onPress: async (inputUserId) => {
+                      if (inputUserId === userId) {
+                        saveUserData();
+                      } else {
+                        Alert.alert("Erreur", "L'ID utilisateur ne correspond pas.");
+                      }
+                    }
+                  }
+                ],
+                "plain-text"
+              );
+            }
+          }
+        ]
+      );
+    } else {
+      // On Android, directly save without confirmation
+      saveUserData();
+    }
+  };
+
+  const saveUserData = async () => {
     try {
       const formattedDateNaissance = date_naissance.split('T')[0]; 
       const updatedUser = {
@@ -58,7 +105,7 @@ const EditUser = () => {
         role,
         grade,
       };
-      const response = await axios.put(`${API_URL}/api/user/${userId}`, updatedUser);
+      const response = await axios.put(`https://mornebourgmass.com/api/user/${userId}`, updatedUser);
       if (!!response && response.status === 200) {
         setSuccessMessage('Utilisateur enregistré avec succès.');
         setModalVisible(true);
@@ -67,6 +114,7 @@ const EditUser = () => {
         setModalVisible(true);
       }
     } catch (error) {
+      console.error('Error during axios.put:', error); // Added console log for error
       let errorMessage = 'Error saving user info: ';
       if (error.response?.status === 404) {
         errorMessage += 'User not found';
@@ -97,28 +145,31 @@ const EditUser = () => {
   }
 
   return (
-    <>
-      <Modal
-        animationType="slide"
-        transparent={!!true}
-        visible={!!modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>{successMessage || ''}</Text>
-            <Pressable
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.textStyle}>OK</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Modal
+          animationType="slide"
+          transparent={!!true}
+          visible={!!modalVisible}
+          onRequestClose={() => {
+            setModalVisible(false);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{successMessage || ''}</Text>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.textStyle}>OK</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
         <Text style={styles.title}>Modifier l'utilisateur</Text>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Numéro Adhérent</Text>
@@ -206,7 +257,7 @@ const EditUser = () => {
           <Text style={styles.saveButtonText}>Enregistrer</Text>
         </Pressable>
       </ScrollView>
-    </>
+    </KeyboardAvoidingView>
   );
 };
 

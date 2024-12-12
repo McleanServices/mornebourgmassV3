@@ -1,19 +1,18 @@
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
 import { Card, Avatar, IconButton } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import { API_URL } from "@env";
+import { useRouter } from 'expo-router';
+//test
 
 const ViewPalmares = () => {
   const [palmares, setPalmares] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPalmares = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/palmares`);
+        const response = await fetch(`https://mornebourgmass.com/api/palmares`);
         if (!response.ok) {
           throw new Error('Failed to fetch palmares');
         }
@@ -41,7 +40,7 @@ const ViewPalmares = () => {
         subtitle={item.description}
         left={(props) => <Avatar.Icon {...props} icon="trophy" />}
         right={(props) => (
-          <IconButton {...props} icon="pencil" onPress={() => navigation.navigate("EditPalmares", { id: item.id })} />
+          <IconButton {...props} icon="pencil" onPress={() => router.push(`/EditPalmares/${item.id}`)} />
         )}
       />
     </Card>

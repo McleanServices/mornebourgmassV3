@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Animated, Linking, ActivityIn
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { API_URL } from "@env";
+//test
 import { useAuth } from '../../../context/auth';
 
 const ShoppingScreen = () => {
@@ -34,7 +34,7 @@ const ShoppingScreen = () => {
 
         const fetchPaymentLink = async () => {
             try {
-                const response = await axios.get(`${API_URL}/api/activityscreen/${activityId}`);
+                const response = await axios.get(`https://mornebourgmass.com/api/activityscreen/${activityId}`);
                 if (response.data) {
                     setPaymentLink(response.data.payment_link);
                     setManualLink(response.data.payment_link);
@@ -64,7 +64,7 @@ const ShoppingScreen = () => {
                 setLoadingPercentage(percentage);
             };
 
-            const response = await axios.get(`${API_URL}/api/activityscreen/${activityId}`);
+            const response = await axios.get(`https://mornebourgmass.com/api/activityscreen/${activityId}`);
             updateLoadingPercentage(25); 
 
             if (response.data) {
@@ -72,7 +72,7 @@ const ShoppingScreen = () => {
                 const id_user = session?.user?.id;
                 updateLoadingPercentage(50);
 
-                const checkResponse = await axios.get(`${API_URL}/api/transactionLink`, {
+                const checkResponse = await axios.get(`https://mornebourgmass.com/api/transactionLink`, {
                     params: {
                         id_user,
                         id_activityscreen: activityId 
@@ -83,7 +83,7 @@ const ShoppingScreen = () => {
                 if (checkResponse.data.exists) {
                     Linking.openURL(checkResponse.data.paymentLink);
                 } else {
-                    await axios.put(`${API_URL}/api/paiement`, {
+                    await axios.put(`https://mornebourgmass.com/api/paiement`, {
                         id_user,
                         id_activityscreen: activityId 
                     }, {
@@ -92,7 +92,7 @@ const ShoppingScreen = () => {
                         }
                     });
 
-                    const recheckResponse = await axios.get(`${API_URL}/api/transactionLink`, {
+                    const recheckResponse = await axios.get(`https://mornebourgmass.com/api/transactionLink`, {
                         params: {
                             id_user,
                             id_activityscreen: activityId 

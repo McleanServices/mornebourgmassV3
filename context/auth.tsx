@@ -26,7 +26,7 @@ const AuthContext = createContext<AuthContextType>({
 // This hook can be used to access the user info.
 export function useSession() {
   const value = useContext(AuthContext);
-  if (process.env.NODE_ENV !== 'production') {
+  if (__DEV__) {
     if (!value) {
       throw new Error('useSession must be wrapped in a <SessionProvider />');
     }

@@ -7,7 +7,7 @@ export default function Register() {
       <Stack.Screen 
         options={{
           title: 'Edit Page',
-          headerShown: false, // Hide the header as it's now in RegisterScreen
+          headerShown: true, // Hide the header as it's now in RegisterScreen
         }} 
       />
       <RegisterScreen />

@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Alert, Platform 
 import { Card, Avatar, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { API_URL } from "@env";
+//test
 
 const ViewActivities = () => {
   const [activities, setActivities] = useState([]);
@@ -13,7 +13,7 @@ const ViewActivities = () => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/activityscreen`);
+        const response = await fetch(`https://mornebourgmass.com/api/activityscreen`);
         if (!response.ok) {
           throw new Error('Failed to fetch activities');
         }

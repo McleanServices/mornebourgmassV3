@@ -8,7 +8,7 @@ export default function Settings() {
         options={{
           title: 'Settings',
           headerShown: true,
-          headerBackTitle: '', // Add this line to remove the back button title
+          headerBackTitle: 'retour', // Add this line to remove the back button title
         }} 
       />
       <SettingsScreen />

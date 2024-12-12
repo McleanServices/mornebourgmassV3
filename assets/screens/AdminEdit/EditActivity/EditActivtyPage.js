@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import { StyleSheet, View, ScrollView } from 'react-native'; // Import ScrollView
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from 'expo-router'; 
 import { LinearGradient } from 'expo-linear-gradient';
-
 
 const data = [
   {
@@ -21,7 +20,7 @@ const data = [
 ];
 
 const EditActivtyPage = () => {
-  const navigation = useNavigation();
+  const router = useRouter(); // Use useRouter from expo-router
   return (
     <LinearGradient
       colors={['#FFFFFF', '#FFFFFF', '#FFFFFF']} // Change gradient colors to white
@@ -32,7 +31,7 @@ const EditActivtyPage = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
         {data.map((item) => (
-          <Card key={item.title} style={styles.card} onPress={() => navigation.navigate(item.navigateTo)}>
+          <Card key={item.title} style={styles.card} onPress={() => router.push(item.navigateTo)}> {/* Use router.push */}
             <Card.Title
               title={item.title}
               subtitle={item.subtitle}

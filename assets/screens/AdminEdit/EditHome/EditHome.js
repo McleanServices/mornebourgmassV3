@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform, Modal, Pressable } from 'react-native';
-import { API_URL } from "@env";
+//test
 
 const EditHomeScreen = () => {
     const [id, setId] = useState(null);  // Add new state for ID
@@ -13,7 +13,7 @@ const EditHomeScreen = () => {
     useEffect(() => {
         const fetchActivity = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/homescreen`);
+                const response = await fetch(`https://mornebourgmass.com/api/homescreen`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch activity data');
                 }

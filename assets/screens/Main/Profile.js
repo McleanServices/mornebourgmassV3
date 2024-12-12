@@ -15,7 +15,7 @@ import {
 import { Link, router } from 'expo-router';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import QRCode from "react-native-qrcode-svg";
-import { API_URL } from "@env";
+//test
 import axios from 'axios';
 import { useAuth } from '../../../context/auth';
 
@@ -32,7 +32,7 @@ const ProfileScreen = () => {
   const refreshUserDetails = async () => {
     try {
       if (session?.user?.id) {
-        const response = await axios.get(`${API_URL}/api/user/${session.user.id}`);
+        const response = await axios.get(`https://mornebourgmass.com/api/user/${session.user.id}`);
         const userData = response.data.user;
         await AsyncStorage.setItem('userDetails', JSON.stringify(userData));
         setUserDetails(userData);
@@ -60,7 +60,7 @@ const ProfileScreen = () => {
     if (email && message) {
       setIsSending(true);
       try {
-        const response = await fetch(`${API_URL}/api/send-email`, {
+        const response = await fetch(`https://mornebourgmass.com/api/send-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

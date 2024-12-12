@@ -1,0 +1,149 @@
+Date : 2024-12-11 09:22:34
+Directory : c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass
+Total : 89 files,  20034 codes, 424 comments, 560 blanks, all 21018 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| JSON               |          2 |     13,568 |          0 |          2 |     13,570 |
+| JavaScript         |         60 |      5,938 |        364 |        473 |      6,775 |
+| TypeScript JSX     |         21 |        359 |         57 |         70 |        486 |
+| JSON with Comments |          3 |         99 |          0 |          3 |        102 |
+| TypeScript         |          2 |         68 |          3 |         11 |         82 |
+| Log                |          1 |          2 |          0 |          1 |          3 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                      | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                         |         89 |     20,034 |        424 |        560 |     21,018 |
+| . (Files)                                                                                                                 |         13 |     13,703 |        329 |         46 |     14,078 |
+| app                                                                                                                       |         22 |        379 |         59 |         69 |        507 |
+| app (Files)                                                                                                               |          2 |        100 |          2 |         19 |        121 |
+| app\(app)                                                                                                                 |          4 |         74 |          5 |         12 |         91 |
+| app\pages                                                                                                                 |         16 |        205 |         52 |         38 |        295 |
+| app\pages (Files)                                                                                                         |         12 |        142 |         52 |         28 |        222 |
+| app\pages\editactivity                                                                                                    |          1 |         17 |          0 |          2 |         19 |
+| app\pages\editactivity\[id]                                                                                               |          1 |         17 |          0 |          2 |         19 |
+| app\pages\edituser                                                                                                        |          1 |         16 |          0 |          3 |         19 |
+| app\pages\edituser\[id]                                                                                                   |          1 |         16 |          0 |          3 |         19 |
+| app\pages\shopping                                                                                                        |          1 |         15 |          0 |          3 |         18 |
+| app\pages\shopping\[id]                                                                                                   |          1 |         15 |          0 |          3 |         18 |
+| app\pages\userdetails                                                                                                     |          1 |         15 |          0 |          2 |         17 |
+| app\pages\userdetails\[id]                                                                                                |          1 |         15 |          0 |          2 |         17 |
+| assets                                                                                                                    |         51 |      5,836 |         30 |        424 |      6,290 |
+| assets\navigation                                                                                                         |          1 |         13 |          2 |          4 |         19 |
+| assets\screens                                                                                                            |         50 |      5,823 |         28 |        420 |      6,271 |
+| assets\screens (Files)                                                                                                    |          6 |        416 |          2 |         45 |        463 |
+| assets\screens\AdminEdit                                                                                                  |         18 |      3,195 |          9 |        197 |      3,401 |
+| assets\screens\AdminEdit (Files)                                                                                          |          1 |        103 |          0 |          4 |        107 |
+| assets\screens\AdminEdit\EditActivity                                                                                     |          6 |      1,478 |          0 |         95 |      1,573 |
+| assets\screens\AdminEdit\EditHome                                                                                         |          2 |        248 |          2 |         19 |        269 |
+| assets\screens\AdminEdit\EditPalmares                                                                                     |          4 |        341 |          0 |         27 |        368 |
+| assets\screens\AdminEdit\EditUsers                                                                                        |          5 |      1,025 |          7 |         52 |      1,084 |
+| assets\screens\Auth                                                                                                       |          4 |        396 |          7 |         43 |        446 |
+| assets\screens\Main                                                                                                       |         10 |      1,637 |          8 |        116 |      1,761 |
+| assets\screens\components                                                                                                 |          7 |        148 |          2 |         18 |        168 |
+| assets\screens\core                                                                                                       |          1 |         11 |          0 |          1 |         12 |
+| assets\screens\helpers                                                                                                    |          4 |         20 |          0 |          0 |         20 |
+| context                                                                                                                   |          2 |        106 |          6 |         19 |        131 |
+| hooks                                                                                                                     |          1 |         10 |          0 |          2 |         12 |
++---------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                                  | language           | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\App.js                                                      | JavaScript         |          0 |        322 |         28 |        350 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app.json                                                    | JSON with Comments |         68 |          0 |          1 |         69 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app.plugin.js                                               | JavaScript         |          0 |          0 |          1 |          1 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\(app)\_layout.js                                        | JavaScript         |         59 |          5 |          7 |         71 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\(app)\activity.tsx                                      | TypeScript JSX     |          4 |          0 |          1 |          5 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\(app)\index.tsx                                         | TypeScript JSX     |          7 |          0 |          3 |         10 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\(app)\profile.tsx                                       | TypeScript JSX     |          4 |          0 |          1 |          5 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\_layout.js                                              | JavaScript         |          9 |          0 |          2 |         11 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\login.tsx                                               | TypeScript JSX     |         91 |          2 |         17 |        110 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\addactivity.tsx                                   | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\adduser.tsx                                       | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\billet.tsx                                        | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\editactivity\[id]\editactivity.tsx                | TypeScript JSX     |         17 |          0 |          2 |         19 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\edithome.tsx                                      | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\editpage.tsx                                      | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\edituser\[id]\edituser.tsx                        | TypeScript JSX     |         16 |          0 |          3 |         19 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\palmares.tsx                                      | TypeScript JSX     |          0 |         26 |          4 |         30 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\reglementation.tsx                                | TypeScript JSX     |          0 |         26 |          4 |         30 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\scancode.tsx                                      | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\settings.tsx                                      | TypeScript JSX     |         16 |          0 |          1 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\shopping\[id]\shopping.tsx                        | TypeScript JSX     |         15 |          0 |          3 |         18 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\userdetails\[id]\userdetails.tsx                  | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\userpage.tsx                                      | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\viewactivty.tsx                                   | TypeScript JSX     |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\app\pages\viewusers.tsx                                     | TypeScript JSX     |          6 |          0 |          3 |          9 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\navigation\AppNavigator.js                           | JavaScript         |         13 |          2 |          4 |         19 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\ActivityScreen.js                            | JavaScript         |         71 |          0 |          8 |         79 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminControl.js                              | JavaScript         |         33 |          0 |          5 |         38 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditActivity\Addactivity.js        | JavaScript         |        302 |          0 |         20 |        322 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditActivity\AddactivityMobile.js  | JavaScript         |        308 |          0 |         20 |        328 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditActivity\EditActivityMobile.js | JavaScript         |        347 |          0 |         24 |        371 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditActivity\EditActivityScreen.js | JavaScript         |        329 |          0 |         21 |        350 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditActivity\EditActivtyPage.js    | JavaScript         |         96 |          0 |          4 |        100 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditActivity\ViewActivities.js     | JavaScript         |         96 |          0 |          6 |        102 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditHome\EditActivity.js           | JavaScript         |         70 |          0 |         10 |         80 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditHome\EditHome.js               | JavaScript         |        178 |          2 |          9 |        189 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditPage.js                        | JavaScript         |        103 |          0 |          4 |        107 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditPalmares\AddPalmares.js        | JavaScript         |         72 |          0 |          7 |         79 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditPalmares\EditPalmares.js       | JavaScript         |        101 |          0 |          9 |        110 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditPalmares\EditPalmaresPage.js   | JavaScript         |         97 |          0 |          4 |        101 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditPalmares\ViewPalmares.js       | JavaScript         |         71 |          0 |          7 |         78 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditUsers\EditUser.js              | JavaScript         |        279 |          0 |         10 |        289 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditUsers\EditUserPage.js          | JavaScript         |         96 |          0 |          7 |        103 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditUsers\Register.js              | JavaScript         |        326 |          7 |         19 |        352 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditUsers\UserDetails.js           | JavaScript         |        122 |          0 |          7 |        129 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\AdminEdit\EditUsers\ViewUsers.js             | JavaScript         |        202 |          0 |          9 |        211 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Auth\AuthLoadingScreen.js                    | JavaScript         |        106 |          4 |         12 |        122 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Auth\Loading.js                              | JavaScript         |         50 |          0 |          3 |         53 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Auth\Login.js                                | JavaScript         |        146 |          2 |         14 |        162 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Auth\Welcome.js                              | JavaScript         |         94 |          1 |         14 |        109 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\EditActivity.js                              | JavaScript         |         70 |          0 |         10 |         80 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\EditActivityScreen.js                        | JavaScript         |        157 |          0 |         14 |        171 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\LoginScreen.js                               | JavaScript         |         55 |          2 |          7 |         64 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\About.js                                | JavaScript         |        136 |          0 |          7 |        143 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Activity.js                             | JavaScript         |        237 |          4 |         21 |        262 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Billet.js                               | JavaScript         |        159 |          0 |         12 |        171 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Home.js                                 | JavaScript         |        268 |          1 |         14 |        283 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Palmares.js                             | JavaScript         |        132 |          0 |          9 |        141 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Profile.js                              | JavaScript         |        268 |          0 |         11 |        279 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Reglementation.js                       | JavaScript         |         23 |          0 |          4 |         27 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\ScanCodeScreen.js                       | JavaScript         |        133 |          3 |         12 |        148 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Settings.js                             | JavaScript         |        102 |          0 |          8 |        110 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\Main\Shopping.js                             | JavaScript         |        179 |          0 |         18 |        197 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\BackButton.js                     | JavaScript         |         22 |          2 |          3 |         27 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\BottomTabNavigator.js             | JavaScript         |          0 |          0 |          1 |          1 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\Button.js                         | JavaScript         |         30 |          0 |          3 |         33 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\Buttonlist.js                     | JavaScript         |         24 |          0 |          4 |         28 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\Header.js                         | JavaScript         |         15 |          0 |          2 |         17 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\Logo.js                           | JavaScript         |         17 |          0 |          2 |         19 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\components\TextInput.js                      | JavaScript         |         40 |          0 |          3 |         43 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\core\Theme.js                                | JavaScript         |         11 |          0 |          1 |         12 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\helpers\EmailValidator.js                    | JavaScript         |          6 |          0 |          0 |          6 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\helpers\NameValidator.js                     | JavaScript         |          4 |          0 |          0 |          4 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\helpers\PasswordValidator.js                 | JavaScript         |          5 |          0 |          0 |          5 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\helpers\UsernameValidator.js                 | JavaScript         |          5 |          0 |          0 |          5 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\assets\screens\index.js                                     | JavaScript         |         30 |          0 |          1 |         31 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\authConfig.js                                               | JavaScript         |          0 |          0 |          1 |          1 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\babel.config.js                                             | JavaScript         |         19 |          0 |          1 |         20 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\context\auth.tsx                                            | TypeScript JSX     |         48 |          3 |         10 |         61 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\context\useStorageState.ts                                  | TypeScript         |         58 |          3 |          9 |         70 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\debug.log                                                   | Log                |          2 |          0 |          1 |          3 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\eas.json                                                    | JSON with Comments |         27 |          0 |          1 |         28 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\hooks\useEvent.ts                                           | TypeScript         |         10 |          0 |          2 |         12 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\index.js                                                    | JavaScript         |          7 |          4 |          4 |         15 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\metro.config.js                                             | JavaScript         |          3 |          2 |          3 |          8 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\package-lock.json                                           | JSON               |     13,483 |          0 |          1 |     13,484 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\package.json                                                | JSON               |         85 |          0 |          1 |         86 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\tsconfig.json                                               | JSON with Comments |          4 |          0 |          1 |          5 |
+| c:\Users\tyrec\OneDrive\Documents\Client1-joan\MorneBourgMass\webpack.config.js                                           | JavaScript         |          5 |          1 |          2 |          8 |
+| Total                                                                                                                     |                    |     20,034 |        424 |        560 |     21,018 |
++---------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+

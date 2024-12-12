@@ -1,0 +1,48 @@
+MornebourgMass v1.0.0 (100)
+Date de sortie : 2024-01-20
+
+Mise à jour majeure incluant nouvelle interface d'administration, système de paiement intégré, scanner QR Code et améliorations de performance et sécurité.
+
+Nouvelles fonctionnalités
+• Nouvelle interface d'administration avec quatre sections principales (À Propos, Utilisateur, Activités, Palmarès)
+• Système de paiement intégré avec vérification automatique des transactions
+• Scanner QR Code pour les utilisateurs standards
+• Nouveau système d'authentification avec gestion des rôles
+
+Améliorations
+• Interface utilisateur
+  - Animation fluide du titre "mornebourgmass" avec effets de fondu
+  - Nouvelle mise en page des catégories sur la page d'accueil
+  - Design épuré et moderne de l'écran de connexion
+  - Interface de paiement simplifiée avec indicateur de progression
+
+• Performance
+  - Optimisation des animations avec Reanimated
+  - Chargement progressif des données
+  - Gestion améliorée du cache
+  - Support optimisé du mode portrait/paysage
+
+• Sécurité
+  - Validation renforcée des champs de saisie
+  - Protection des routes administrateur
+  - Gestion sécurisée des tokens JWT
+  - Vérification améliorée des transactions
+
+• Navigation
+  - Migration complète vers expo-router
+  - Nouveaux chemins de navigation optimisés
+  - Accès rapide aux paramètres
+  - Navigation fluide entre les sections
+
+Corrections
+• Suppression du texte "Retour" redondant sur le bouton de navigation
+• Correction de la gestion du clavier sur l'écran de connexion
+• Optimisation de la barre de navigation inférieure
+• Amélioration des messages d'erreur
+
+Notes de compatibilité
+• Version minimale d'Android requise : 8.0
+• Optimisé pour les dernières versions d'Android
+• Support complet des appareils tablettes
+
+Pour signaler un problème, veuillez contacter notre support technique.

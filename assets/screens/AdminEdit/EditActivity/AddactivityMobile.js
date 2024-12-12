@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from "@env";
+//test
 
 const AddActivityMobileScreen = () => {
   const [title, setTitle] = useState('');
@@ -25,7 +25,7 @@ const AddActivityMobileScreen = () => {
       if (Platform.OS !== 'web') {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-          alert('Sorry, we need camera roll permissions to make this work!');
+          alert('Désolé, nous avons besoin des autorisations de la bibliothèque de médias pour que cela fonctionne!');
         }
       }
     })();
@@ -46,13 +46,13 @@ const AddActivityMobileScreen = () => {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'An error occurred while picking the image');
+      Alert.alert('Erreur', 'Une erreur s\'est produite lors de la sélection de l\'image');
     }
   };
 
   const uploadImage = async () => {
     if (!selectedImage) {
-      Alert.alert('No image selected', 'Please select an image first');
+      Alert.alert('Aucune image sélectionnée', 'Veuillez d\'abord sélectionner une image');
       return null;
     }
 
@@ -64,7 +64,7 @@ const AddActivityMobileScreen = () => {
     });
 
     try {
-      let response = await fetch(`${API_URL}/api/upload`, {
+      let response = await fetch(`https://mornebourgmass.com/api/upload`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -75,28 +75,27 @@ const AddActivityMobileScreen = () => {
 
       let result = await response.json();
       if (response.ok) {
-        Alert.alert('Upload successful', 'Image uploaded successfully');
-        setImageUrl(result.imageUrl); // Ensure this is the correct path to the image URL
-        return result.imageUrl;
+        Alert.alert('Téléchargement réussi', 'Image téléchargée avec succès');
+        setImageUrl('http://mornebourgmass.com/api/uploads/1733946884558-photo.jpg');
+        return 'http://mornebourgmass.com/api/uploads/1733946884558-photo.jpg';
       } else {
-        Alert.alert('Upload failed', result.message);
+        Alert.alert('Échec du téléchargement', result.message);
         return null;
       }
     } catch (error) {
       console.error('Upload error:', error);
-      Alert.alert('Upload error', 'An error occurred while uploading the image');
+      Alert.alert('Erreur de téléchargement', 'Une erreur s\'est produite lors du téléchargement de l\'image');
       return null;
     }
   };
 
   const validateInputs = () => {
     const errors = {};
-    if (!title) errors.title = 'Please input the title';
-    if (!description) errors.description = 'Please input the description';
-    if (!date) errors.date = 'Please input the date';
-    if (!time) errors.time = 'Please input the time';
-    if (!imageUrl) errors.imageUrl = 'Please input the image URL';
-    if (!nombreMaxTickets) errors.nombreMaxTickets = 'Please input the number of max tickets';
+    if (!title) errors.title = 'Veuillez entrer le titre';
+    if (!description) errors.description = 'Veuillez entrer la description';
+    if (!date) errors.date = 'Veuillez entrer la date';
+    if (!time) errors.time = 'Veuillez entrer l\'heure';
+    if (!nombreMaxTickets) errors.nombreMaxTickets = 'Veuillez entrer le nombre maximum de billets';
 
     setInputErrors(errors);
     return Object.keys(errors).length === 0;
@@ -114,7 +113,7 @@ const AddActivityMobileScreen = () => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/activity`, {
+      const response = await axios.post(`https://mornebourgmass.com/api/activity`, {
         title,
         description,
         date: date.toISOString().split('T')[0],
@@ -127,7 +126,7 @@ const AddActivityMobileScreen = () => {
       }
     } catch (error) {
       console.error('Error adding activity:', error);
-      alert('Failed to add activity');
+      alert('Échec de l\'ajout de l\'activité');
     }
   };
 
@@ -145,6 +144,9 @@ const AddActivityMobileScreen = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.infoText}>
+        Après avoir créé l'image, allez à l'édition de l'activité pour ajouter l'image et le lien de paiement.
+      </Text>
       <Modal
         animationType="slide"
         transparent={true}
@@ -155,7 +157,7 @@ const AddActivityMobileScreen = () => {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>Activity added successfully</Text>
+            <Text style={styles.modalText}>Activité ajoutée avec succès</Text>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => {
@@ -167,7 +169,7 @@ const AddActivityMobileScreen = () => {
           </View>
         </View>
       </Modal>
-      <Text style={styles.label}>Title</Text>
+      <Text style={styles.label}>Titre</Text>
       <TextInput
         style={styles.input}
         value={title}
@@ -186,11 +188,11 @@ const AddActivityMobileScreen = () => {
         <TextInput
           style={styles.input}
           value={date.toISOString().split('T')[0]}
-          placeholder="Select Date"
+          placeholder="Sélectionner la date"
           editable={false}
         />
       </Pressable>
-      <Text style={styles.tapMeText}>Tap me</Text>
+      <Text style={styles.tapMeText}>Tapez-moi</Text>
       {showDatePicker && (
         <DateTimePicker
           value={date}
@@ -200,16 +202,16 @@ const AddActivityMobileScreen = () => {
         />
       )}
       {inputErrors.date && <Text style={styles.errorText}>{inputErrors.date}</Text>}
-      <Text style={styles.label}>Time</Text>
+      <Text style={styles.label}>Heure</Text>
       <Pressable onPress={() => setShowTimePicker(true)}>
         <TextInput
           style={styles.input}
           value={time.toTimeString().split(' ')[0]}
-          placeholder="Select Time"
+          placeholder="Sélectionner l'heure"
           editable={false}
         />
       </Pressable>
-      <Text style={styles.tapMeText}>Tap me</Text>
+      <Text style={styles.tapMeText}>Tapez-moi</Text>
       {showTimePicker && (
         <DateTimePicker
           value={time}
@@ -220,31 +222,17 @@ const AddActivityMobileScreen = () => {
       )}
       {inputErrors.time && <Text style={styles.errorText}>{inputErrors.time}</Text>}
       <View style={styles.spacing} />
-      <Text style={styles.label}>Image URL</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Image URL"
-        value={imageUrl || ''}
-        onChangeText={setImageUrl}
-        editable={false}
-      />
-      {inputErrors.imageUrl && <Text style={styles.errorText}>{inputErrors.imageUrl}</Text>}
-      <Pressable style={styles.imagePicker} onPress={pickImage}>
-        <Ionicons name="cloud-upload-outline" size={32} color="gray" />
-        <Text>Pick an image from gallery</Text>
-      </Pressable>
       <Text style={styles.label}>Nombre Max Tickets</Text>
       <TextInput
         style={styles.input}
         value={nombreMaxTickets}
         onChangeText={setNombreMaxTickets}
-        keyboardType="numeric"
       />
       {inputErrors.nombreMaxTickets && <Text style={styles.errorText}>{inputErrors.nombreMaxTickets}</Text>}
       {errorMessage ? (
         <Text style={styles.errorMessage}>{errorMessage}</Text>
       ) : null}
-      <Button title="Add Activity" onPress={handleAddActivity} />
+      <Button title="Ajouter l'activité" onPress={handleAddActivity} />
     </View>
   );
 };
@@ -253,6 +241,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  infoText: {
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    color: 'blue',
   },
   label: {
     fontSize: 16,

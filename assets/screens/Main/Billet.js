@@ -11,7 +11,7 @@ import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
-import { API_URL } from "@env";
+//test
 import { useAuth } from '../../../context/auth';
 import * as Notifications from 'expo-notifications';
 
@@ -27,7 +27,7 @@ const BilletScreen = () => {
         const id_user = session?.user?.id;
         const activityId = 14; // For testing
 
-        const checkResponse = await axios.get(`${API_URL}/api/transactionLink`, {
+        const checkResponse = await axios.get(`https://mornebourgmass.com/api/transactionLink`, {
           params: {
             id_user,
             id_activityscreen: activityId 
@@ -35,13 +35,13 @@ const BilletScreen = () => {
         });
 
         if (!checkResponse.data.exists) {
-          await axios.put(`${API_URL}/api/paiement`, {
+          await axios.put(`https://mornebourgmass.com/api/paiement`, {
             id_user,
             id_activityscreen: activityId 
           });
         }
 
-        const response = await axios.get(`${API_URL}/api/activityscreen/${activityId}`);
+        const response = await axios.get(`https://mornebourgmass.com/api/activityscreen/${activityId}`);
         if (response.data) {
           setTickets([{
             id: "1",

@@ -8,7 +8,8 @@ import { fr } from 'date-fns/locale';
 import axios from 'axios';
 import { useDropzone } from 'react-dropzone';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from "@env";
+import { URL } from 'url';
+//test
 registerLocale('fr', fr);
 
 const AddActivity = ({ navigation }) => {
@@ -50,7 +51,7 @@ const AddActivity = ({ navigation }) => {
 
     try {
       console.log('Uploading image...');
-      let response = await fetch(`${API_URL}/api/upload`, {
+      let response = await fetch(`https://mornebourgmass.com/api/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -101,7 +102,7 @@ const AddActivity = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/activity`, {
+      const response = await axios.post(`https://mornebourgmass.com/api/activity`, {
         title,
         description,
         date,
@@ -131,6 +132,9 @@ const AddActivity = ({ navigation }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
+        <Text style={styles.infoText}>
+          After you've created the image, go to the Edit Activity screen to add the image and payment link.
+        </Text>
         <Modal
           animationType="slide"
           transparent={true}
@@ -239,6 +243,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  infoText: {
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   label: {
     fontSize: 16,

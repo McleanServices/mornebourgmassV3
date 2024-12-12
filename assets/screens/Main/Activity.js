@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Button, Link
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import axios from 'axios';
 import debounce from 'lodash.debounce'; // Import debounce from lodash
-import { API_URL } from "@env";
+//test
 import { useAuth } from '../../../context/auth';
 
 
@@ -19,7 +19,7 @@ const ActivityScreen = () => {
 
     const fetchActivities = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/activityscreen`);
+            const response = await fetch(`https://mornebourgmass.com/api/activityscreen`);
             if (!response.ok) {
                 throw new Error('Failed to fetch activities');
             }
@@ -38,7 +38,7 @@ const ActivityScreen = () => {
             const id_user = session?.user?.id; // Get user ID from session
 
             // Check if transaction link already exists
-            const checkResponse = await axios.get(`${API_URL}/api/transactionLink`, {
+            const checkResponse = await axios.get(`https://mornebourgmass.com/api/transactionLink`, {
                 params: {
                     id_user,
                     id_activityscreen: activityId // Include activity ID
@@ -48,7 +48,7 @@ const ActivityScreen = () => {
             if (checkResponse.data.exists) {
                 // Transaction link exists, open it
                 const existingPaymentLink = checkResponse.data.paymentLink;
-                const response = await fetch(`${API_URL}/api/checkPaymentStatus?paymentLink=${encodeURIComponent(existingPaymentLink)}`);
+                const response = await fetch(`https://mornebourgmass.com/api/checkPaymentStatus?paymentLink=${encodeURIComponent(existingPaymentLink)}`);
                 const data = await response.json();
                 console.log('Payment Status:', data);
                 return data.status; // Return payment status
@@ -66,7 +66,7 @@ const ActivityScreen = () => {
 
     const fetchPaymentLinks = async () => {
         try {
-            const response = await fetch(`${API_URL}/api/activityscreen`);
+            const response = await fetch(`https://mornebourgmass.com/api/activityscreen`);
             if (!response.ok) {
                 throw new Error('Failed to fetch payment links');
             }
@@ -124,9 +124,10 @@ const ActivityScreen = () => {
 
     const renderItem = ({ item }) => {
         const formattedDate = formatDate(item.date.split('T')[0]); // Format date
+        const imageUrl = item.imageUrl || 'http://mornebourgmass.com/api/uploads/1733946884558-photo.jpg.jpg'; // Use default image if imageUrl is null
         return (
             <View style={styles.item}>
-                <Image source={{ uri: item.imageUrl }} style={styles.image} />
+                <Image source={{ uri: imageUrl }} style={styles.image} />
                 <View style={styles.textContainer}>
                     <Text style={styles.title}>{item.title}</Text>
                     <Text style={styles.dateTime}>{formattedDate} à {item.time}</Text>

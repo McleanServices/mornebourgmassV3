@@ -78,3 +78,8 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
+
+# ESLint-related files
+eslint.config.mjs
+eslint-plugin-custom.js
+

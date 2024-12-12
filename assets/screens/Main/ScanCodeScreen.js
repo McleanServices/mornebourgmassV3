@@ -3,7 +3,6 @@ import { StyleSheet, View, Text, Button } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 import axios from 'axios';
 import { useRouter, useFocusEffect, Link } from 'expo-router';
-import { API_URL } from "@env";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ScanCodeScreen = () => {
@@ -28,10 +27,8 @@ const ScanCodeScreen = () => {
       try {
         setNavigated(true);
         await AsyncStorage.setItem('userData', data);
-        router.replace({
-          pathname: '/pages/userdetails/[id]/userdetails',
-          params: { id: data }
-        });
+        // Replace Link component with router.replace
+        router.replace(`/pages/userdetails/${data}/userdetails`);
       } catch (err) {
         setError('Failed to save user data.');
         setNavigated(false);
@@ -50,10 +47,10 @@ const ScanCodeScreen = () => {
   });
 
   if (hasPermission === null) {
-    return <Text style={styles.permissionText}>Requesting camera permission...</Text>;
+    return <Text style={styles.permissionText}>Requesting camera permission...</Text>
   }
   if (hasPermission === false) {
-    return <Text style={styles.errorText}>No access to camera</Text>;
+    return <Text style={styles.errorText}>No access to camera</Text>
   }
 
   return (

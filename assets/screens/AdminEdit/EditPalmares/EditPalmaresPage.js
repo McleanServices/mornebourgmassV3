@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Avatar, Card, IconButton, Text } from 'react-native-paper';
 import { StyleSheet, View, ScrollView } from 'react-native'; // Import ScrollView
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from 'expo-router'; // Import useRouter from expo-router
 import { LinearGradient } from 'expo-linear-gradient';
 import EditPalmares from './EditPalmares';
-import { API_URL } from "@env";
+//test
 
 const data = [
   {
@@ -22,7 +22,7 @@ const data = [
 ];
 
 const EditPalmaresPage = () => {
-  const navigation = useNavigation();
+  const router = useRouter(); // Use useRouter instead of useNavigation
   return (
     <LinearGradient
       colors={['#FFFFFF', '#FFFFFF', '#FFFFFF']} // Change gradient colors to white
@@ -33,7 +33,7 @@ const EditPalmaresPage = () => {
       </View>
       <ScrollView contentContainerStyle={styles.scrollView} keyboardShouldPersistTaps="handled">
         {data.map((item) => (
-          <Card key={item.title} style={styles.card} onPress={() => navigation.navigate(item.navigateTo)}>
+          <Card key={item.title} style={styles.card} onPress={() => router.push(item.navigateTo)}> {/* Use router.push instead of navigation.navigate */}
             <Card.Title
               title={item.title}
               left={(props) => <Avatar.Icon {...props} icon={item.icon} />}

@@ -4,7 +4,7 @@
     "slug": "morne-bourg-mass",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo1.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -19,27 +19,33 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo1.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.tyreceexpo.mynewproject2",
+      "package": "com.sunnysidecode.mornebourgmass",
       "jsEngine": "hermes",
-      "newArchEnabled": true
+      "newArchEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
     },
     "web": {
-      "favicon": "./assets/logo1.png",
+      "favicon": "./assets/icon.png",
       "baseUrl": "/mobile"
     },
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "0c3f7964-199f-421e-ab17-198009cb4307"
+        "projectId": "af23753c-0b7b-434b-a4ab-61ec38fc8c4e"
       }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/0c3f7964-199f-421e-ab17-198009cb4307"
     },
     "plugins": [
       "expo-asset",
@@ -63,6 +69,7 @@
     "experiments": {
       "baseUrl": "/mobile"
     },
-    "scheme": "mornebourgmass"
+    "scheme": "mornebourgmass",
+    "owner": "sunnysidecode"
   }
 }

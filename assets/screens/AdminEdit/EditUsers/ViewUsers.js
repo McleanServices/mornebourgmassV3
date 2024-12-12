@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, Alert, Platform, T
 import { Card, Avatar, IconButton } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from "@env";
+//test
 import { useAuth } from '../../../../context/auth';
 
 const ViewUsers = () => {
@@ -21,7 +21,7 @@ const ViewUsers = () => {
         if (!token) {
           throw new Error('No token found');
         }
-        const response = await fetch(`${API_URL}/api/users`, {
+        const response = await fetch(`https://mornebourgmass.com/api/users`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

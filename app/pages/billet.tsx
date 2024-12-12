@@ -1,4 +1,4 @@
-import { BilletScreen } from "../../assets/screens";
+import BilletScreen  from "../../assets/screens/Main/Billet";
 
 import { Stack } from "expo-router";
 
