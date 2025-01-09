@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform, ScrollView, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import TimePicker from 'react-time-picker';
+import 'react-time-picker/dist/TimePicker.css';
+import 'react-clock/dist/Clock.css';
 //test
 
 const AddActivityMobileScreen = () => {
@@ -19,6 +24,8 @@ const AddActivityMobileScreen = () => {
   const [nombreMaxTickets, setNombreMaxTickets] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [inputErrors, setInputErrors] = useState({});
+  const [paymentLink, setPaymentLink] = useState('');
+  const [showPaymentLink, setShowPaymentLink] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -91,14 +98,29 @@ const AddActivityMobileScreen = () => {
 
   const validateInputs = () => {
     const errors = {};
-    if (!title) errors.title = 'Veuillez entrer le titre';
-    if (!description) errors.description = 'Veuillez entrer la description';
+    if (!title.trim()) errors.title = 'Veuillez entrer le titre';
+    if (!description.trim()) errors.description = 'Veuillez entrer la description';
     if (!date) errors.date = 'Veuillez entrer la date';
     if (!time) errors.time = 'Veuillez entrer l\'heure';
-    if (!nombreMaxTickets) errors.nombreMaxTickets = 'Veuillez entrer le nombre maximum de billets';
+    if (!nombreMaxTickets.trim()) {
+      errors.nombreMaxTickets = 'Veuillez entrer le nombre maximum de billets';
+    } else if (isNaN(nombreMaxTickets) || parseInt(nombreMaxTickets) <= 0) {
+      errors.nombreMaxTickets = 'Le nombre de billets doit être un nombre positif';
+    }
+    if (showPaymentLink && !paymentLink.trim()) {
+      errors.paymentLink = 'Veuillez entrer le lien de paiement';
+    }
+    if (!selectedImage && !imageUrl) {
+      errors.image = 'Veuillez sélectionner une image';
+    }
 
     setInputErrors(errors);
-    return Object.keys(errors).length === 0;
+    
+    if (Object.keys(errors).length > 0) {
+      Alert.alert('Erreur de validation', 'Veuillez remplir tous les champs requis correctement');
+      return false;
+    }
+    return true;
   };
 
   const handleAddActivity = async () => {
@@ -120,6 +142,7 @@ const AddActivityMobileScreen = () => {
         time: time.toTimeString().split(' ')[0],
         imageUrl: newImageUrl,
         nombre_max_tickets: nombreMaxTickets,
+        payment_link: paymentLink,
       });
       if (response.status === 201) {
         setModalVisible(true);
@@ -142,8 +165,22 @@ const AddActivityMobileScreen = () => {
     setTime(currentTime);
   };
 
+  const handleWebTimeChange = (newTime) => {
+    if (newTime) {
+      const [hours, minutes] = newTime.split(':');
+      const newTimeDate = new Date();
+      newTimeDate.setHours(parseInt(hours));
+      newTimeDate.setMinutes(parseInt(minutes));
+      setTime(newTimeDate);
+    }
+  };
+
+  const togglePaymentLink = () => {
+    setShowPaymentLink(true);
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.infoText}>
         Après avoir créé l'image, allez à l'édition de l'activité pour ajouter l'image et le lien de paiement.
       </Text>
@@ -184,16 +221,25 @@ const AddActivityMobileScreen = () => {
       />
       {inputErrors.description && <Text style={styles.errorText}>{inputErrors.description}</Text>}
       <Text style={styles.label}>Date</Text>
-      <Pressable onPress={() => setShowDatePicker(true)}>
-        <TextInput
-          style={styles.input}
-          value={date.toISOString().split('T')[0]}
-          placeholder="Sélectionner la date"
-          editable={false}
+      {Platform.OS === 'web' ? (
+        <DatePicker
+          selected={date}
+          onChange={(date) => setDate(date)}
+          dateFormat="yyyy-MM-dd"
+          className="web-datepicker"
         />
-      </Pressable>
+      ) : (
+        <Pressable onPress={() => setShowDatePicker(true)}>
+          <TextInput
+            style={styles.input}
+            value={date.toISOString().split('T')[0]}
+            placeholder="Sélectionner la date"
+            editable={false}
+          />
+        </Pressable>
+      )}
       <Text style={styles.tapMeText}>Tapez-moi</Text>
-      {showDatePicker && (
+      {showDatePicker && Platform.OS !== 'web' && (
         <DateTimePicker
           value={date}
           mode="date"
@@ -203,16 +249,27 @@ const AddActivityMobileScreen = () => {
       )}
       {inputErrors.date && <Text style={styles.errorText}>{inputErrors.date}</Text>}
       <Text style={styles.label}>Heure</Text>
-      <Pressable onPress={() => setShowTimePicker(true)}>
-        <TextInput
-          style={styles.input}
-          value={time.toTimeString().split(' ')[0]}
-          placeholder="Sélectionner l'heure"
-          editable={false}
+      {Platform.OS === 'web' ? (
+        <TimePicker
+          onChange={handleWebTimeChange}
+          value={`${time.getHours().toString().padStart(2, '0')}:${time.getMinutes().toString().padStart(2, '0')}`}
+          className="web-timepicker"
+          clearIcon={null}
+          disableClock={true}
+          format="HH:mm"
         />
-      </Pressable>
-      <Text style={styles.tapMeText}>Tapez-moi</Text>
-      {showTimePicker && (
+      ) : (
+        <Pressable onPress={() => setShowTimePicker(true)}>
+          <TextInput
+            style={styles.input}
+            value={time.toTimeString().split(' ')[0]}
+            placeholder="Sélectionner l'heure"
+            editable={false}
+          />
+        </Pressable>
+      )}
+      {!Platform.OS === 'web' && <Text style={styles.tapMeText}>Tapez-moi</Text>}
+      {showTimePicker && Platform.OS !== 'web' && (
         <DateTimePicker
           value={time}
           mode="time"
@@ -220,7 +277,6 @@ const AddActivityMobileScreen = () => {
           onChange={handleTimeChange}
         />
       )}
-      {inputErrors.time && <Text style={styles.errorText}>{inputErrors.time}</Text>}
       <View style={styles.spacing} />
       <Text style={styles.label}>Nombre Max Tickets</Text>
       <TextInput
@@ -232,8 +288,29 @@ const AddActivityMobileScreen = () => {
       {errorMessage ? (
         <Text style={styles.errorMessage}>{errorMessage}</Text>
       ) : null}
+      <Text style={styles.label}>Image</Text>
+      <Pressable onPress={pickImage} style={styles.imagePicker}>
+        {selectedImage ? (
+          <Image source={{ uri: selectedImage }} style={{ width: 100, height: 100 }} />
+        ) : (
+          <Text>Sélectionner une image</Text>
+        )}
+      </Pressable>
+      {inputErrors.image && <Text style={styles.errorText}>{inputErrors.image}</Text>}
+      {showPaymentLink && (
+        <View>
+          <Text style={styles.label}>Lien de paiement</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Lien de paiement"
+            value={paymentLink}
+            onChangeText={setPaymentLink}
+          />
+          {inputErrors.paymentLink && <Text style={styles.errorText}>{inputErrors.paymentLink}</Text>}
+        </View>
+      )}
       <Button title="Ajouter l'activité" onPress={handleAddActivity} />
-    </View>
+    </ScrollView>
   );
 };
 
@@ -317,6 +394,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
   },
+  'web-timepicker': {
+    padding: 10,
+    marginBottom: 15,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  toggleButton: {
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 5,
+    marginVertical: 10,
+    alignItems: 'center',
+  },
+  toggleButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
+  },
 });
 
 export default AddActivityMobileScreen;
+
+// TODO : add prix input and update api for it 
+
+
+

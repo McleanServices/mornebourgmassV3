@@ -204,7 +204,7 @@ const HomeScreen = () => {
                 </Text>
                 <IconButton
                   icon="chevron-right"
-                  onPress={() => router.push("/pages/reglementation")}
+                  onPress={() => router.push("/pages/rules")}
                 />
               </View>
               <View style={styles.customRecommendationCard}>

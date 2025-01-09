@@ -17,6 +17,7 @@ import axios from "axios";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import validator from "validator";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import { Picker } from '@react-native-picker/picker'; // Add this import at the top
 
 const RegisterScreen = () => {
   const [nextUserId, setNextUserId] = useState("");
@@ -34,6 +35,15 @@ const RegisterScreen = () => {
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [isFormValid, setIsFormValid] = useState(false);
+  const [grade, setGrade] = useState(1); // Default to 1 (adult) - now as integer
+  const [dateInput, setDateInput] = useState(''); // Add this state
+  const [gradeModalVisible, setGradeModalVisible] = useState(false); // Add new state for grade modal
+
+  const gradeOptions = [
+    { label: "Adult", value: 1 },    // Changed to integers
+    { label: "Admin", value: 2 },
+    { label: "Enfant", value: 3 }
+  ];
 
   useEffect(() => {
     const fetchNextUserId = async () => {
@@ -60,6 +70,7 @@ const RegisterScreen = () => {
             password,
             phoneNumber,
             dateNaissance,
+            grade // Load saved grade
           } = JSON.parse(savedData);
           setIdentifiant(identifiant);
           setNom(nom);
@@ -68,6 +79,7 @@ const RegisterScreen = () => {
           setPassword(password);
           setPhoneNumber(phoneNumber);
           setDateNaissance(new Date(dateNaissance));
+          setGrade(grade); // Set grade
         }
       } catch (error) {
         console.error(
@@ -92,6 +104,7 @@ const RegisterScreen = () => {
           password,
           phoneNumber,
           dateNaissance: dateNaissance.toISOString(),
+          grade // Save grade
         };
         await AsyncStorage.setItem("registerData", JSON.stringify(data));
       } catch (error) {
@@ -100,7 +113,7 @@ const RegisterScreen = () => {
     };
 
     saveData();
-  }, [identifiant, nom, prenom, email, password, phoneNumber, dateNaissance]);
+  }, [identifiant, nom, prenom, email, password, phoneNumber, dateNaissance, grade]);
 
   useEffect(() => {
     if (password !== confirmPassword) {
@@ -161,6 +174,7 @@ const RegisterScreen = () => {
         password,
         numero_telephone: phoneNumber.toString(), // Ensure phone number is varchar
         date_naissance: dateNaissance.toISOString().split("T")[0],
+        grade: parseInt(grade) // Ensure grade is sent as integer
       });
 
       if (response.status === 201) {
@@ -191,6 +205,7 @@ const RegisterScreen = () => {
         password,
         phoneNumber,
         dateNaissance: dateNaissance.toISOString(),
+        grade // Save grade
       };
       await AsyncStorage.setItem("registerData", JSON.stringify(data));
       Alert.alert(
@@ -207,9 +222,56 @@ const RegisterScreen = () => {
   };
 
   const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || dateNaissance;
-    setShowDatePicker(Platform.OS === "ios");
-    setDateNaissance(currentDate);
+    if (Platform.OS === 'web') {
+      // For web platform
+      const inputDate = event.target.value;
+      setDateInput(inputDate);
+      
+      // Validate date format (YYYY-MM-DD)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(inputDate)) {
+        const newDate = new Date(inputDate);
+        if (!isNaN(newDate.getTime())) {
+          setDateNaissance(newDate);
+        }
+      }
+    } else {
+      // For mobile platforms
+      const currentDate = selectedDate || dateNaissance;
+      setShowDatePicker(Platform.OS === "ios");
+      setDateNaissance(currentDate);
+    }
+  };
+
+  const formatDateInput = (value) => {
+    // Remove any non-digit characters
+    const cleanValue = value.replace(/\D/g, '');
+    
+    // Add hyphens after YYYY and MM
+    if (cleanValue.length >= 6) {
+      return `${cleanValue.slice(0, 4)}-${cleanValue.slice(4, 6)}-${cleanValue.slice(6, 8)}`;
+    } else if (cleanValue.length >= 4) {
+      return `${cleanValue.slice(0, 4)}-${cleanValue.slice(4)}`;
+    }
+    return cleanValue;
+  };
+
+  const handleDateInputChange = (text) => {
+    const formatted = formatDateInput(text);
+    setDateInput(formatted);
+    
+    // Update dateNaissance if valid date
+    if (/^\d{4}-\d{2}-\d{2}$/.test(formatted)) {
+      const newDate = new Date(formatted);
+      if (!isNaN(newDate.getTime())) {
+        setDateNaissance(newDate);
+      }
+    }
+  };
+
+  const handleGradeSelection = (value) => {
+    setGrade(value);
+    setGradeModalVisible(false);
   };
 
   return (
@@ -297,22 +359,97 @@ const RegisterScreen = () => {
             <Text style={styles.errorText}>{phoneError}</Text>
           ) : null}
           <Text style={styles.label}>Date de Naissance</Text>
-          <Pressable
-            onPress={() => setShowDatePicker(true)}
-            style={[styles.input, { marginBottom: 50 }]}
-          >
-            <Text style={{ fontSize: 16, color: "#000" }}>
-              {dateNaissance.toISOString().split("T")[0] ||
-                "Sélectionner la date"}
-            </Text>
-          </Pressable>
-          {showDatePicker && (
-            <DateTimePicker
-              value={dateNaissance}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
+          {Platform.OS === 'web' ? (
+            <>
+              <TextInput
+                style={styles.input}
+                value={dateInput}
+                onChangeText={handleDateInputChange}
+                placeholder="YYYYMMDD"
+                maxLength={10}
+                keyboardType="numeric"
+              />
+              <Text style={styles.formatHint}>
+                Format: YYYYMMDD (ex: 1990-01-01)
+              </Text>
+            </>
+          ) : (
+            <>
+              <Pressable
+                onPress={() => setShowDatePicker(true)}
+                style={[styles.input, { marginBottom: 50 }]}
+              >
+                <Text style={{ fontSize: 16, color: "#000" }}>
+                  {dateNaissance.toISOString().split("T")[0] ||
+                    "Sélectionner la date"}
+                </Text>
+              </Pressable>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={dateNaissance}
+                  mode="date"
+                  display="default"
+                  onChange={handleDateChange}
+                />
+              )}
+            </>
+          )}
+          <Text style={styles.label}>Type Adherent</Text>
+          {Platform.OS === 'web' ? (
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={grade}
+                onValueChange={(itemValue) => setGrade(parseInt(itemValue))}
+                style={styles.picker}
+              >
+                {gradeOptions.map((option) => (
+                  <Picker.Item 
+                    key={option.value} 
+                    label={option.label} 
+                    value={option.value} 
+                  />
+                ))}
+              </Picker>
+            </View>
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.gradeButton}
+                onPress={() => setGradeModalVisible(true)}
+              >
+                <Text style={styles.gradeButtonText}>
+                  {gradeOptions.find(opt => opt.value === grade)?.label || 'Sélectionner'}
+                </Text>
+              </TouchableOpacity>
+
+              <Modal
+                animationType="slide"
+                transparent={true}
+                visible={gradeModalVisible}
+                onRequestClose={() => setGradeModalVisible(false)}
+              >
+                <View style={styles.gradeModalContainer}>
+                  <View style={styles.gradeModalContent}>
+                    <Text style={styles.gradeModalTitle}>Sélectionner le type</Text>
+                    {gradeOptions.map((option) => (
+                      <TouchableOpacity
+                        key={option.value}
+                        style={styles.gradeModalButton}
+                        onPress={() => handleGradeSelection(option.value)}
+                      >
+                        <Text style={styles.gradeModalButtonText}>{option.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                    <TouchableOpacity
+                      style={[styles.gradeModalButton, styles.cancelButton]}
+                      onPress={() => setGradeModalVisible(false)}
+                    >
+                      <Text style={styles.gradeModalButtonText}>Annuler</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </Modal>
+            </>
           )}
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -404,6 +541,65 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     marginBottom: 15,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+  },
+  formatHint: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: -10,
+    marginBottom: 15,
+    fontStyle: 'italic',
+  },
+  gradeButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  gradeButtonText: {
+    fontSize: 16,
+  },
+  gradeModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  gradeModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '80%',
+  },
+  gradeModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  gradeModalButton: {
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  gradeModalButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: '#dc3545',
   },
 });
 

@@ -12,7 +12,7 @@ export default function EditActivity() {
           headerShown: true,
         }} 
       />
-      {Platform.OS === 'web' ? <EditActivityScreen /> : <EditActivityMobile />}
+      {Platform.OS === 'web' ? <EditActivityMobile /> : <EditActivityMobile />}
     </>
   );
 }

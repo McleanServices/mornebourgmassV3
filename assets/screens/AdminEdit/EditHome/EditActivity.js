@@ -34,7 +34,7 @@ const EditActivity = () => {
     });
 
     try {
-      let response = await fetch('http://localhost:8080/api/upload', {
+      let response = await fetch('https://mornebourgmass.com/api/upload', {
         method: 'POST',
         body: formData,
         headers: {

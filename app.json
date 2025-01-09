@@ -34,7 +34,9 @@
     },
     "web": {
       "favicon": "./assets/icon.png",
-      "baseUrl": "/mobile"
+      "baseUrl": "/mobile",
+      "output": "single",
+      "bundler": "metro"
     },
     "runtimeVersion": {
       "policy": "sdkVersion"

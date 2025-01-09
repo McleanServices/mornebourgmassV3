@@ -25,6 +25,7 @@ const EditActivityMobile = () => {
   const [uploading, setUploading] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [disableDelete, setDisableDelete] = useState(false);
+  const [prixUnitaire, setPrixUnitaire] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -149,13 +150,14 @@ const EditActivityMobile = () => {
     }
 
     try {
-      const response = await axios.put(`https://mornebourgmass.com/api/activityscreen/${id}`, {
+      const response = await axios.put(`http://localhost:8080/api/activityscreen/${id}`, {
         title,
         description,
         date: date.toISOString().split('T')[0],
         time: time.toTimeString().split(' ')[0],
         imageUrl: newImageUrl,
         payment_link: paymentLink,
+        prix_unitaire: prixUnitaire, // Added prix_unitaire
       });
       if (response.status === 200) {
         setModalVisible(true);
@@ -210,7 +212,7 @@ const EditActivityMobile = () => {
 
   const handleDeleteActivity = async () => {
     try {
-      const response = await axios.delete(`https://mornebourgmass.com/api/activityscreen/${id}`);
+      const response = await axios.delete(`https://mornebourgmass.com/activityscreen/${id}`);
       if (response.status === 200) {
         Alert.alert('Succès', 'Activité supprimée avec succès');
         router.back(); // Use router.back() to navigate back
@@ -351,6 +353,13 @@ const EditActivityMobile = () => {
             />
           </View>
         )}
+        <Text style={styles.label}>Prix Unitaire</Text>
+        <TextInput
+          style={styles.input}
+          value={prixUnitaire.toString()}
+          onChangeText={(text) => setPrixUnitaire(parseInt(text) || 0)}
+          keyboardType="numeric"
+        />
         <Pressable style={styles.imagePicker} onPress={pickImage}>
           <Ionicons name="cloud-upload-outline" size={32} color="gray" />
           <Text>Sélectionner une image depuis la galerie</Text>

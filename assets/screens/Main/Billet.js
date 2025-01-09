@@ -10,76 +10,111 @@ import {
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import axios from 'axios';
-//test
 import { useAuth } from '../../../context/auth';
 import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
 
 const BilletScreen = () => {
   const router = useRouter();
   const { session } = useAuth();
   const [tickets, setTickets] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState(null);
 
   useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        const id_user = session?.user?.id;
-        const activityId = 14; // For testing
-
-        const checkResponse = await axios.get(`https://mornebourgmass.com/api/transactionLink`, {
-          params: {
-            id_user,
-            id_activityscreen: activityId 
-          }
-        });
-
-        if (!checkResponse.data.exists) {
-          await axios.put(`https://mornebourgmass.com/api/paiement`, {
-            id_user,
-            id_activityscreen: activityId 
-          });
-        }
-
-        const response = await axios.get(`https://mornebourgmass.com/api/activityscreen/${activityId}`);
-        if (response.data) {
-          setTickets([{
-            id: "1",
-            title: "Pass Général",
-            description: "Accès à tous les événements de MorneBourgMass",
-            color: "#89CFF0",
-            date: "2024-02-01",
-            price: "50€"
-          }]);
-        }
-      } catch (error) {
-        console.error('Error fetching tickets:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTickets();
+    // Removed API calls
   }, [session]);
 
   useEffect(() => {
     const presentNotification = async () => {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Nouveau Billet Disponible!",
-          body: "Consultez les billets disponibles pour MorneBourgMass.",
-        },
-        trigger: { seconds: 30, repeats: true },
-      });
+      if (Platform.OS !== 'web') {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Nouveau Billet Disponible!",
+            body: "Consultez les billets disponibles pour MorneBourgMass.",
+          },
+          trigger: { seconds: 30, repeats: true },
+        });
+      } else {
+        console.log("Notifications are not supported on web.");
+      }
     };
 
     presentNotification();
   }, []);
 
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const storedDetails = await AsyncStorage.getItem('userDetails');
+        if (storedDetails) {
+          setUserDetails(JSON.parse(storedDetails));
+        }
+      } catch (error) {
+        console.error("Failed to fetch user details:", error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    const fetchTickets = async () => {
+      if (userDetails?.id_user) {
+        setLoading(true);
+        try {
+          const response = await axios.get(`http://localhost:8080/api/paiement/${userDetails.id_user}`);
+          setTickets(response.data);
+        } catch (error) {
+          console.error("Failed to fetch tickets:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTickets();
+  }, [userDetails]);
+
+  const generatePDF = async (ticket) => {
+    try {
+      const html = `
+        <html>
+          <body>
+            <h1>${ticket.title}</h1>
+            <p>${ticket.description}</p>
+            <p>Prix: ${ticket.prix_unitaire}</p>
+          </body>
+        </html>
+      `;
+      const { uri } = await Print.printToFileAsync({ html });
+      if (uri) {
+        const pdfName = `${FileSystem.documentDirectory}${ticket.title}.pdf`;
+        await FileSystem.moveAsync({
+          from: uri,
+          to: pdfName,
+        });
+        alert(`PDF downloaded to: ${pdfName}`);
+      } else {
+        throw new Error("Failed to generate PDF");
+      }
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("An error occurred while generating the PDF. Please try again.");
+    }
+  };
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <Text style={styles.sectionHeader}>Billets Disponibles</Text>
+        {userDetails && (
+          <Text style={styles.userIdText}>ID Utilisateur: {userDetails.id_user}</Text>
+        )}
         {loading ? (
           <ActivityIndicator size="large" color="#8A2BE2" />
         ) : (
@@ -87,17 +122,13 @@ const BilletScreen = () => {
             data={tickets}
             renderItem={({ item }) => (
               <TouchableOpacity 
-                style={[styles.ticketCard, { backgroundColor: item.color }]}
-                onPress={() => router.push({
-                  pathname: '/payment',
-                  params: { ticketId: item.id }
-                })}
+                style={[styles.ticketCard, { backgroundColor: item.color || "#89CFF0" }]}
+                onPress={() => generatePDF(item)}
               >
                 <Text style={styles.ticketTitle}>{item.title}</Text>
                 <Text style={styles.ticketDescription}>{item.description}</Text>
                 <View style={styles.ticketFooter}>
-                  <Text style={styles.ticketDate}>Valide jusqu'au {item.date}</Text>
-                  <Text style={styles.ticketPrice}>{item.price}</Text>
+                  <Text style={styles.ticketPrice}>{item.prix_unitaire}</Text>
                 </View>
                 <Ionicons 
                   name="chevron-forward" 
@@ -165,6 +196,14 @@ const styles = StyleSheet.create({
     top: '50%',
     marginTop: -12,
   },
+  userIdText: {
+    fontSize: 16,
+    color: "#2C3E50",
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
 });
 
 export default BilletScreen;
+
+// TODO : Finish pdf design

@@ -12,7 +12,7 @@ import { theme } from '../assets/screens/core/Theme';
 import { usernameValidator } from '../assets/screens/helpers/UsernameValidator';
 import { passwordValidator } from '../assets/screens/helpers/PasswordValidator';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, withRepeat, withSequence } from 'react-native-reanimated';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 //test
 
 export default function SignIn() {
@@ -85,6 +85,7 @@ export default function SignIn() {
         const user = { id: decodedToken.id, role: userRole };
 
         signIn(token, user);
+        await AsyncStorage.setItem('Role', userDetailsResponse.data.user.role);
         router.replace('/(app)');
       } else {
         setError(data.message || 'Échec de la connexion');

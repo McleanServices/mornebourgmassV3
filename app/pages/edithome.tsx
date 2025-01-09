@@ -6,7 +6,7 @@ export default function EditHome() {
     <>
       <Stack.Screen 
         options={{
-          title: 'Edit Page',
+          title: 'Edit Page', 
           headerShown: true,
         }} 
       />

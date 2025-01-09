@@ -5,6 +5,7 @@ import { theme } from '../../core/Theme';
 //test
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
 
 const EditUser = () => {
   const { id } = useLocalSearchParams();
@@ -23,6 +24,12 @@ const EditUser = () => {
   const [error, setError] = useState(null);
   const [confirmUserId, setConfirmUserId] = useState(''); // Add state for confirm userId
 
+  const gradeOptions = [
+    { label: "Adult", value: 1 },
+    { label: "Admin", value: 2 },
+    { label: "Enfant", value: 3 }
+  ];
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -36,7 +43,7 @@ const EditUser = () => {
         setNumeroTelephone(user.numero_telephone || '');
         setDateNaissance(user.date_naissance ? user.date_naissance.split('T')[0] : ''); 
         setRole(user.role || '');
-        setGrade(user.grade || '');
+        setGrade(user.grade || ''); // Fetch grade from the database
         await AsyncStorage.setItem('userId', userId); // Save userId in AsyncStorage
       } catch (error) {
         setError(<Text>Error fetching user info: {error.message}</Text>);
@@ -236,22 +243,22 @@ const EditUser = () => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Rôle</Text>
-          <TextInput
-            style={styles.input}
-            value={role}
-            onChangeText={setRole}
-            placeholder="Rôle"
-          />
-        </View>
-        <View style={styles.inputContainer}>
           <Text style={styles.label}>Grade</Text>
-          <TextInput
-            style={styles.input}
-            value={grade}
-            onChangeText={setGrade}
-            placeholder="Grade"
-          />
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={grade}
+              onValueChange={(itemValue) => setGrade(parseInt(itemValue))}
+              style={styles.picker}
+            >
+              {gradeOptions.map((option) => (
+                <Picker.Item 
+                  key={option.value} 
+                  label={option.label} 
+                  value={option.value} 
+                />
+              ))}
+            </Picker>
+          </View>
         </View>
         <Pressable style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Enregistrer</Text>
@@ -333,6 +340,16 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  picker: {
+    height: 50,
+    width: '100%',
   },
 });
 

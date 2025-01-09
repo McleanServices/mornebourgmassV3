@@ -34,7 +34,8 @@ const SettingsScreen = () => {
         fetchUserDetails();
     }, [session]);
 
-    const handleSignOut = () => {
+    const handleSignOut = async () => {
+        await AsyncStorage.clear(); // Clear all AsyncStorage items
         signOut();
         router.replace('/login');
     };
