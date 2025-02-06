@@ -1,5 +1,5 @@
 import React from "react";
-import BilletScreen  from "../../assets/screens/Main/Billet";
+import About  from "../../../assets/screens/Main/About";
 
 import { Stack } from "expo-router";
 
@@ -8,11 +8,11 @@ export default function Billet() {
     <>
       <Stack.Screen
         options={{
-          title: "Billet",
+          title: "Accueil",
           headerShown: true,
         }}
       />
-      <BilletScreen />
+      <About />
     </>
   );
 }

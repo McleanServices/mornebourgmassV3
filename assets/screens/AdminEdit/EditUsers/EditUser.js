@@ -6,6 +6,7 @@ import { theme } from '../../core/Theme';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
+import { RadioButton } from 'react-native-paper';
 
 const EditUser = () => {
   const { id } = useLocalSearchParams();
@@ -23,6 +24,9 @@ const EditUser = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState(null);
   const [confirmUserId, setConfirmUserId] = useState(''); // Add state for confirm userId
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPasswordFields, setShowPasswordFields] = useState(false); // Add state to toggle password fields
 
   const gradeOptions = [
     { label: "Adult", value: 1 },
@@ -56,6 +60,11 @@ const EditUser = () => {
   }, [userId]);
 
   const handleSave = async () => {
+    if (newPassword && newPassword !== confirmPassword) {
+      Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
+      return;
+    }
+
     if (Platform.OS === 'ios') {
       Alert.alert(
         "Confirmation",
@@ -113,6 +122,11 @@ const EditUser = () => {
         grade,
       };
       const response = await axios.put(`https://mornebourgmass.com/api/user/${userId}`, updatedUser);
+      
+      if (newPassword) {
+        await axios.put(`https://c7f3-194-3-170-41.ngrok-free.app/api/user/${userId}/password`, { newPassword });
+      }
+
       if (!!response && response.status === 200) {
         setSuccessMessage('Utilisateur enregistré avec succès.');
         setModalVisible(true);
@@ -244,22 +258,58 @@ const EditUser = () => {
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Grade</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={grade}
-              onValueChange={(itemValue) => setGrade(parseInt(itemValue))}
-              style={styles.picker}
+          {gradeOptions.map((option) => (
+            <Pressable 
+              key={option.value} 
+              style={[
+                styles.radioButtonBox, 
+                grade === option.value && styles.radioButtonBoxSelected
+              ]}
+              onPress={() => setGrade(option.value)}
             >
-              {gradeOptions.map((option) => (
-                <Picker.Item 
-                  key={option.value} 
-                  label={option.label} 
-                  value={option.value} 
+              <View style={styles.radioButtonContainer}>
+                <RadioButton
+                  value={option.value}
+                  status={grade === option.value ? 'checked' : 'unchecked'}
+                  onPress={() => setGrade(option.value)}
                 />
-              ))}
-            </Picker>
-          </View>
+                <Text>{option.label}</Text>
+              </View>
+            </Pressable>
+          ))}
         </View>
+        <Pressable
+          style={styles.togglePasswordButton}
+          onPress={() => setShowPasswordFields(!showPasswordFields)}
+        >
+          <Text style={styles.togglePasswordButtonText}>
+            {showPasswordFields ? 'Cacher les champs de mot de passe' : 'Changer le mot de passe'}
+          </Text>
+        </Pressable>
+        {showPasswordFields && (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nouveau Mot de Passe</Text>
+              <TextInput
+                style={styles.input}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                placeholder="Nouveau Mot de Passe"
+                secureTextEntry
+              />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Confirmer le Mot de Passe</Text>
+              <TextInput
+                style={styles.input}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirmer le Mot de Passe"
+                secureTextEntry
+              />
+            </View>
+          </>
+        )}
         <Pressable style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Enregistrer</Text>
         </Pressable>
@@ -350,6 +400,31 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: '100%',
+  },
+  radioButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioButtonBox: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  radioButtonBoxSelected: {
+    borderColor: theme.colors.primary,
+  },
+  togglePasswordButton: {
+    backgroundColor: theme.colors.secondary,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  togglePasswordButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

@@ -1,9 +1,10 @@
 import RegisterScreen from '../../assets/screens/AdminEdit/EditUsers/Register';
 import { Stack } from "expo-router";
+import {ScrollView} from "react-native";
 
 export default function Register() {
   return (
-    <>
+    <ScrollView>
       <Stack.Screen 
         options={{
           title: 'Edit Page',
@@ -11,6 +12,6 @@ export default function Register() {
         }} 
       />
       <RegisterScreen />
-    </>
+    </ScrollView>
   );
 }

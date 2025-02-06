@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform, ScrollView, Image } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Modal, Pressable, Alert, Platform, ScrollView, Image, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,6 +9,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import TimePicker from 'react-time-picker';
 import 'react-time-picker/dist/TimePicker.css';
 import 'react-clock/dist/Clock.css';
+import { useNavigation } from '@react-navigation/native';
 //test
 
 const AddActivityMobileScreen = () => {
@@ -26,6 +27,7 @@ const AddActivityMobileScreen = () => {
   const [inputErrors, setInputErrors] = useState({});
   const [paymentLink, setPaymentLink] = useState('');
   const [showPaymentLink, setShowPaymentLink] = useState(true);
+  const navigation = useNavigation();
 
   useEffect(() => {
     (async () => {
@@ -146,6 +148,8 @@ const AddActivityMobileScreen = () => {
       });
       if (response.status === 201) {
         setModalVisible(true);
+        navigation.goBack();
+        navigation.goBack();
       }
     } catch (error) {
       console.error('Error adding activity:', error);
@@ -180,7 +184,8 @@ const AddActivityMobileScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: 100 }]}>
+      <View style={styles.container}>
       <Text style={styles.infoText}>
         Après avoir créé l'image, allez à l'édition de l'activité pour ajouter l'image et le lien de paiement.
       </Text>
@@ -309,15 +314,21 @@ const AddActivityMobileScreen = () => {
           {inputErrors.paymentLink && <Text style={styles.errorText}>{inputErrors.paymentLink}</Text>}
         </View>
       )}
-      <Button title="Ajouter l'activité" onPress={handleAddActivity} />
+      <TouchableOpacity
+        style={[styles.button, { margin: 20 }]}
+        onPress={handleAddActivity}
+      >
+        <Text style={styles.buttonText}>Ajouter l'activité</Text>
+      </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
+    paddingBottom: 40,
   },
   infoText: {
     fontSize: 14,
@@ -357,9 +368,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
+    backgroundColor: "#007BFF",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+    width: "80%",
   },
   buttonClose: {
     backgroundColor: '#2196F3',
@@ -413,11 +427,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  buttonAjouter: {
+    marginBottom: 50,
+  }
 });
 
 export default AddActivityMobileScreen;
 
-// TODO : add prix input and update api for it 
+// TODO : add prix input and update api for it
 
 
 

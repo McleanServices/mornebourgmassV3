@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform, Modal, Pressable } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ActivityIndicator, Platform, Modal, Pressable, TouchableOpacity } from 'react-native';
 //test
 
 const EditHomeScreen = () => {
@@ -9,6 +9,8 @@ const EditHomeScreen = () => {
     const [notreMission, setNotreMission] = useState(''); // Add state for NotreMission
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [inputErrors, setInputErrors] = useState({}); // Define inputErrors state
+    const isFormValid = title && description && notreMission; // Add form validation logic
 
     useEffect(() => {
         const fetchActivity = async () => {
@@ -94,35 +96,44 @@ const EditHomeScreen = () => {
                 </View>
             </Modal>
             <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Titre</Text>
+                <Text style={styles.label}>Titre</Text>
                 <TextInput
                     style={styles.input}
                     value={title}
                     onChangeText={setTitle}
                 />
+                {inputErrors.title && <Text style={styles.errorText}>{inputErrors.title}</Text>}
             </View>
             <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Description</Text>
+                <Text style={styles.label}>Description</Text>
                 <TextInput
                     style={styles.input}
                     value={description}
                     onChangeText={setDescription}
                     multiline
                 />
+                {inputErrors.description && <Text style={styles.errorText}>{inputErrors.description}</Text>}
             </View>
             <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Mission</Text>
+                <Text style={styles.label}>Mission</Text>
                 <TextInput
                     style={styles.input}
                     value={notreMission}
                     onChangeText={setNotreMission}
                     multiline
                 />
+                {inputErrors.notreMission && <Text style={styles.errorText}>{inputErrors.notreMission}</Text>}
             </View>
             {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
             ) : (
-                <Button title="Mettre à jour l'activité" onPress={handleUpdate} />
+                <TouchableOpacity
+                    style={[styles.button, !isFormValid && { backgroundColor: "#ccc" }]}
+                    onPress={handleUpdate}
+                    disabled={!isFormValid}
+                >
+                    <Text style={styles.buttonText}>Mettre à jour l'activité</Text>
+                </TouchableOpacity>
             )}
         </View>
     );
@@ -131,26 +142,27 @@ const EditHomeScreen = () => {
 const styles = StyleSheet.create({
     container: {
         padding: 20,
+        paddingBottom: 40,
         backgroundColor: '#f4f4f4',
     },
     inputContainer: {
         marginBottom: 20,
     },
-    inputLabel: {
-        position: "absolute",
-        left: 10,
-        top: -10,
-        backgroundColor: '#f4f4f4',
-        paddingHorizontal: 5,
-        zIndex: 1,
+    label: {
+        fontSize: 16,
+        marginBottom: 5,
     },
     input: {
-        height: 60,
-        borderColor: '#ccc',
         borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        marginBottom: 15,
         borderRadius: 5,
-        paddingHorizontal: 10,
-        fontSize: 16,
+    },
+    errorText: {
+        color: 'red',
+        fontSize: 12,
+        marginBottom: 10,
     },
     centeredView: {
         flex: 1,
@@ -170,6 +182,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         padding: 10,
         elevation: 2,
+        backgroundColor: '#2196F3', // Ensure default background color is set
     },
     buttonClose: {
         backgroundColor: '#2196F3',
@@ -181,6 +194,11 @@ const styles = StyleSheet.create({
     },
     modalText: {
         marginBottom: 15,
+        textAlign: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
         textAlign: 'center',
     },
 });

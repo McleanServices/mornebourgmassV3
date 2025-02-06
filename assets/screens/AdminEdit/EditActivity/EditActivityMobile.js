@@ -26,6 +26,8 @@ const EditActivityMobile = () => {
   const [confirmText, setConfirmText] = useState('');
   const [disableDelete, setDisableDelete] = useState(false);
   const [prixUnitaire, setPrixUnitaire] = useState(0);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -144,13 +146,12 @@ const EditActivityMobile = () => {
 
   const handleUpdateActivity = async () => {
     let newImageUrl = imageUrl;
-
     if (selectedImage) {
       newImageUrl = await uploadImage();
     }
 
     try {
-      const response = await axios.put(`http://localhost:8080/api/activityscreen/${id}`, {
+      const response = await axios.put(`https://c7f3-194-3-170-41.ngrok-free.app/api/activityscreen/${id}`, {
         title,
         description,
         date: date.toISOString().split('T')[0],
@@ -169,52 +170,24 @@ const EditActivityMobile = () => {
   };
 
   const confirmDeleteActivity = () => {
-    Alert.alert(
-      'Confirmer la suppression',
-      'Êtes-vous sûr de vouloir supprimer cette activité ? Tapez "supprimer" pour confirmer.',
-      [
-        {
-          text: 'Annuler',
-          style: 'cancel',
-        },
-        {
-          text: 'Supprimer',
-          style: 'destructive',
-          onPress: () => {
-            Alert.prompt(
-              'Confirmer la suppression',
-              'Tapez "supprimer" pour confirmer la suppression.',
-              [
-                {
-                  text: 'Annuler',
-                  style: 'cancel',
-                },
-                {
-                  text: 'Supprimer',
-                  style: 'destructive',
-                  onPress: (input) => {
-                    if (input === 'supprimer') {
-                      handleDeleteActivity();
-                    } else {
-                      Alert.alert('Erreur', 'Texte de confirmation incorrect');
-                    }
-                  },
-                },
-              ],
-              'plain-text'
-            );
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirmation = () => {
+    if (deleteConfirmation.toLowerCase() === 'supprimer') {
+      handleDeleteActivity();
+    } else {
+      Alert.alert('Erreur', 'Texte de confirmation incorrect');
+    }
+    setDeleteModalVisible(false);
   };
 
   const handleDeleteActivity = async () => {
     try {
-      const response = await axios.delete(`https://mornebourgmass.com/activityscreen/${id}`);
+      const response = await axios.delete(`https://c7f3-194-3-170-41.ngrok-free.app/api/activityscreen/${id}`);
       if (response.status === 200) {
         Alert.alert('Succès', 'Activité supprimée avec succès');
+        router.back();
         router.back(); // Use router.back() to navigate back
       }
     } catch (error) {
@@ -367,6 +340,38 @@ const EditActivityMobile = () => {
         <Button title="Mettre à jour l'activité" onPress={handleUpdateActivity} />
         <Button title="Supprimer l'activité" onPress={confirmDeleteActivity} disabled={disableDelete} />
         {disableDelete && <Text style={styles.warningText}>Impossible de supprimer une activité avec des paiements</Text>}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={deleteModalVisible}
+          onRequestClose={() => {
+            setDeleteModalVisible(!deleteModalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={[styles.modalView, { backgroundColor: 'white' }]}>
+              <Text style={styles.modalText}>Tapez "supprimer" pour confirmer la suppression.</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Tapez ici"
+                value={deleteConfirmation}
+                onChangeText={setDeleteConfirmation}
+              />
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={handleDeleteConfirmation}
+              >
+                <Text style={styles.textStyle}>Confirmer</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.button, styles.buttonClose]}
+                onPress={() => setDeleteModalVisible(false)}
+              >
+                <Text style={styles.textStyle}>Annuler</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
       </View>
     </ScrollView>
   );

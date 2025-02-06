@@ -1,17 +1,18 @@
 import EditHomeScreen from '../../assets/screens/AdminEdit/EditHome/EditHome';
-
 import { Stack } from 'expo-router';
+import { ScrollView} from 'react-native';
+
 export default function EditHome() {
   return (
-    <>
-      <Stack.Screen 
+    <ScrollView>
+      <Stack.Screen
         options={{
-          title: 'Edit Page', 
+          title: 'Modifier Accueil', 
           headerShown: true,
-        }} 
+        }}
       />
       <EditHomeScreen />
-    </>
+      </ScrollView>
   );
 }
 

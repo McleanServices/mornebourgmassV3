@@ -4,7 +4,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   Image,
   Dimensions,
   FlatList,
@@ -39,34 +38,38 @@ const About = () => {
     fetchActivities();
   }, []);
 
+  const renderHeader = () => (
+    <View>
+      <Text style={styles.sectionHeader}>À propos de nous</Text>
+      <View style={styles.imagesContainer}>
+        {images.map((image, index) => (
+          <Image key={index} source={image} style={styles.image} />
+        ))}
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Notre mission</Text>
+        <Text style={styles.sectionDescription}>{notreMission}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <ScrollView style={styles.scrollView}>
-          <Text style={styles.sectionHeader}>À propos de nous</Text>
-          <View style={styles.imagesContainer}>
-            {images.map((image, index) => (
-              <Image key={index} source={image} style={styles.image} />
-            ))}
-          </View>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Notre mission</Text>
-            <Text style={styles.sectionDescription}>{notreMission}</Text>
-          </View>
-          <FlatList
-            data={activities}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.activityCard}>
-                <Text style={styles.activityTitle}>{item.title}</Text>
-                <Text style={styles.activityDescription}>{item.description}</Text>
-              </View>
-            )}
-            ListEmptyComponent={
-              <Text style={styles.noActivityText}>Aucune activité récente.</Text>
-            }
-          />
-        </ScrollView>
+        <FlatList
+          data={activities}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.activityCard}>
+              <Text style={styles.activityTitle}>{item.title}</Text>
+              <Text style={styles.activityDescription}>{item.description}</Text>
+            </View>
+          )}
+          ListHeaderComponent={renderHeader}
+          ListEmptyComponent={
+            <Text style={styles.noActivityText}>Aucune activité récente.</Text>
+          }
+        />
       </SafeAreaView>
     </SafeAreaProvider>
   );

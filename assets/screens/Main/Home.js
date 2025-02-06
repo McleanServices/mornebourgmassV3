@@ -98,7 +98,7 @@ const HomeScreen = () => {
       id: "5",
       name: "À propos",
       icon: "information-circle",
-      onPress: () => router.push("/pages/reglementation"),
+      onPress: () => router.push("/pages/about/about"),
     },
   ];
 
